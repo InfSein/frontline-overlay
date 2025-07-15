@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { OverlayEvent } from "@/app/types/overlay"
 
 const useOverlay = () => {
-  const wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(location.href)
   let ws : WebSocket | undefined
   let queue : any[] | null = []
   let rseqCounter = 0
@@ -12,80 +9,84 @@ const useOverlay = () => {
   let eventsStarted = false
   let sendMessage : (obj: any, cb?: any) => void
 
-  if (wsUrl) {
-    sendMessage = (obj: any) => {
-      if (queue) queue.push(obj)
-      else ws!.send(JSON.stringify(obj))
-    }
 
-    function connectWs() {
-      ws = new WebSocket(wsUrl![1])
+  const initialize = (window: Window) => {
+    const wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(window.location.href)
+    if (wsUrl) {
+      sendMessage = (obj: any) => {
+        if (queue) queue.push(obj)
+        else ws!.send(JSON.stringify(obj))
+      }
 
-      ws.addEventListener('error', (e) => {
-        console.error(e)
-      })
+      function connectWs() {
+        ws = new WebSocket(wsUrl![1])
 
-      ws.addEventListener('open', () => {
-        console.log('Connected!')
+        ws.addEventListener('error', (e) => {
+          console.error(e)
+        })
+
+        ws.addEventListener('open', () => {
+          console.log('Connected!')
+
+          const q = queue ?? []
+          queue = null
+
+          for (const msg of q) sendMessage(msg)
+        })
+
+        ws.addEventListener('message', (msg : any) => {
+          try {
+            msg = JSON.parse(msg.data)
+          } catch {
+            console.error('Invalid message received: ', msg)
+            return
+          }
+
+          if (msg.rseq !== undefined && responsePromises[msg.rseq]) {
+            responsePromises[msg.rseq](msg)
+            delete responsePromises[msg.rseq]
+          } else {
+            processEvent(msg)
+          }
+        })
+
+        ws.addEventListener('close', () => {
+          queue = []
+
+          console.log('Trying to reconnect...')
+          // Don't spam the server with retries.
+          setTimeout(() => {
+            connectWs()
+          }, 300)
+        })
+      }
+
+      connectWs()
+    } else {
+      sendMessage = (obj : any, cb : any = undefined) => {
+        if (queue)
+          queue.push([obj, cb])
+        else
+          window.OverlayPluginApi!.callHandler(JSON.stringify(obj), cb)
+      }
+
+      function waitForApi() {
+        if (!window.OverlayPluginApi || !window.OverlayPluginApi.ready) {
+          setTimeout(waitForApi, 300)
+          return
+        }
 
         const q = queue ?? []
         queue = null
 
-        for (const msg of q) sendMessage(msg)
-      })
+        window.__OverlayCallback = processEvent
 
-      ws.addEventListener('message', (msg : any) => {
-        try {
-          msg = JSON.parse(msg.data)
-        } catch {
-          console.error('Invalid message received: ', msg)
-          return
-        }
-
-        if (msg.rseq !== undefined && responsePromises[msg.rseq]) {
-          responsePromises[msg.rseq](msg)
-          delete responsePromises[msg.rseq]
-        } else {
-          processEvent(msg)
-        }
-      })
-
-      ws.addEventListener('close', () => {
-        queue = []
-
-        console.log('Trying to reconnect...')
-        // Don't spam the server with retries.
-        setTimeout(() => {
-          connectWs()
-        }, 300)
-      })
-    }
-
-    connectWs()
-  } else {
-    sendMessage = (obj : any, cb : any = undefined) => {
-      if (queue)
-        queue.push([obj, cb])
-      else
-        window.OverlayPluginApi!.callHandler(JSON.stringify(obj), cb)
-    }
-
-    function waitForApi() {
-      if (!window.OverlayPluginApi || !window.OverlayPluginApi.ready) {
-        setTimeout(waitForApi, 300)
-        return
+        for (const [msg, resolve] of q)
+          sendMessage(msg, resolve)
       }
 
-      const q = queue ?? []
-      queue = null
-
-      window.__OverlayCallback = processEvent
-
-      for (const [msg, resolve] of q)
-        sendMessage(msg, resolve)
+      waitForApi()
     }
-
-    waitForApi()
   }
 
   function processEvent(msg: any) {
@@ -147,6 +148,8 @@ const useOverlay = () => {
   }
 
   return {
+    eventsStarted,
+    initialize,
     addOverlayListener,
     removeOverlayListener,
     callOverlayHandler,
