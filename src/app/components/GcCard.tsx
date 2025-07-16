@@ -20,26 +20,50 @@ export default function GcCard({
   const color = getGrandCompanyColor(gc)
   const flag = getGrandCompanyFlag(gc)
 
+  const containerStyle: React.CSSProperties = {
+    //width: '100%',
+    padding: '8px',
+    gap: '4px',
+    borderRadius: '4px',
+    boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: color,
+    backgroundImage: `url(${flag})`,
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'contain',
+  }
+
   return (
-    <div
-      className="w-full p-6 mx-auto rounded-xl shadow-lg flex items-center gap-x-4"
-      style={{
-        backgroundColor: color,
-        backgroundImage: `url(${flag})`,
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'contain',
-      }}
-    >
+    <div style={containerStyle}>
       <div>
-        <div className="text-2xl font-medium text-white">
+        <div
+          style={{
+            fontSize: '28px',
+            lineHeight: 1.5,
+            fontWeight: 500,
+            color: 'white',
+          }}
+        >
           { getGrandCompanyName(gc) }
         </div>
-        <p className="text-slate-300">
+        <p style={{
+          color: '#cad5e2',
+          margin: 0
+        }}>
           { me ? '⭐我方' : '　敌方' }
         </p>
       </div>
-      <div className="ml-auto text-4xl font-bold text-white">
+      <div
+        style={{
+          marginLeft: 'auto',
+          marginRight: '4px',
+          fontSize: '42px',
+          fontWeight: 'bold',
+          color: 'white',
+        }}
+      >
         { floatPoints }
       </div>
     </div>

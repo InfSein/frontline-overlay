@@ -34,8 +34,9 @@ export default function Home() {
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
-    if (msgType !== '00' || msgChannel !== '0839') return
+    if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
     //if (!onConflict) return
+    if (!msg) return
 
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
     if (matchGc && matchGc[1]) {
@@ -115,9 +116,34 @@ export default function Home() {
   ])
 
   return (
-    <div className="font-sans w-full flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-16">
-      <main className="w-full flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div className="w-full grid grid-cols-3 gap-2">
+    <div
+      style={{
+        fontFamily: '"Cambria", "思源宋体 CN"',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyItems: 'center',
+        gap: '8px',
+      }}
+    >
+      <main
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '8px',
+          }}
+        >
           <GcCard gc={GrandCompany.maelstrom} me={gc === GrandCompany.maelstrom} floatPoints={gcFp.maelstrom} />
           <GcCard gc={GrandCompany.twinadder} me={gc === GrandCompany.twinadder} floatPoints={gcFp.twinadder} />
           <GcCard gc={GrandCompany.immoflame} me={gc === GrandCompany.immoflame} floatPoints={gcFp.immoflame} />
