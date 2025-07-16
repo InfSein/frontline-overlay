@@ -6,19 +6,23 @@ import {
 } from '@/app/tools'
 
 type GcCardProps = {
+  /** 大国防联军 */
   gc: GrandCompany
-  active: boolean
+  /** 是否为己方 */
+  me: boolean
+  /** 点分 */
+  floatPoints: number
 }
 
 export default function GcCard({
-  gc, active,
+  gc, me, floatPoints
 }: GcCardProps) {
   const color = getGrandCompanyColor(gc)
   const flag = getGrandCompanyFlag(gc)
 
   return (
     <div
-      className="p-6 max-w-sm mx-auto rounded-xl shadow-lg flex items-center gap-x-4"
+      className="w-full p-6 mx-auto rounded-xl shadow-lg flex items-center gap-x-4"
       style={{
         backgroundColor: color,
         backgroundImage: `url(${flag})`,
@@ -28,12 +32,15 @@ export default function GcCard({
       }}
     >
       <div>
-        <div className="text-xl font-medium text-white">
+        <div className="text-2xl font-medium text-white">
           { getGrandCompanyName(gc) }
         </div>
-        <p className="text-slate-500">
-          { active ? '我方' : '&nbsp;' }
+        <p className="text-slate-300">
+          { me ? '⭐我方' : '　敌方' }
         </p>
+      </div>
+      <div className="ml-auto text-4xl font-bold text-white">
+        { floatPoints }
       </div>
     </div>
   )
