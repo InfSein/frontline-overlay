@@ -12,3 +12,19 @@
  */
 export type OverlayEvent = "CombatData" | "LogLine" | "ImportedLogLines" | 
   "ChangeZone" | "ChangePrimaryPlayer" | "OnlineStatusChanged" | "PartyChanged" | "BroadcastMessage"
+
+export type ChangeZoneData = {
+  type: "ChangeZone"
+  zoneID: number
+  zoneName: string
+}
+export type ChangePrimaryPlayerData = {
+  type: "ChangePrimaryPlayer"
+  charID: string
+  charName: string
+}
+export type LoglineData = {
+  type: "LogLine"
+  line: string[]
+  rawLine: string
+}

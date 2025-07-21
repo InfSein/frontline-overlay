@@ -6,34 +6,66 @@ import {
 } from '@/app/tools'
 
 type GcCardProps = {
+  /** 大国防联军 */
   gc: GrandCompany
-  active: boolean
+  /** 是否为己方 */
+  me: boolean
+  /** 点分 */
+  floatPoints: number
 }
 
 export default function GcCard({
-  gc, active,
+  gc, me, floatPoints
 }: GcCardProps) {
   const color = getGrandCompanyColor(gc)
   const flag = getGrandCompanyFlag(gc)
 
+  const containerStyle: React.CSSProperties = {
+    //width: '100%',
+    padding: '8px',
+    gap: '4px',
+    borderRadius: '4px',
+    boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: color,
+    backgroundImage: `url(${flag})`,
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'contain',
+  }
+
   return (
-    <div
-      className="p-6 max-w-sm mx-auto rounded-xl shadow-lg flex items-center gap-x-4"
-      style={{
-        backgroundColor: color,
-        backgroundImage: `url(${flag})`,
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'contain',
-      }}
-    >
+    <div style={containerStyle}>
       <div>
-        <div className="text-xl font-medium text-white">
+        <div
+          style={{
+            fontSize: '28px',
+            lineHeight: 1.5,
+            fontWeight: 500,
+            color: 'white',
+            textShadow: '1px 1px 2px black'
+          }}
+        >
           { getGrandCompanyName(gc) }
         </div>
-        <p className="text-slate-500">
-          { active ? '我方' : '&nbsp;' }
+        <p style={{
+          color: '#cad5e2',
+          margin: 0
+        }}>
+          { me ? '⭐我方' : '　敌方' }
         </p>
+      </div>
+      <div
+        style={{
+          marginLeft: 'auto',
+          marginRight: '4px',
+          fontSize: '42px',
+          fontWeight: 'bold',
+          color: 'white',
+        }}
+      >
+        { floatPoints }
       </div>
     </div>
   )
