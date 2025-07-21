@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 //import Image from "next/image";
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
+import PreferenceTab from './components/PreferenceTab';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline } from './types'
-import { ChangeZoneData, LoglineData } from './types/overlay';
+import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
   getGrandCompanyColor,
@@ -36,22 +37,62 @@ const gcFp : Record<GrandCompany, number> = {
 const pointMap : Record<string, PointInfo | "neutrality"> = {}
 const prePoints : PrePointInfo[] = []
 
+interface LasthitInfo {
+  perpetratorName: string;
+  victimName: string;
+  hitActionName: string;
+}
+interface DeathInfo {
+  happenTime: number;
+  victimName: string;
+  perpetratorName: string;
+  summonedBy?: string;
+  lasthitActionName: string;
+}
+
+/** 玩家表 | `key:charID` | `val:charName` */
+const playerMap : Record<string, string> = {}
+/** 召唤物表 | `key:召唤物ID` | `val:召唤者ID` */
+const summonMap : Record<string, string> = {}
+/** 上次受击表 | `key:施害者ID+受害者ID` */
+const playerLasthitMap : Record<string, LasthitInfo> = {}
+const deaths : DeathInfo[] = []
+
 const parseGc = (gc_name: string) => {
   if (gc_name === '黑涡团') return GrandCompany.maelstrom
   else if (gc_name === '双蛇党') return GrandCompany.twinadder
   else if (gc_name === '恒辉队') return GrandCompany.immoflame
   throw new Error('parseGc: unknown gc:' + gc_name)
 }
+const formatTime = (timestamp: number) => {
+  return new Date(timestamp).toISOString().slice(11, 19)
+}
 
 export default function Home() {
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
 
+  const [playerId, setPlayerId] = useState<string>('')
+  const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
   const [frontline, setFrontline] = useState<Frontline | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [ppIndex, setPpIndex] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
+
+  const availableTabs = ['situation', 'knockout', 'death', 'calendar', 'preference'] as const
+  const [activeTab, setActiveTab] = useState<typeof availableTabs[number]>('situation');
+  const [collapsed, setCollapsed] = useState(false);
+  const getTabName = (tab: typeof availableTabs[number]) => {
+    switch (tab) {
+      case 'situation': return '战况';
+      case 'knockout': return '击倒';
+      case 'death': return '阵亡';
+      case 'calendar': return '日历';
+      case 'preference': return '设置';
+      default: return '???';
+    }
+  }
 
   const activePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
     if (pointMap[key] && pointMap[key] !== 'neutrality') {
@@ -172,10 +213,71 @@ export default function Home() {
       setDummy(0)
     }
   }
+  const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
+    setPlayerId(data.charID)
+    setPlayerName(data.charName)
+  }, [
+    setPlayerId, setPlayerName
+  ]);
   const loglineCallback = useCallback((data: LoglineData) => {
     const msgType = data.line[0] // "00"
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
+
+    if (onConflict || frontline) { // * 为了减轻负载，仅在纷争前线期间解析战斗
+      if (msgType === '03') { // 添加战斗成员
+        console.log(JSON.stringify(data))
+      } else if (msgType === '15' || msgType === '16') { // ActionEffect or AOEActionEffect
+        const perpetratorId = data.line[1]
+        const perpetratorName = data.line[2]
+        const hitActionName = data.line[4]
+        const victimId = data.line[5]
+        const victimName = data.line[6]
+        if (perpetratorId && perpetratorName && hitActionName && victimId && victimName) {
+          const key = `${perpetratorId}-${victimId}`
+          playerLasthitMap[key] = {
+            perpetratorName: perpetratorName,
+            victimName: victimName,
+            hitActionName: hitActionName,
+          }
+        } else {
+          console.warn('Invalid ActionEffect data:', JSON.stringify(data))
+        }
+      } else if (msgType === '19') { // Death
+        // 19:400002F8:冰封的石文A1:400002FF:亚灵神巴哈姆特
+        const victimId = data.line[1]
+        const victimName = data.line[2]
+        const perpetratorId = data.line[3]
+        const perpetratorName = data.line[4]
+        if (perpetratorId && perpetratorName && victimId && victimName) {
+          let summoner : string | undefined
+          if (summonMap[perpetratorId]) {
+            const summonerId = summonMap[perpetratorId]
+            if (playerMap[summonerId]) {
+              summoner = playerMap[summonerId]
+            }
+          }
+          deaths.push({
+            happenTime: Date.now(),
+            victimName: victimName,
+            perpetratorName: perpetratorName,
+            summonedBy: summoner,
+            lasthitActionName: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
+          })
+        } else {
+          console.warn('Invalid Death data:', JSON.stringify(data))
+        }
+      } else if (msgType === '105') { // Summon
+        // 105:Add:400002FF:BNpcID:1E7B:BNpcNameID:19A6:CastTargetID:E0000000:CurrentMP:10000:CurrentWorldID:65535:Heading:-0.4157:Level:100:MaxHP:57000:MaxMP:10000:ModelStatus:3072:Name:亚灵神巴哈姆特:NPCTargetID:E0000000:OwnerID:105812EF:PosX:-5.9613:PosY:-6.2225:PosZ:-5.0000:Radius:2.1000:Type:2:WorldID:65535
+        const summonedId = data.line[2]
+        const ownerId = data.line[28]
+        if (summonedId && ownerId) {
+          summonMap[summonedId] = ownerId
+        } else {
+          console.warn('Invalid Summon data:', JSON.stringify(data))
+        }
+      }
+    }
 
     if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
     //if (!onConflict) return
@@ -235,12 +337,12 @@ export default function Home() {
         if (pointMap[pt] && pointMap[pt] !== 'neutrality') {
           pointMap[pt].cancel()
         }
+        while (prePoints.length > ptMax) prePoints.pop()
         if (prePoints.length < ptMax) {
           const key = `seize-${Date.now()}-${ppIndex}`
           setPpIndex(index => index + 1)
           prePoints.push(createPrePoint(key, 15))
         }
-        while (prePoints.length > ptMax) prePoints.pop()
         setDummy(d => d + 1)
         return
       }
@@ -250,7 +352,8 @@ export default function Home() {
         while (prePoints.length > 3) prePoints.pop()
         setDummy(d => d + 1)
       }
-    } else if (frontline === Frontline.shatter) {
+    }
+    else if (frontline === Frontline.shatter) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'A') return 200
         else if (ptLv === 'B') return 50
@@ -301,7 +404,7 @@ export default function Home() {
     ) console.log(JSON.stringify(data))
     // setLogs(val => val + '\r\n' + data.rawLine)
   }, [
-    frontline, ptMax, ppIndex,
+    onConflict, frontline, ptMax, ppIndex,
   ])
 
   const getCards = () => {
@@ -347,16 +450,18 @@ export default function Home() {
     initialize(window)
 
     addOverlayListener('ChangeZone', zoneChangeCallback)
+    addOverlayListener('ChangePrimaryPlayer', primaryPlayerChangeCallback)
     addOverlayListener('LogLine', loglineCallback)
 
     startOverlayEvents()
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback)
+      removeOverlayListener('ChangePrimaryPlayer', primaryPlayerChangeCallback)
       removeOverlayListener('LogLine', loglineCallback)
     }
   }, [
-    loglineCallback,
+    loglineCallback, primaryPlayerChangeCallback,
     initialize, addOverlayListener, removeOverlayListener, startOverlayEvents
   ])
 
@@ -364,10 +469,22 @@ export default function Home() {
     width: 'calc(100% - 10px)',
     fontSize: '20px',
     alignSelf: 'baseline',
+    color: 'white',
     background: 'rgba(31, 31, 31, 0.9)',
     border: '1px solid rgba(0, 0, 0, 0.5)',
     borderRadius: '4px',
     padding: '2px 4px',
+  }
+  const panelStyle : React.CSSProperties = {
+    width: '100%',
+    flex: 1,
+    background: 'rgba(255,255,255,0.1)',
+    padding: '8px',
+    borderRadius: '4px',
+    color: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
   }
 
   return (
@@ -375,6 +492,7 @@ export default function Home() {
       style={{
         fontFamily: '"Cambria", "思源宋体 CN"',
         width: 'calc(100% - 8px)',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -384,53 +502,161 @@ export default function Home() {
         background: 'rgba(0, 0, 0, 0.5)',
       }}
     >
-      <main
+      {/* 顶部操作栏 */}
+      <div
         style={{
           width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
+          justifyContent: 'space-between',
           alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '4px 8px',
+          borderRadius: '4px',
         }}
       >
-        <div style={titleStyle}>剩余点分</div>
-        <div
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {availableTabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '4px 8px',
+                background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
+                border: '1px solid transparent',
+                borderRadius: '4px',
+                color: 'white',
+                cursor: 'pointer',
+              }}
+            >
+              {getTabName(tab)}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
           style={{
-            width: '100%',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '8px',
+            padding: '4px 8px',
+            border: 'none',
+            background: 'rgba(255, 255, 255, 0.3)',
+            color: 'white',
+            cursor: 'pointer',
           }}
         >
-          <GcCard gc={GrandCompany.maelstrom} me={gc === GrandCompany.maelstrom} floatPoints={getGcPoint(GrandCompany.maelstrom)} />
-          <GcCard gc={GrandCompany.twinadder} me={gc === GrandCompany.twinadder} floatPoints={getGcPoint(GrandCompany.twinadder)} />
-          <GcCard gc={GrandCompany.immoflame} me={gc === GrandCompany.immoflame} floatPoints={getGcPoint(GrandCompany.immoflame)} />
-        </div>
-        <div style={titleStyle}>当前据点</div>
-        <div
+          {collapsed ? '展开' : '折叠'}
+        </button>
+      </div>
+
+      {/* 主要内容区 */}
+      {!collapsed && (
+        <main
           style={{
             width: '100%',
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '2px',
+            gap: '4px',
+            alignItems: 'center',
           }}
         >
-          {
-            getCards().map(val => {
-              return (
-                <PointCard
-                  key={val.key}
-                  type={val.type}
-                  ptLv={val.ptLv}
-                  ptName={val.ptName}
-                  ptProgress={val.ptProgress}
-                  ptDescription={val.ptDescription}
-                />
-              )
-            })
-          }
-        </div>
-      </main>
+          {/* 战况 */}
+          {activeTab === 'situation' && (
+            <div style={panelStyle}>
+              <div style={titleStyle}>剩余点分</div>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '8px',
+                }}
+              >
+                <GcCard gc={GrandCompany.maelstrom} me={gc === GrandCompany.maelstrom} floatPoints={getGcPoint(GrandCompany.maelstrom)} />
+                <GcCard gc={GrandCompany.twinadder} me={gc === GrandCompany.twinadder} floatPoints={getGcPoint(GrandCompany.twinadder)} />
+                <GcCard gc={GrandCompany.immoflame} me={gc === GrandCompany.immoflame} floatPoints={getGcPoint(GrandCompany.immoflame)} />
+              </div>
+              <div style={titleStyle}>当前据点</div>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                }}
+              >
+                {
+                  getCards().map(val => {
+                    return (
+                      <PointCard
+                        key={val.key}
+                        type={val.type}
+                        ptLv={val.ptLv}
+                        ptName={val.ptName}
+                        ptProgress={val.ptProgress}
+                        ptDescription={val.ptDescription}
+                      />
+                    )
+                  })
+                }
+              </div>
+            </div>
+          )}
+          {/* 击倒 */}
+          {activeTab === 'knockout' && (
+            <div style={panelStyle}>
+              {
+                deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName).map((death, deathIndex) => (
+                  <div key={'knockout' + deathIndex}>
+                    <span>{formatTime(death.happenTime)}　</span>
+                    <span>使用</span>
+                    {
+                      death.summonedBy && (
+                        <>
+                          <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                          <span>发动的</span>
+                        </>
+                      )
+                    }
+                    <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                    <span>击倒了</span>
+                    <span style={{color: 'orangered'}}>{death.victimName}</span>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+          {/* 死亡 */}
+          {activeTab === 'death' && (
+            <div style={panelStyle}>
+              {
+                deaths.filter(death => death.victimName === playerName).map((death, deathIndex) => (
+                  <div key={'death' + deathIndex}>
+                    <span>{formatTime(death.happenTime)}　</span>
+                    <span>被</span>
+                    <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
+                    {
+                      death.summonedBy && (
+                        <>
+                          <span>召唤的</span>
+                          <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                        </>
+                      )
+                    }
+                    <span>用</span>
+                    <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                    <span>击倒了</span>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+          {/* 日历 */}
+          {activeTab === 'calendar' && (
+            <div style={panelStyle}>Calendar 内容</div>
+          )}
+          {/* 设置 */}
+          {activeTab === 'preference' && (<PreferenceTab onSave={() => {}} />)}
+        </main>
+      )}
     </div>
   );
 }

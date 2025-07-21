@@ -18,6 +18,11 @@ export type ChangeZoneData = {
   zoneID: number
   zoneName: string
 }
+export type ChangePrimaryPlayerData = {
+  type: "ChangePrimaryPlayer"
+  charID: string
+  charName: string
+}
 export type LoglineData = {
   type: "LogLine"
   line: string[]

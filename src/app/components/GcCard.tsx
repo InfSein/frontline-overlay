@@ -44,6 +44,7 @@ export default function GcCard({
             lineHeight: 1.5,
             fontWeight: 500,
             color: 'white',
+            textShadow: '1px 1px 2px black'
           }}
         >
           { getGrandCompanyName(gc) }
