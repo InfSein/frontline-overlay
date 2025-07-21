@@ -12,6 +12,7 @@ import {
   getGrandCompanyName,
   getGrandCompanyColor,
 } from '@/app/tools'
+import CalendarTab from './components/CalendarTab';
 
 interface PointInfo {
   remain: number;
@@ -51,11 +52,11 @@ interface DeathInfo {
 }
 
 /** 玩家表 | `key:charID` | `val:charName` */
-const playerMap : Record<string, string> = {}
+let playerMap : Record<string, string> = {}
 /** 召唤物表 | `key:召唤物ID` | `val:召唤者ID` */
-const summonMap : Record<string, string> = {}
+let summonMap : Record<string, string> = {}
 /** 上次受击表 | `key:施害者ID+受害者ID` */
-const playerLasthitMap : Record<string, LasthitInfo> = {}
+let playerLasthitMap : Record<string, LasthitInfo> = {}
 const deaths : DeathInfo[] = []
 
 const parseGc = (gc_name: string) => {
@@ -65,12 +66,13 @@ const parseGc = (gc_name: string) => {
   throw new Error('parseGc: unknown gc:' + gc_name)
 }
 const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toISOString().slice(11, 19)
+  return new Date(timestamp).toTimeString().slice(0, 8)
 }
 
 export default function Home() {
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
@@ -78,6 +80,7 @@ export default function Home() {
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [ppIndex, setPpIndex] = useState<number>(0)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dummy, setDummy] = useState(0) // 手动刷新
 
   const availableTabs = ['situation', 'knockout', 'death', 'calendar', 'preference'] as const
@@ -197,11 +200,15 @@ export default function Home() {
   }
 
   const zoneChangeCallback = (data: ChangeZoneData) => {
-    //console.log('Zone changed:', JSON.stringify(data))
-    if (data.zoneID === 554) {
-      setFrontline(Frontline.shatter)
+    console.log('Zone changed:', JSON.stringify(data))
+    if (data.zoneID === 1273) {
+      setFrontline(Frontline.secure)
     } else if (data.zoneID === 431) {
       setFrontline(Frontline.seize)
+    } else if (data.zoneID === 554) {
+      setFrontline(Frontline.shatter)
+    } else if (data.zoneID === 999) {
+      setFrontline(Frontline.naadam)
     } else {
       setOnConflict(false); setFrontline(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
@@ -210,6 +217,7 @@ export default function Home() {
         else val.cancel()
       })
       prePoints.length = 0
+      playerMap = {}; summonMap = {}; playerLasthitMap = {}
       setDummy(0)
     }
   }
@@ -226,13 +234,27 @@ export default function Home() {
 
     if (onConflict || frontline) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
-        console.log(JSON.stringify(data))
-      } else if (msgType === '15' || msgType === '16') { // ActionEffect or AOEActionEffect
-        const perpetratorId = data.line[1]
-        const perpetratorName = data.line[2]
-        const hitActionName = data.line[4]
-        const victimId = data.line[5]
-        const victimName = data.line[6]
+        // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
+        const charId = data.line[2]
+        const charName = data.line[3]
+        playerMap[charId] = charName
+      } else if (
+        (msgType === '21' || msgType === '22') // 发动技能
+        && (
+          (data.line[8] || '').toString().endsWith('3')
+          || (data.line[10] || '').toString().endsWith('3')
+          || (data.line[12] || '').toString().endsWith('3')
+          || (data.line[14] || '').toString().endsWith('3')
+          || (data.line[16] || '').toString().endsWith('3')
+        ) // 造成了伤害
+      ) {
+        // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
+        // 22|2025-07-21T20:15:49.3900000+08:00|1058F1D5|浮|72DC|霰弹枪|40000002|木人|720003|17700000|0|0|0|0|0|0|0|0|0|0|0|0|0|0|75000|75000|10000|10000|||104.12|-4.71|2.31|3.14|57000|57000|10000|10000|||94.94|-13.42|2.31|-2.71|0007B835|1|2|00||01|72DC|72DC|0.100|0000|69f2e27a0f10b758
+        const perpetratorId = data.line[2]
+        const perpetratorName = data.line[3]
+        const hitActionName = data.line[5]
+        const victimId = data.line[6]
+        const victimName = data.line[7]
         if (perpetratorId && perpetratorName && hitActionName && victimId && victimName) {
           const key = `${perpetratorId}-${victimId}`
           playerLasthitMap[key] = {
@@ -240,47 +262,45 @@ export default function Home() {
             victimName: victimName,
             hitActionName: hitActionName,
           }
-        } else {
-          console.warn('Invalid ActionEffect data:', JSON.stringify(data))
         }
-      } else if (msgType === '19') { // Death
-        // 19:400002F8:冰封的石文A1:400002FF:亚灵神巴哈姆特
-        const victimId = data.line[1]
-        const victimName = data.line[2]
-        const perpetratorId = data.line[3]
-        const perpetratorName = data.line[4]
-        if (perpetratorId && perpetratorName && victimId && victimName) {
-          let summoner : string | undefined
-          if (summonMap[perpetratorId]) {
-            const summonerId = summonMap[perpetratorId]
-            if (playerMap[summonerId]) {
-              summoner = playerMap[summonerId]
+      } else if (msgType === '25') { // Death
+        // 25|2025-07-21T20:04:08.8860000+08:00|10582BA7|卷饼|1058F1D5|浮|d94e2430f7a262f2
+        const victimId = data.line[2]
+        const victimName = data.line[3]
+        const perpetratorId = data.line[4]
+        const perpetratorName = data.line[5]
+        if (victimId && !victimId.startsWith('40')) { // 忽略场景物体
+          if (perpetratorId && perpetratorName && victimName) {
+            let summoner : string | undefined
+            if (summonMap[perpetratorId]) {
+              const summonerId = summonMap[perpetratorId]
+              if (playerMap[summonerId]) {
+                summoner = playerMap[summonerId]
+              }
             }
+            deaths.push({
+              happenTime: Date.now(),
+              victimName: victimName,
+              perpetratorName: perpetratorName,
+              summonedBy: summoner,
+              lasthitActionName: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
+            })
+            setDummy(d => d + 1)
           }
-          deaths.push({
-            happenTime: Date.now(),
-            victimName: victimName,
-            perpetratorName: perpetratorName,
-            summonedBy: summoner,
-            lasthitActionName: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
-          })
-        } else {
-          console.warn('Invalid Death data:', JSON.stringify(data))
         }
-      } else if (msgType === '105') { // Summon
-        // 105:Add:400002FF:BNpcID:1E7B:BNpcNameID:19A6:CastTargetID:E0000000:CurrentMP:10000:CurrentWorldID:65535:Heading:-0.4157:Level:100:MaxHP:57000:MaxMP:10000:ModelStatus:3072:Name:亚灵神巴哈姆特:NPCTargetID:E0000000:OwnerID:105812EF:PosX:-5.9613:PosY:-6.2225:PosZ:-5.0000:Radius:2.1000:Type:2:WorldID:65535
-        const summonedId = data.line[2]
-        const ownerId = data.line[28]
+        
+      } else if (msgType === '261' && data.line[2] === 'Add') { // Summon
+        // 261|2025-07-21T20:19:36.6860000+08:00|Add|40007109|BNpcID|3951|BNpcNameID|E53|CastTargetID|E0000000|CurrentMP|10000|CurrentWorldID|65535|Heading|1.6445|Level|100|MaxHP|57000|MaxMP|10000|ModelStatus|3072|Name|象式浮空炮塔|NPCTargetID|E0000000|OwnerID|1058F1D5|PosX|95.1405|PosY|-7.4485|PosZ|2.3552|Radius|1.0000|Type|2|WorldID|65535|0ed50912a51e73d8
+        const summonedId = data.line[3]
+        const ownerId = data.line[29]
         if (summonedId && ownerId) {
           summonMap[summonedId] = ownerId
-        } else {
-          console.warn('Invalid Summon data:', JSON.stringify(data))
         }
       }
     }
 
     if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
-    //if (!onConflict) return
+    if (!onConflict) return
     if (!msg) return
 
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
@@ -416,10 +436,15 @@ export default function Home() {
       ptProgress?: number
       ptDescription: string
     }[] = Object.entries(pointMap).map(([key, val]) => {
+      let ptName = ''
+      if (frontline === Frontline.seize) ptName = '亚拉戈石文'
+      else if (frontline === Frontline.shatter) ptName = '冰封的石文'
+      else if (frontline === Frontline.naadam) ptName = '无垢的大地'
+      ptName += key
       if (val === 'neutrality') {
         return {
           key: `pointMap-${key}`,
-          type: 'neutrality', ptName: key, ptDescription: '中立'
+          type: 'neutrality', ptName: ptName, ptDescription: '中立'
         }
       } else {
         return {
@@ -427,7 +452,7 @@ export default function Home() {
           type: val.paused ? 'neutrality' : 'active',
           color: val.paused ? '' : getGrandCompanyColor(val.owner),
           ptLv: val.ptLv,
-          ptName: key,
+          ptName: ptName,
           ptProgress: val.remain / val.total * 100,
           ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.remain.toString(),
         }
@@ -499,7 +524,7 @@ export default function Home() {
         justifyItems: 'center',
         gap: '8px',
         padding: '4px',
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: 'transparent',
       }}
     >
       {/* 顶部操作栏 */}
@@ -516,10 +541,11 @@ export default function Home() {
       >
         <div style={{ display: 'flex', gap: '8px' }}>
           {availableTabs.map((tab) => (
-            <button
+            <div
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
+                fontSize: '20px',
                 padding: '4px 8px',
                 background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
                 border: '1px solid transparent',
@@ -529,21 +555,23 @@ export default function Home() {
               }}
             >
               {getTabName(tab)}
-            </button>
+            </div>
           ))}
         </div>
-        <button
+        <div
           onClick={() => setCollapsed(!collapsed)}
           style={{
+            fontSize: '20px',
             padding: '4px 8px',
-            border: 'none',
-            background: 'rgba(255, 255, 255, 0.3)',
+            border: '1px solid transparent',
+            borderRadius: '4px',
+            background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
             color: 'white',
             cursor: 'pointer',
           }}
         >
-          {collapsed ? '展开' : '折叠'}
-        </button>
+          点此{collapsed ? '展开' : '折叠'}
+        </div>
       </div>
 
       {/* 主要内容区 */}
@@ -605,7 +633,7 @@ export default function Home() {
             <div style={panelStyle}>
               {
                 deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName).map((death, deathIndex) => (
-                  <div key={'knockout' + deathIndex}>
+                  <div key={'knockout' + deathIndex} style={titleStyle}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>使用</span>
                     {
@@ -629,7 +657,7 @@ export default function Home() {
             <div style={panelStyle}>
               {
                 deaths.filter(death => death.victimName === playerName).map((death, deathIndex) => (
-                  <div key={'death' + deathIndex}>
+                  <div key={'death' + deathIndex} style={titleStyle}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>被</span>
                     <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
@@ -651,7 +679,10 @@ export default function Home() {
           )}
           {/* 日历 */}
           {activeTab === 'calendar' && (
-            <div style={panelStyle}>Calendar 内容</div>
+            <CalendarTab
+              panelStyle={panelStyle}
+              titleStyle={titleStyle}
+            />
           )}
           {/* 设置 */}
           {activeTab === 'preference' && (<PreferenceTab onSave={() => {}} />)}

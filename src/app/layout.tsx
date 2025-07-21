@@ -27,7 +27,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{
-          height: 'calc(100% - 0.25rem)'
+          height: 'calc(100% - 1.25rem)'
         }}
       >
         {children}
