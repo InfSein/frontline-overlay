@@ -151,7 +151,10 @@ export default function CalendarTab({
                   //marginLeft: '16px',
                 }}
               >
-                <div style={{ marginLeft: '1em' }}>{ getFrontline((remainder + val + 1) % 4)[1] }</div>
+                <div>
+                  <span style={{ margin: '0 0.3em 0 0.5em' }}> · </span>
+                  <span>{ getFrontline((remainder + val + 1) % 4)[1] }</span>
+                </div>
                 <div style={{ marginLeft: 'auto' }}>{ `　(${formatDate(getNext23(now, val))}／${timeUntilNext23(now, val)}后)` }</div>
               </div>
             )

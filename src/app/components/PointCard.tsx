@@ -18,11 +18,11 @@ export default function GcCard({
 }: PointCardProps) {
   let color = ''
   if (type === 'active') {
-    color = '#1D3734'
+    color = '#70ACFFFF'
   } else if (type === 'neutrality') {
-    color = '#303033'
+    color = '#ADADADFF'
   } else {
-    color = '#203446'
+    color = '#ADADADFF'
   }
   if (specifyColor) color = specifyColor
 
@@ -69,6 +69,7 @@ export default function GcCard({
         <div style={{
           width: '30px',
           fontSize: '20px',
+          fontWeight: 'bold',
           textAlign: 'center',
         }}>
           {ptLv && <span>{ptLv}</span>}
