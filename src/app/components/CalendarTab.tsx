@@ -55,13 +55,13 @@ export default function CalendarTab({
   }
   const getNext23 = (now: Date, addDay?: number) => {
     const next23 = new Date(now)
-    if (addDay) {
-      next23.setDate(next23.getDate() + addDay)
-    }
     next23.setHours(23, 0, 0, 0)
     // 如果已经过了今天23:00，则目标是明天的23:00
     if (now.getTime() >= next23.getTime()) {
       next23.setDate(next23.getDate() + 1)
+    }
+    if (addDay) {
+      next23.setDate(next23.getDate() + addDay)
     }
     return next23
   }
