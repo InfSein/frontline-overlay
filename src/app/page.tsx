@@ -100,8 +100,6 @@ export default function Home() {
   const [frontline, setFrontline] = useState<Frontline | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
-  const [ppIndex, setPpIndex] = useState<number>(0)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dummy, setDummy] = useState(0) // 手动刷新
 
   const availableTabs = ['situation', 'knockout', 'death', 'calendar', 'preference'] as const
@@ -118,10 +116,14 @@ export default function Home() {
     }
   }
 
+  const getCurrPointCount = () => {
+    return prePoints.length + Object.keys(pointMap).length
+  }
   const activePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
     if (pointMap[key] && pointMap[key].type !== 'initial') {
       pointMap[key].owner = owner
       pointMap[key].resume()
+      setDummy(d => d + 1)
       return
     }
     if (pointMap[key]) {
@@ -368,7 +370,6 @@ export default function Home() {
     }
 
     if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
-    if (!onConflict) return
     if (!msg) return
 
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
@@ -381,6 +382,8 @@ export default function Home() {
       else setPtMax(0)
       return
     }
+    
+    if (!onConflict && !frontline) return
 
     if (frontline === Frontline.seize) {
       const getFp = (ptLv: string) => {
@@ -427,10 +430,9 @@ export default function Home() {
         if (pointMap[pt] && pointMap[pt].type !== 'initial') {
           pointMap[pt].cancel()
         }
-        while (prePoints.length > ptMax) prePoints.pop()
+        while (prePoints.length && getCurrPointCount() > ptMax) prePoints.pop()
         if (prePoints.length < ptMax) {
-          const key = `seize-${Date.now()}-${ppIndex}`
-          setPpIndex(index => index + 1)
+          const key = `seize-${Date.now()}-${dummy}`
           prePoints.push(createPrePoint(key, 15))
         }
         setDummy(d => d + 1)
@@ -439,7 +441,7 @@ export default function Home() {
 
       if (msg === '距离“尘封秘岩（争夺战）”结束还有10分钟。') {
         setPtMax(3)
-        while (prePoints.length > 3) prePoints.pop()
+        while (prePoints.length && getCurrPointCount() > 3) prePoints.pop()
         setDummy(d => d + 1)
       }
     }
@@ -527,17 +529,14 @@ export default function Home() {
 
       if (msg === '距离战斗开始已经过5分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(4)
-        while (prePoints.length > 4) prePoints.pop()
         setDummy(d => d + 1)
       }
       if (msg === '距离战斗开始已经过10分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(3)
-        while (prePoints.length > 3) prePoints.pop()
         setDummy(d => d + 1)
       }
       if (msg === '距离战斗开始已经过15分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(2)
-        while (prePoints.length > 2) prePoints.pop()
         setDummy(d => d + 1)
       }
     }
@@ -550,7 +549,7 @@ export default function Home() {
     ) console.log(JSON.stringify(data))
     // setLogs(val => val + '\r\n' + data.rawLine)
   }, [
-    onConflict, frontline, ptMax, ppIndex,
+    onConflict, frontline, ptMax, dummy,
   ])
 
   const getCards = () => {
@@ -573,13 +572,13 @@ export default function Home() {
           type: 'neutrality',
           ptLv: val.ptLv,
           ptName: ptName,
-          ptDescription: '中立' + val.time?.remain ? ('／还需 ' + val.time!.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString()),
+          ptDescription: '中立' + (val.time ? ('／还需 ' + val.time.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString())),
         }
       } else {
         return {
           key: `pointMap-${key}`,
           type: val.paused ? 'neutrality' : 'active',
-          color: val.paused ? '' : getGrandCompanyColor(val.owner),
+          specifyColor: val.paused ? '' : getGrandCompanyColor(val.owner),
           ptLv: val.ptLv,
           ptName: ptName,
           ptProgress: val.remain / val.total * 100,
@@ -597,6 +596,12 @@ export default function Home() {
       })
     })
     return result
+  }
+  const getKnockouts = () => {
+    return deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName)
+  }
+  const getDeaths = () => {
+    return deaths.filter(death => death.victimName === playerName)
   }
 
   useEffect(() => {
@@ -620,7 +625,7 @@ export default function Home() {
   ])
 
   const titleStyle : React.CSSProperties = {
-    width: 'calc(100% - 10px)',
+    width: '100%',
     fontSize: '20px',
     alignSelf: 'baseline',
     color: 'white',
@@ -676,10 +681,11 @@ export default function Home() {
               style={{
                 fontSize: '20px',
                 padding: '4px 8px',
-                background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
+                background: (!collapsed && activeTab === tab) ? 'rgba(255,255,255,0.3)' : 'transparent',
                 border: '1px solid transparent',
                 borderRadius: '4px',
-                color: 'black',
+                color: 'white',
+                textShadow: '1px 1px 2px black',
                 cursor: 'pointer',
               }}
             >
@@ -695,7 +701,8 @@ export default function Home() {
             border: '1px solid transparent',
             borderRadius: '4px',
             background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-            color: 'black',
+            color: 'white',
+            textShadow: '1px 1px 2px black',
             cursor: 'pointer',
           }}
         >
@@ -761,7 +768,12 @@ export default function Home() {
           {activeTab === 'knockout' && (
             <div style={panelStyle}>
               {
-                deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName).map((death, deathIndex) => (
+                !getKnockouts().length && (
+                  <div style={titleStyle}>暂无击倒记录</div>
+                )
+              }
+              {
+                getKnockouts().map((death, deathIndex) => (
                   <div key={'knockout' + deathIndex} style={titleStyle}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>使用</span>
@@ -785,7 +797,12 @@ export default function Home() {
           {activeTab === 'death' && (
             <div style={panelStyle}>
               {
-                deaths.filter(death => death.victimName === playerName).map((death, deathIndex) => (
+                !getDeaths().length && (
+                  <div style={titleStyle}>暂无死亡记录</div>
+                )
+              }
+              {
+                getDeaths().map((death, deathIndex) => (
                   <div key={'death' + deathIndex} style={titleStyle}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>被</span>
