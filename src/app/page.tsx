@@ -14,7 +14,9 @@ import {
 } from '@/app/tools'
 import CalendarTab from './components/CalendarTab';
 
+/** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
+  type?: undefined;
   remain: number;
   total: number;
   owner: GrandCompany;
@@ -24,10 +26,29 @@ interface PointInfo {
   resume: () => void;
   cancel: () => void;
 }
+/** 初始点结构，仅限刚刚刷新出来，未被占领过的点 */
+interface InitialPointInfo {
+  type: 'initial';
+  /** 草原的点刷出来之后要等一段时间才能占领 */
+  time?: {
+    /** 剩余刷新时间 */
+    remain: number;
+    /** 总需刷新时间 */
+    total: number;
+  }
+  /** 点等级 */
+  ptLv: string;
+  /** 点总分 */
+  ptTotal: number;
+  cancel: () => void;
+}
+/** 还未刷新，但可以推测剩余刷新时间的点 */
 interface PrePointInfo {
   key: string;
+  /** 剩余刷新时间 */
   remain: number;
-  total: number
+  /** 总需刷新时间 */
+  total: number;
 }
 
 const gcFp : Record<GrandCompany, number> = {
@@ -35,7 +56,7 @@ const gcFp : Record<GrandCompany, number> = {
   [GrandCompany.twinadder]: 0,
   [GrandCompany.immoflame]: 0,
 }
-const pointMap : Record<string, PointInfo | "neutrality"> = {}
+const pointMap : Record<string, PointInfo | InitialPointInfo> = {}
 const prePoints : PrePointInfo[] = []
 
 interface LasthitInfo {
@@ -98,10 +119,13 @@ export default function Home() {
   }
 
   const activePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
-    if (pointMap[key] && pointMap[key] !== 'neutrality') {
+    if (pointMap[key] && pointMap[key].type !== 'initial') {
       pointMap[key].owner = owner
       pointMap[key].resume()
       return
+    }
+    if (pointMap[key]) {
+      pointMap[key].cancel()
     }
 
     let remain = total
@@ -151,6 +175,50 @@ export default function Home() {
 
     startTimer()
   }
+  const createInitialPoint = (key: string, ptLv: string, total: number, countdown?: number) => {
+    if (pointMap[key]) {
+      pointMap[key].cancel()
+    }
+
+    let remain = countdown || 0
+    let timer: NodeJS.Timeout | null = null
+
+    const tick = () => {
+      if (!countdown) return
+      remain -= 1
+      if (remain <= 0) {
+        remain = 0; cleanup()
+      }
+      setDummy(d => d + 1)
+    }
+    const cleanup = () => {
+      if (timer) clearInterval(timer)
+      delete pointMap[key]
+      setDummy(d => d + 1)
+    }
+    const startTimer = () => {
+      if (!timer) {
+        timer = setInterval(tick, 1000)
+      }
+    }
+
+    pointMap[key] = {
+      type: 'initial',
+      time: countdown ? {
+        get remain() {
+          return remain
+        },
+        total: countdown,
+      } : undefined,
+      ptLv: ptLv,
+      ptTotal: total,
+      cancel() {
+        cleanup()
+      }
+    }
+
+    startTimer()
+  }
   const createPrePoint = (key: string, total: number) => {
     let remain = total
     let timer: NodeJS.Timeout | null = null
@@ -190,7 +258,7 @@ export default function Home() {
   const getGcPoint = (gc: GrandCompany) => {
     if (frontline === Frontline.seize) {
       const arr = Object.values(pointMap)
-        .filter(val => val !== 'neutrality' && val.owner === gc)
+        .filter(val => val.type !== 'initial' && val.owner === gc)
         .map(val => (val as PointInfo).remain)
       if (!arr.length) return 0
       return arr.reduce((prev, cur) => prev + cur)
@@ -213,7 +281,7 @@ export default function Home() {
       setOnConflict(false); setFrontline(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
       Object.entries(pointMap).forEach(([key, val]) => {
-        if (val === 'neutrality') delete pointMap[key]
+        if (val.type === 'initial') delete pointMap[key]
         else val.cancel()
       })
       prePoints.length = 0
@@ -324,8 +392,10 @@ export default function Home() {
 
       const matchNeutral = msg.match(/(S|A|B)级的亚拉戈石文(.*?)开始活动了！/)
       if (matchNeutral && matchNeutral[2]) {
+        const ptLv = matchNeutral[1]
         const pt = matchNeutral[2]
-        pointMap[pt] = 'neutrality'
+        const [total] = getFp(ptLv)
+        createInitialPoint(pt, ptLv, total)
         setDummy(d => d + 1)
         return
       }
@@ -344,7 +414,7 @@ export default function Home() {
       const matchPause = msg.match(/(S|A|B)级的亚拉戈石文(.*?)变为中立状态！/)
       if (matchPause) {
         const pt = matchPause[2]
-        if (pointMap[pt] && pointMap[pt] !== 'neutrality') {
+        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
           pointMap[pt].pause()
         }
         setDummy(d => d + 1)
@@ -354,7 +424,7 @@ export default function Home() {
       const matchClean = msg.match(/(S|A|B)级的亚拉戈石文(.*?)的情报已枯竭！/)
       if (matchClean) {
         const pt = matchClean[2]
-        if (pointMap[pt] && pointMap[pt] !== 'neutrality') {
+        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
           pointMap[pt].cancel()
         }
         while (prePoints.length > ptMax) prePoints.pop()
@@ -408,12 +478,68 @@ export default function Home() {
     }
     else if (frontline === Frontline.naadam) {
       const getFp = (ptLv: string) => {
-        if (ptLv === 'S') return 200
-        else if (ptLv === 'A') return 100
-        else if (ptLv === 'B') return 50
+        if (ptLv === 'S') return [200, 20]
+        else if (ptLv === 'A') return [100, 10]
+        else if (ptLv === 'B') return [50, 5]
         throw new Error('[gcFp] wtf point is? ' + ptLv)
       }
 
+      const matchInitial = msg.match(/30秒后(S|A|B)级无垢的大地(.*?)即将进入可契约状态。/)
+      if (matchInitial && matchInitial[2]) {
+        const ptLv = matchInitial[1]
+        const pt = matchInitial[2]
+        const [total] = getFp(ptLv)
+        createInitialPoint(pt, ptLv, total, 30)
+        setDummy(d => d + 1)
+        return
+      }
+
+      const matchNeutral = msg.match(/(S|A|B)级无垢的大地(.*?)进入了可契约状态！/)
+      if (matchNeutral && matchNeutral[2]) {
+        const ptLv = matchNeutral[1]
+        const pt = matchNeutral[2]
+        const [total] = getFp(ptLv)
+        createInitialPoint(pt, ptLv, total)
+        setDummy(d => d + 1)
+        return
+      }
+
+      const matchConquer = msg.match(/(黑涡团|双蛇党|恒辉队)与(S|A|B)级无垢的大地(.*?)签订了契约。/)
+      if (matchConquer) {
+        const pt = matchConquer[3]
+        const ptLv = matchConquer[2]
+        const owner = parseGc(matchConquer[1])
+        const [total, drop] = getFp(ptLv)
+        activePoint(pt, owner, ptLv, total, drop)
+        setDummy(d => d + 1)
+        return
+      }
+
+      const matchClean = msg.match(/无垢的大地(.*?)已失效。/)
+      if (matchClean) {
+        const pt = matchClean[1]
+        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
+          pointMap[pt].cancel()
+        }
+        setDummy(d => d + 1)
+        return
+      }
+
+      if (msg === '距离战斗开始已经过5分钟，无垢的大地的同时出现数量减少了！') {
+        setPtMax(4)
+        while (prePoints.length > 4) prePoints.pop()
+        setDummy(d => d + 1)
+      }
+      if (msg === '距离战斗开始已经过10分钟，无垢的大地的同时出现数量减少了！') {
+        setPtMax(3)
+        while (prePoints.length > 3) prePoints.pop()
+        setDummy(d => d + 1)
+      }
+      if (msg === '距离战斗开始已经过15分钟，无垢的大地的同时出现数量减少了！') {
+        setPtMax(2)
+        while (prePoints.length > 2) prePoints.pop()
+        setDummy(d => d + 1)
+      }
     }
 
     if (
@@ -441,10 +567,13 @@ export default function Home() {
       else if (frontline === Frontline.shatter) ptName = '冰封的石文'
       else if (frontline === Frontline.naadam) ptName = '无垢的大地'
       ptName += key
-      if (val === 'neutrality') {
+      if (val.type === 'initial') {
         return {
           key: `pointMap-${key}`,
-          type: 'neutrality', ptName: ptName, ptDescription: '中立'
+          type: 'neutrality',
+          ptLv: val.ptLv,
+          ptName: ptName,
+          ptDescription: '中立' + val.time?.remain ? ('／还需 ' + val.time!.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString()),
         }
       } else {
         return {
@@ -464,7 +593,7 @@ export default function Home() {
         type: 'preparing',
         ptName: '即将刷新',
         ptProgress: val.remain / val.total * 100,
-        ptDescription: val.remain.toString() + 's',
+        ptDescription: '还需 ' + val.remain.toString() + 's',
       })
     })
     return result
