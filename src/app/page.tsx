@@ -679,7 +679,7 @@ export default function Home() {
                 background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
                 border: '1px solid transparent',
                 borderRadius: '4px',
-                color: 'white',
+                color: 'black',
                 cursor: 'pointer',
               }}
             >
@@ -695,7 +695,7 @@ export default function Home() {
             border: '1px solid transparent',
             borderRadius: '4px',
             background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-            color: 'white',
+            color: 'black',
             cursor: 'pointer',
           }}
         >
