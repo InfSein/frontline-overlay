@@ -55,13 +55,13 @@ export default function CalendarTab({
   }
   const getNext23 = (now: Date, addDay?: number) => {
     const next23 = new Date(now)
-    if (addDay) {
-      next23.setDate(next23.getDate() + addDay)
-    }
     next23.setHours(23, 0, 0, 0)
     // 如果已经过了今天23:00，则目标是明天的23:00
     if (now.getTime() >= next23.getTime()) {
       next23.setDate(next23.getDate() + 1)
+    }
+    if (addDay) {
+      next23.setDate(next23.getDate() + addDay)
     }
     return next23
   }
@@ -148,10 +148,10 @@ export default function CalendarTab({
                   border: '1px solid rgba(0, 0, 0, 0.5)',
                   borderRadius: '4px',
                   padding: '2px 4px',
-                  marginLeft: '16px',
+                  //marginLeft: '16px',
                 }}
               >
-                <div>{ getFrontline((remainder + val + 1) % 4)[1] }</div>
+                <div style={{ marginLeft: '1em' }}>{ getFrontline((remainder + val + 1) % 4)[1] }</div>
                 <div style={{ marginLeft: 'auto' }}>{ `　(${formatDate(getNext23(now, val))}／${timeUntilNext23(now, val)}后)` }</div>
               </div>
             )
