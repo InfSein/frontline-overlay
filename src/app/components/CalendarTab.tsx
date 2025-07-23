@@ -83,7 +83,7 @@ export default function CalendarTab() {
   return (
     <div className={PageStyle.panel}>
       <div className={PageStyle.title}>
-        <div className="flex">
+        <div className="flex w-full items-center">
           <div>当前战场</div>
           <div className="ml-auto">{ `(还剩${timeUntilNext23(now)})` }</div>
         </div>
