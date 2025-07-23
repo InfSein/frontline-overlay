@@ -13,10 +13,10 @@
 ## 工作进度
 此项目仍在内测阶段，功能尚不完整。
 
-|          ＼          |         开发          |         测试          |
+|          ＼          |          开发         |          测试         |
 | :------------------: | :-------------------: | :-------------------: |
 |    尘封秘岩（争夺战）   |  :white_check_mark:   |  :white_check_mark:   |
-|   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :black_square_button: |
+|   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
 |     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
 |   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
 

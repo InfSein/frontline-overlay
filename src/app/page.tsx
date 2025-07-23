@@ -112,7 +112,7 @@ export default function Home() {
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
 
-  const availableTabs = ['situation', 'knockout', 'death', 'goodboy', 'badboy', 'calendar'] as const
+  const availableTabs = ['situation', 'knockout', 'death', 'goodboy', 'badboy', 'calendar', 'about'] as const
   const [activeTab, setActiveTab] = useState<typeof availableTabs[number]>('situation');
   const [collapsed, setCollapsed] = useState(false);
   const getTabName = (tab: typeof availableTabs[number]) => {
@@ -123,6 +123,7 @@ export default function Home() {
       case 'goodboy': return '好人';
       case 'badboy': return '坏人';
       case 'calendar': return '日历';
+      case 'about': return '关于';
       default: return '???';
     }
   }
@@ -682,7 +683,7 @@ export default function Home() {
     if (!onConflict && !frontline){
       return '还未进入纷争前线'
     } else if (frontline === Frontline.shatter || frontline === Frontline.secure) {
-      return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据。'
+      return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据'
     }
     return false
   }
@@ -898,6 +899,14 @@ export default function Home() {
           {/* 日历 */}
           {activeTab === 'calendar' && (
             <CalendarTab />
+          )}
+          {/* 关于 */}
+          {activeTab === 'about' && (
+            <div className={PageStyle.panel}>
+              <div className={PageStyle.title_info}>
+                当前版本：{process.env.APP_VERSION}
+              </div>
+            </div>
           )}
         </main>
       )}

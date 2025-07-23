@@ -23,13 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ height: "100%", userSelect: "none" }}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{
-          height: 'calc(100% - 1.25rem)'
-        }}
-      >
+    <html lang="zh-CN" style={{ height: "100%", userSelect: "none" }}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
         {children}
       </body>
     </html>
