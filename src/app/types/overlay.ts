@@ -20,7 +20,7 @@ export type ChangeZoneData = {
 }
 export type ChangePrimaryPlayerData = {
   type: "ChangePrimaryPlayer"
-  charID: string
+  charID: number
   charName: string
 }
 export type LoglineData = {

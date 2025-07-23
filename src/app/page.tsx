@@ -11,6 +11,7 @@ import {
   getGrandCompanyName,
   getGrandCompanyColor,
   getActionDamageFromLogLine,
+  getFrontlineNames,
 } from '@/app/tools'
 import CalendarTab from './components/CalendarTab';
 
@@ -267,7 +268,7 @@ export default function Home() {
   }
 
   const getGcPoint = (gc: GrandCompany) => {
-    if (frontline === Frontline.seize) {
+    if (frontline === Frontline.seize || frontline === Frontline.naadam) {
       const arr = Object.values(pointMap)
         .filter(val => val.type !== 'initial' && val.owner === gc)
         .map(val => (val as PointInfo).remain)
@@ -286,7 +287,7 @@ export default function Home() {
       setFrontline(Frontline.seize)
     } else if (data.zoneID === 554) {
       setFrontline(Frontline.shatter)
-    } else if (data.zoneID === 999) {
+    } else if (data.zoneID === 888) {
       setFrontline(Frontline.naadam)
     } else {
       setOnConflict(false); setFrontline(''); setGc('')
@@ -301,7 +302,7 @@ export default function Home() {
     }
   }
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
-    setPlayerId(data.charID)
+    setPlayerId(data.charID.toString(16).toUpperCase())
     setPlayerName(data.charName)
   }, [
     setPlayerId, setPlayerName
@@ -327,8 +328,12 @@ export default function Home() {
         const victimId = data.line[6]
         const victimName = data.line[7] || '???'
 
-        if (perpetratorId && victimId) {
+        const isValidAction = data.line[8] !== '0'
+
+        if (isValidAction && perpetratorId && victimId) {
           const { hit, damage } = getActionDamageFromLogLine(data.line)
+
+          
 
           // 记录上次伤害表
           if (hit) {
@@ -343,13 +348,13 @@ export default function Home() {
           if (hitActionId && victimId === playerId && perpetratorId !== playerId) {
             // 记录好人
             const goodActions = [
-              '卫护', '至黑之夜',
-              '疗愈', '救疗', '水流幕', '鼓舞激励之策', '吉星相位', '心关',
-              '闭式舞姿',
-              '守护之光',
+              '卫护'/**/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
+              'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
+              '闭式舞姿'/**/,
+              '73E6'/*守护之光*/,
             ]
             if (goodActions.includes(hitActionId) || goodActions.includes(hitActionName)) {
-              if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName)
+              if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               goodboys.push({
                 happenTime: Date.now(),
                 perpetratorName: perpetratorName,
@@ -359,10 +364,15 @@ export default function Home() {
             }
             // 记录坏人
             const badActions = [
-              '全力挥打', '献身', '陨石冲击', '魔弹射手',
+              'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
             ]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
-              if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName)
+              console.log(
+                'Action:', hitActionId, hitActionName, '\n',
+                'damage:', damage, '\n',
+                'log:', data.rawLine
+              )
+              if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               badboys.push({
                 happenTime: Date.now(),
                 perpetratorName: perpetratorName,
@@ -485,6 +495,7 @@ export default function Home() {
       }
     }
     else if (frontline === Frontline.shatter) {
+      /*
       const getFp = (ptLv: string) => {
         if (ptLv === 'A') return 200
         else if (ptLv === 'B') return 50
@@ -498,7 +509,7 @@ export default function Home() {
         if (immoflame.includes(pt)) return GrandCompany.immoflame
         if (twinadder.includes(pt)) return GrandCompany.twinadder
         if (maelstrom.includes(pt)) return GrandCompany.maelstrom
-        throw new Error('[judgeBelong] wtf point is? ' + pt)
+        return undefined
       }
 
       const matchPtActive = msg.match(/冰封的石文(A|B)(\d{1,2})启动了，冰块变得脆弱了！/)
@@ -506,7 +517,8 @@ export default function Home() {
         const fp = getFp(matchPtActive[1])
         const pt = matchPtActive[1] + matchPtActive[2]
         const _gc = judgeBelong(pt)
-        gcFp[_gc] += fp
+        if (_gc) gcFp[_gc] += fp
+        setDummy(d => d + 1)
       }
 
       const matchPtDestroy = msg.match(/冰封的石文(A|B)(\d{1,2})被破坏了！/)
@@ -514,8 +526,10 @@ export default function Home() {
         const fp = getFp(matchPtDestroy[1])
         const pt = matchPtDestroy[1] + matchPtDestroy[2]
         const _gc = judgeBelong(pt)
-        gcFp[_gc] -= fp
+        if (_gc) gcFp[_gc] -= fp
+        setDummy(d => d + 1)
       }
+      */
     }
     else if (frontline === Frontline.naadam) {
       const getFp = (ptLv: string) => {
@@ -663,26 +677,13 @@ export default function Home() {
     initialize, addOverlayListener, removeOverlayListener, startOverlayEvents
   ])
 
-  const titleStyle : React.CSSProperties = {
-    width: '100%',
-    fontSize: '20px',
-    alignSelf: 'baseline',
-    color: 'white',
-    background: 'rgba(31, 31, 31, 0.9)',
-    border: '1px solid rgba(0, 0, 0, 0.5)',
-    borderRadius: '4px',
-    padding: '2px 4px',
-  }
-  const panelStyle : React.CSSProperties = {
-    width: '100%',
-    flex: 1,
-    background: 'rgba(255,255,255,0.1)',
-    padding: '8px',
-    borderRadius: '4px',
-    color: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
+  const lockSituationMsg = () => {
+    if (!onConflict && !frontline){
+      return '还未进入纷争前线'
+    } else if (frontline === Frontline.shatter || frontline === Frontline.secure) {
+      return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据。'
+    }
+    return false
   }
 
   return (
@@ -763,29 +764,34 @@ export default function Home() {
         >
           {/* 战况 */}
           {activeTab === 'situation' && (
-            <div style={panelStyle}>
-              <div style={titleStyle}>剩余点分</div>
-              <div
-                style={{
-                  width: '100%',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '8px',
-                }}
-              >
+            <div className={PageStyle.panel}>
+              {
+                lockSituationMsg() && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-black/30">
+                    <div className="text-center text-white">
+                      <div className="text-4xl mb-2">
+                        ⛓️🔒⛓️
+                      </div>
+                      <div className="text-2xl font-semibold">
+                        { lockSituationMsg() }
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+              <div className={PageStyle.title}>剩余点分</div>
+              <div className="w-full grid grid-cols-3 gap-2">
                 <GcCard gc={GrandCompany.maelstrom} me={gc === GrandCompany.maelstrom} floatPoints={getGcPoint(GrandCompany.maelstrom)} />
                 <GcCard gc={GrandCompany.twinadder} me={gc === GrandCompany.twinadder} floatPoints={getGcPoint(GrandCompany.twinadder)} />
                 <GcCard gc={GrandCompany.immoflame} me={gc === GrandCompany.immoflame} floatPoints={getGcPoint(GrandCompany.immoflame)} />
               </div>
-              <div style={titleStyle}>当前据点</div>
-              <div
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                }}
-              >
+              <div className={PageStyle.title}>当前据点</div>
+              {
+                (frontline === Frontline.shatter || frontline === Frontline.secure) && (
+                  <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">暂不支持解析{ getFrontlineNames(frontline)[1] }的当前据点数据。</div>
+                )
+              }
+              <div className="w-full flex flex-col gap-0.5">
                 {
                   getCards().map(val => {
                     return (
@@ -837,7 +843,12 @@ export default function Home() {
             <div style={panelStyle}>
               {
                 !getDeaths().length && (
-                  <div style={titleStyle}>暂无死亡记录</div>
+                  <div className={PageStyle.title}>暂无死亡记录</div>
+                )
+              }
+              {
+                (!!getDeaths().length && (!onConflict && !frontline)) && (
+                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
                 )
               }
               {
@@ -867,7 +878,12 @@ export default function Home() {
             <div style={panelStyle}>
               {
                 !goodboys.length && (
-                  <div style={titleStyle}>暂无记录</div>
+                  <div className={PageStyle.title}>暂无记录</div>
+                )
+              }
+              {
+                (!!goodboys.length && (!onConflict && !frontline)) && (
+                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
                 )
               }
               {
@@ -887,7 +903,12 @@ export default function Home() {
             <div style={panelStyle}>
               {
                 !badboys.length && (
-                  <div style={titleStyle}>暂无记录</div>
+                  <div className={PageStyle.title}>暂无记录</div>
+                )
+              }
+              {
+                (!!badboys.length && (!onConflict && !frontline)) && (
+                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
                 )
               }
               {
@@ -898,7 +919,7 @@ export default function Home() {
                     <span>对你发动了</span>
                     <span style={{color: 'orangered'}}>{log.actionName}</span>
                     {
-                      log.actionDamage && (
+                      !!log.actionDamage && (
                         <>
                           <span>，造成了</span>
                           <span style={{color: 'orangered'}}>{log.actionDamage}</span>
