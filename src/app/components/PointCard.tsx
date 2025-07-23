@@ -66,28 +66,13 @@ export default function GcCard({
     <div style={containerStyle}>
       <div style={progressBgStyle}></div>
       <div style={contentStyle}>
-        <div style={{
-          width: '30px',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-        }}>
+        <div className="w-[30px] text-[20px] font-bold text-center">
           {ptLv && <span>{ptLv}</span>}
         </div>
-        <div style={{
-          fontSize: '24px',
-          lineHeight: 1.5,
-          fontWeight: 'bold',
-          color: 'white',
-        }}>
+        <div className="text-[24px] leading-[1.5] font-bold text-white">
           {ptName}
         </div>
-        <div style={{
-          marginLeft: 'auto',
-          marginRight: '4px',
-          fontSize: '24px',
-          color: 'white',
-        }}>
+        <div className="ml-auto mr-1 text-[24px] text-white">
           {ptDescription}
         </div>
       </div>
