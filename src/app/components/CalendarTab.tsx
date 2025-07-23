@@ -95,12 +95,7 @@ export default function CalendarTab() {
         }}
       >
         <div className="ml-auto">
-          <div
-            className="text-[28px] leading-[1.5] font-medium text-white"
-            style={{
-              textShadow: '1px 1px 2px black',
-            }}
-          >
+          <div className="text-[28px] leading-[1.5] font-medium text-white text-shadow">
             { getFrontline(remainder)[1] }
           </div>
           <p className="text-[#cad5e2] m-0 mr-1 text-right">

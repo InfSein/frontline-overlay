@@ -679,9 +679,8 @@ export default function Home() {
             <div
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer"
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
               style={{
-                textShadow: '1px 1px 2px black',
                 background: !collapsed && activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
               }}
             >
@@ -691,9 +690,8 @@ export default function Home() {
         </div>
         <div
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer"
+          className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
           style={{
-            textShadow: '1px 1px 2px black',
             background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
           }}
         >
