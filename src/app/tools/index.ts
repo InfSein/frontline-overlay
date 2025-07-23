@@ -32,3 +32,40 @@ export const getFrontlineNames = (fl: Frontline) => {
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
   }
 }
+
+/**
+ * 从 ACT 网络日志行中获取技能伤害量
+ * @returns hit: 是否命中, damage: 伤害量
+ */
+export const getActionDamageFromLogLine = (logline: string[]) => {
+  let hit = false; let damage = 0
+  const mightIndex = [8, 10, 12, 14, 16, 18, 20, 22] as const
+  mightIndex.forEach(index => {
+    if (isDamage(logline[index])) {
+      hit = true
+      damage = parseDamage(logline[index + 1])
+      return
+    }
+  })
+  return { hit, damage }
+
+  function isDamage(logStr: string) {
+    return (logStr || '').toString().endsWith('3')
+  }
+  function parseDamage(damageStr: string) {
+    const paddedDamageX16 = (damageStr || '').padStart(8, '0')
+    if (paddedDamageX16[4] !== '4') {
+      const prefix = paddedDamageX16.slice(0, 4)
+      return parseInt(prefix, 16)
+    } else {
+      const A = paddedDamageX16.slice(0, 2)
+      const B = paddedDamageX16.slice(2, 4)
+      const D = paddedDamageX16.slice(6, 8)
+      const bVal = parseInt(B, 16)
+      const dVal = parseInt(D, 16)
+      const diff = (bVal - dVal + 256) % 256
+      const resultHex = D + A + diff.toString(16).padStart(2, '0').toUpperCase()
+      return parseInt(resultHex, 16)
+    }
+  }
+}

@@ -4,13 +4,13 @@ import { useCallback, useEffect, useState } from 'react'
 //import Image from "next/image";
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
-import PreferenceTab from './components/PreferenceTab';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
   getGrandCompanyColor,
+  getActionDamageFromLogLine,
 } from '@/app/tools'
 import CalendarTab from './components/CalendarTab';
 
@@ -63,6 +63,7 @@ interface LasthitInfo {
   perpetratorName: string;
   victimName: string;
   hitActionName: string;
+  hitActionDamage: number;
 }
 interface DeathInfo {
   happenTime: number;
@@ -70,6 +71,12 @@ interface DeathInfo {
   perpetratorName: string;
   summonedBy?: string;
   lasthitActionName: string;
+}
+interface SelfActionLog {
+  happenTime: number;
+  perpetratorName: string;
+  actionName: string;
+  actionDamage: number;
 }
 
 /** 玩家表 | `key:charID` | `val:charName` */
@@ -79,6 +86,8 @@ let summonMap : Record<string, string> = {}
 /** 上次受击表 | `key:施害者ID+受害者ID` */
 let playerLasthitMap : Record<string, LasthitInfo> = {}
 const deaths : DeathInfo[] = []
+const goodboys : SelfActionLog[] = []
+const badboys : SelfActionLog[] = []
 
 const parseGc = (gc_name: string) => {
   if (gc_name === '黑涡团') return GrandCompany.maelstrom
@@ -93,7 +102,6 @@ const formatTime = (timestamp: number) => {
 export default function Home() {
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
@@ -102,7 +110,7 @@ export default function Home() {
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
 
-  const availableTabs = ['situation', 'knockout', 'death', 'calendar', 'preference'] as const
+  const availableTabs = ['situation', 'knockout', 'death', 'goodboy', 'badboy', 'calendar'] as const
   const [activeTab, setActiveTab] = useState<typeof availableTabs[number]>('situation');
   const [collapsed, setCollapsed] = useState(false);
   const getTabName = (tab: typeof availableTabs[number]) => {
@@ -110,8 +118,9 @@ export default function Home() {
       case 'situation': return '战况';
       case 'knockout': return '击倒';
       case 'death': return '阵亡';
+      case 'goodboy': return '好人';
+      case 'badboy': return '坏人';
       case 'calendar': return '日历';
-      case 'preference': return '设置';
       default: return '???';
     }
   }
@@ -308,29 +317,59 @@ export default function Home() {
         const charId = data.line[2]
         const charName = data.line[3]
         playerMap[charId] = charName
-      } else if (
-        (msgType === '21' || msgType === '22') // 发动技能
-        && (
-          (data.line[8] || '').toString().endsWith('3')
-          || (data.line[10] || '').toString().endsWith('3')
-          || (data.line[12] || '').toString().endsWith('3')
-          || (data.line[14] || '').toString().endsWith('3')
-          || (data.line[16] || '').toString().endsWith('3')
-        ) // 造成了伤害
-      ) {
+      } else if ((msgType === '21' || msgType === '22')) { // 发动技能
         // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
         // 22|2025-07-21T20:15:49.3900000+08:00|1058F1D5|浮|72DC|霰弹枪|40000002|木人|720003|17700000|0|0|0|0|0|0|0|0|0|0|0|0|0|0|75000|75000|10000|10000|||104.12|-4.71|2.31|3.14|57000|57000|10000|10000|||94.94|-13.42|2.31|-2.71|0007B835|1|2|00||01|72DC|72DC|0.100|0000|69f2e27a0f10b758
         const perpetratorId = data.line[2]
-        const perpetratorName = data.line[3]
-        const hitActionName = data.line[5]
+        const perpetratorName = data.line[3] || '???'
+        const hitActionId = data.line[4]
+        const hitActionName = data.line[5] || '???'
         const victimId = data.line[6]
-        const victimName = data.line[7]
-        if (perpetratorId && perpetratorName && hitActionName && victimId && victimName) {
-          const key = `${perpetratorId}-${victimId}`
-          playerLasthitMap[key] = {
-            perpetratorName: perpetratorName,
-            victimName: victimName,
-            hitActionName: hitActionName,
+        const victimName = data.line[7] || '???'
+
+        if (perpetratorId && victimId) {
+          const { hit, damage } = getActionDamageFromLogLine(data.line)
+
+          // 记录上次伤害表
+          if (hit) {
+            const key = `${perpetratorId}-${victimId}`
+            playerLasthitMap[key] = {
+              perpetratorName: perpetratorName,
+              victimName: victimName,
+              hitActionName: hitActionName,
+              hitActionDamage: damage,
+            }
+          }
+          if (hitActionId && victimId === playerId && perpetratorId !== playerId) {
+            // 记录好人
+            const goodActions = [
+              '卫护', '至黑之夜',
+              '疗愈', '救疗', '水流幕', '鼓舞激励之策', '吉星相位', '心关',
+              '闭式舞姿',
+              '守护之光',
+            ]
+            if (goodActions.includes(hitActionId) || goodActions.includes(hitActionName)) {
+              if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName)
+              goodboys.push({
+                happenTime: Date.now(),
+                perpetratorName: perpetratorName,
+                actionName: hitActionName,
+                actionDamage: damage,
+              })
+            }
+            // 记录坏人
+            const badActions = [
+              '全力挥打', '献身', '陨石冲击', '魔弹射手',
+            ]
+            if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
+              if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName)
+              badboys.push({
+                happenTime: Date.now(),
+                perpetratorName: perpetratorName,
+                actionName: hitActionName,
+                actionDamage: damage,
+              })
+            }
           }
         }
       } else if (msgType === '25') { // Death
@@ -549,7 +588,7 @@ export default function Home() {
     ) console.log(JSON.stringify(data))
     // setLogs(val => val + '\r\n' + data.rawLine)
   }, [
-    onConflict, frontline, ptMax, dummy,
+    onConflict, frontline, ptMax, dummy, playerId,
   ])
 
   const getCards = () => {
@@ -823,6 +862,55 @@ export default function Home() {
               }
             </div>
           )}
+          {/* 好人 */}
+          {activeTab === 'goodboy' && (
+            <div style={panelStyle}>
+              {
+                !goodboys.length && (
+                  <div style={titleStyle}>暂无记录</div>
+                )
+              }
+              {
+                goodboys.map((log, logIndex) => (
+                  <div key={'goodboy' + logIndex} style={titleStyle}>
+                    <span>{formatTime(log.happenTime)}　</span>
+                    <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                    <span>对你发动了</span>
+                    <span style={{color: 'orangered'}}>{log.actionName}</span>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+          {/* 坏人 */}
+          {activeTab === 'badboy' && (
+            <div style={panelStyle}>
+              {
+                !badboys.length && (
+                  <div style={titleStyle}>暂无记录</div>
+                )
+              }
+              {
+                badboys.map((log, logIndex) => (
+                  <div key={'goodboy' + logIndex} style={titleStyle}>
+                    <span>{formatTime(log.happenTime)}　</span>
+                    <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                    <span>对你发动了</span>
+                    <span style={{color: 'orangered'}}>{log.actionName}</span>
+                    {
+                      log.actionDamage && (
+                        <>
+                          <span>，造成了</span>
+                          <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                          <span>伤害</span>
+                        </>
+                      )
+                    }
+                  </div>
+                ))
+              }
+            </div>
+          )}
           {/* 日历 */}
           {activeTab === 'calendar' && (
             <CalendarTab
@@ -830,8 +918,6 @@ export default function Home() {
               titleStyle={titleStyle}
             />
           )}
-          {/* 设置 */}
-          {activeTab === 'preference' && (<PreferenceTab onSave={() => {}} />)}
         </main>
       )}
     </div>
