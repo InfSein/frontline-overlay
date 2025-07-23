@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
+import PageStyle from '../page.module.css'
 import { getFrontlineNames } from '../tools';
 import { Frontline } from '../types';
-
-interface CalendarTabProps {
-  panelStyle: React.CSSProperties;
-  titleStyle: React.CSSProperties;
-}
 
 const startDate = new Date('07/17/2025 23:00:00') // 此时间节点是 尘封秘岩
 const showFuture = [0, 1, 2] as const
@@ -15,9 +11,7 @@ function daysBetween(from: Date, to: Date) {
   return Math.floor(diffMs / (1000 * 3600 * 24))
 }
 
-export default function CalendarTab({
-  panelStyle, titleStyle,
-}: CalendarTabProps) {
+export default function CalendarTab() {
   const [now, setNow] = useState<Date>(new Date())
   const [days, setDays] = useState<number>(daysBetween(startDate, new Date()))
   const [remainder, setRemainder] = useState<number>(days % 4)
@@ -87,75 +81,47 @@ export default function CalendarTab({
   }
 
   return (
-    <div style={panelStyle}>
-      <div style={titleStyle}>
-        <div style={{
-          display: 'flex',
-        }}>
+    <div className={PageStyle.panel}>
+      <div className={PageStyle.title}>
+        <div className="flex">
           <div>当前战场</div>
-          <div style={{ marginLeft: 'auto' }}>{ `(还剩${timeUntilNext23(now)})` }</div>
+          <div className="ml-auto">{ `(还剩${timeUntilNext23(now)})` }</div>
         </div>
       </div>
-      <div style={{
-        padding: '8px',
-        gap: '4px',
-        borderRadius: '4px',
-        boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: getCardBackgroundColor(remainder),
-      }}>
-        <div style={{
-          marginLeft: 'auto',
-        }}>
-          <div
-            style={{
-              fontSize: '28px',
-              lineHeight: 1.5,
-              fontWeight: 500,
-              color: 'white',
-              textShadow: '1px 1px 2px black'
-            }}
-          >
+      <div
+        className="p-2 gap-1 rounded shadow-xl flex items-center"
+        style={{
+          backgroundColor: getCardBackgroundColor(remainder),
+        }}
+      >
+        <div className="ml-auto">
+          <div className="text-[28px] leading-[1.5] font-medium text-white text-shadow">
             { getFrontline(remainder)[1] }
           </div>
-          <p style={{
-            color: '#cad5e2',
-            margin: 0,
-            marginRight: '4px',
-            textAlign: 'right',
-          }}>
+          <p className="text-[#cad5e2] m-0 mr-1 text-right">
             { getFrontline(remainder)[2] }
           </p>
         </div>
       </div>
-      <div style={titleStyle}>未来战场</div>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        fontSize: '18px',
-      }}>
+      <div className={PageStyle.title}>未来战场</div>
+      <div className="flex flex-col gap-[2px] text-[18px]">
         {
           showFuture.map(val => {
             return (
               <div
                 key={'future' + val}
+                className="flex items-center border border-black/50 rounded px-1 py-0.5"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
                   backgroundColor: getCardBackgroundColor((remainder + val + 1) % 4),
-                  border: '1px solid rgba(0, 0, 0, 0.5)',
-                  borderRadius: '4px',
-                  padding: '2px 4px',
-                  //marginLeft: '16px',
                 }}
               >
                 <div>
-                  <span style={{ margin: '0 0.3em 0 0.5em' }}> · </span>
+                  <span className="mx-[0.3em] ml-[0.5em]"> · </span>
                   <span>{ getFrontline((remainder + val + 1) % 4)[1] }</span>
                 </div>
-                <div style={{ marginLeft: 'auto' }}>{ `　(${formatDate(getNext23(now, val))}／${timeUntilNext23(now, val)}后)` }</div>
+                <div className="ml-auto">
+                  {`　(${formatDate(getNext23(now, val))}／${timeUntilNext23(now, val)}后)`}
+                </div>
               </div>
             )
           })

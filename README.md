@@ -1,4 +1,4 @@
-# 纷争前线悬浮窗
+# FFXIV 纷争前线悬浮窗
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.1-000?logo=next.js)
 ![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react&logoColor=white)
@@ -6,12 +6,19 @@
 
 专为纷争前线制作的 ACT OverlayPlugin 悬浮窗插件。
 
-
-
-
 > [!TIP]\
 > 专为国服简体中文客户端设计。
 > 其他服务器/语言的客户端可能无法使用部分功能。
+
+## 工作进度
+此项目仍在内测阶段，功能尚不完整。
+
+|          ＼          |          开发         |          测试         |
+| :------------------: | :-------------------: | :-------------------: |
+|    尘封秘岩（争夺战）   |  :white_check_mark:   |  :white_check_mark:   |
+|   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
+|     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
+|   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
 
 ## 特色
 

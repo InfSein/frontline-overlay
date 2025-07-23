@@ -1,0 +1,10 @@
+.panel {
+  @apply w-full relative flex-1 bg-white/10 p-2 rounded text-white flex flex-col gap-1;
+}
+
+.title {
+  @apply w-full flex items-center text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-900/90 border border-black/50;
+}
+.title_info {
+  @apply w-full flex items-center text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-blue-500 border border-blue-700;
+}
