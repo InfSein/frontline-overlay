@@ -39,33 +39,17 @@ export default function GcCard({
     <div style={containerStyle}>
       <div>
         <div
-          style={{
-            fontSize: '28px',
-            lineHeight: 1.5,
-            fontWeight: 500,
-            color: 'white',
-            textShadow: '1px 1px 2px black'
-          }}
+          className="text-[28px] leading-[1.5] font-medium text-white"
+          style={{ textShadow: '1px 1px 2px black' }}
         >
-          { getGrandCompanyName(gc) }
+          {getGrandCompanyName(gc)}
         </div>
-        <p style={{
-          color: '#cad5e2',
-          margin: 0
-        }}>
-          { me ? '⭐我方' : '　敌方' }
+        <p className="text-[#cad5e2] m-0">
+          {me ? '⭐我方' : '　敌方'}
         </p>
       </div>
-      <div
-        style={{
-          marginLeft: 'auto',
-          marginRight: '4px',
-          fontSize: '42px',
-          fontWeight: 'bold',
-          color: 'white',
-        }}
-      >
-        { floatPoints }
+      <div className="ml-auto mr-1 text-[42px] font-bold text-white">
+        {floatPoints}
       </div>
     </div>
   )

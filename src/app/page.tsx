@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 //import Image from "next/image";
+import PageStyle from './page.module.css'
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
 import useOverlay from "./tools/overlay";
@@ -688,45 +689,22 @@ export default function Home() {
 
   return (
     <div
+      className="flex flex-col h-full items-center justify-items-center gap-2 p-1 bg-transparent"
       style={{
-        fontFamily: '"Cambria", "思源宋体 CN"',
         width: 'calc(100% - 8px)',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyItems: 'center',
-        gap: '8px',
-        padding: '4px',
-        background: 'transparent',
+        fontFamily: '"Cambria", "思源宋体 CN"',
       }}
     >
       {/* 顶部操作栏 */}
-      <div
-        style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          background: 'rgba(255, 255, 255, 0.1)',
-          padding: '4px 8px',
-          borderRadius: '4px',
-        }}
-      >
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="w-full flex justify-between items-center bg-white/10 p-1 px-2 rounded">
+        <div className="flex gap-2">
           {availableTabs.map((tab) => (
             <div
               key={tab}
               onClick={() => setActiveTab(tab)}
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
               style={{
-                fontSize: '20px',
-                padding: '4px 8px',
-                background: (!collapsed && activeTab === tab) ? 'rgba(255,255,255,0.3)' : 'transparent',
-                border: '1px solid transparent',
-                borderRadius: '4px',
-                color: 'white',
-                textShadow: '1px 1px 2px black',
-                cursor: 'pointer',
+                background: !collapsed && activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
               }}
             >
               {getTabName(tab)}
@@ -735,15 +713,9 @@ export default function Home() {
         </div>
         <div
           onClick={() => setCollapsed(!collapsed)}
+          className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
           style={{
-            fontSize: '20px',
-            padding: '4px 8px',
-            border: '1px solid transparent',
-            borderRadius: '4px',
             background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-            color: 'white',
-            textShadow: '1px 1px 2px black',
-            cursor: 'pointer',
           }}
         >
           点此{collapsed ? '展开' : '折叠'}
@@ -752,16 +724,7 @@ export default function Home() {
 
       {/* 主要内容区 */}
       {!collapsed && (
-        <main
-          style={{
-            width: '100%',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-            alignItems: 'center',
-          }}
-        >
+        <main className="w-full flex flex-1 flex-col gap-1 items-center">
           {/* 战况 */}
           {activeTab === 'situation' && (
             <div className={PageStyle.panel}>
@@ -811,15 +774,15 @@ export default function Home() {
           )}
           {/* 击倒 */}
           {activeTab === 'knockout' && (
-            <div style={panelStyle}>
+            <div className={PageStyle.panel}>
               {
                 !getKnockouts().length && (
-                  <div style={titleStyle}>暂无击倒记录</div>
+                  <div className={PageStyle.title}>暂无击倒记录</div>
                 )
               }
               {
                 getKnockouts().map((death, deathIndex) => (
-                  <div key={'knockout' + deathIndex} style={titleStyle}>
+                  <div key={'knockout' + deathIndex} className={PageStyle.title}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>使用</span>
                     {
@@ -840,7 +803,7 @@ export default function Home() {
           )}
           {/* 死亡 */}
           {activeTab === 'death' && (
-            <div style={panelStyle}>
+            <div className={PageStyle.panel}>
               {
                 !getDeaths().length && (
                   <div className={PageStyle.title}>暂无死亡记录</div>
@@ -853,7 +816,7 @@ export default function Home() {
               }
               {
                 getDeaths().map((death, deathIndex) => (
-                  <div key={'death' + deathIndex} style={titleStyle}>
+                  <div key={'death' + deathIndex} className={PageStyle.title}>
                     <span>{formatTime(death.happenTime)}　</span>
                     <span>被</span>
                     <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
@@ -875,7 +838,7 @@ export default function Home() {
           )}
           {/* 好人 */}
           {activeTab === 'goodboy' && (
-            <div style={panelStyle}>
+            <div className={PageStyle.panel}>
               {
                 !goodboys.length && (
                   <div className={PageStyle.title}>暂无记录</div>
@@ -888,7 +851,7 @@ export default function Home() {
               }
               {
                 goodboys.map((log, logIndex) => (
-                  <div key={'goodboy' + logIndex} style={titleStyle}>
+                  <div key={'goodboy' + logIndex} className={PageStyle.title}>
                     <span>{formatTime(log.happenTime)}　</span>
                     <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
                     <span>对你发动了</span>
@@ -900,7 +863,7 @@ export default function Home() {
           )}
           {/* 坏人 */}
           {activeTab === 'badboy' && (
-            <div style={panelStyle}>
+            <div className={PageStyle.panel}>
               {
                 !badboys.length && (
                   <div className={PageStyle.title}>暂无记录</div>
@@ -913,7 +876,7 @@ export default function Home() {
               }
               {
                 badboys.map((log, logIndex) => (
-                  <div key={'goodboy' + logIndex} style={titleStyle}>
+                  <div key={'badboy' + logIndex} className={PageStyle.title}>
                     <span>{formatTime(log.happenTime)}　</span>
                     <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
                     <span>对你发动了</span>
@@ -934,10 +897,7 @@ export default function Home() {
           )}
           {/* 日历 */}
           {activeTab === 'calendar' && (
-            <CalendarTab
-              panelStyle={panelStyle}
-              titleStyle={titleStyle}
-            />
+            <CalendarTab />
           )}
         </main>
       )}

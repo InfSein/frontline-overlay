@@ -28,19 +28,8 @@ export default function Preference(props: {
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        background: 'rgba(255,255,255,0.1)',
-        padding: '8px',
-        borderRadius: '4px',
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-      }}
-    >
-      <div style={{ fontWeight: 'bold' }}>设置选项</div>
+    <div className="w-full bg-white/10 p-2 rounded text-white flex flex-col gap-2">
+      <div className="font-bold">设置选项</div>
 
       <label style={labelStyle}>
         用户名：
@@ -65,15 +54,8 @@ export default function Preference(props: {
       </label>
 
       <button
+        className="px-3 py-1.5 border-none rounded bg-white/30 text-white cursor-pointer"
         onClick={handleSave}
-        style={{
-          padding: '6px 12px',
-          border: 'none',
-          borderRadius: '4px',
-          background: 'rgba(255,255,255,0.3)',
-          color: 'white',
-          cursor: 'pointer',
-        }}
       >
         保存
       </button>
