@@ -335,8 +335,6 @@ export default function Home() {
         if (isValidAction && perpetratorId && victimId) {
           const { hit, damage } = getActionDamageFromLogLine(data.line)
 
-          
-
           // 记录上次伤害表
           if (hit) {
             const key = `${perpetratorId}-${victimId}`
@@ -368,6 +366,7 @@ export default function Home() {
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
             ]
+            const mustHaveDamage = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
               console.log(
                 'Action:', hitActionId, hitActionName, '\n',
@@ -375,12 +374,18 @@ export default function Home() {
                 'log:', data.rawLine
               )
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
-              badboys.push({
-                happenTime: Date.now(),
-                perpetratorName: perpetratorName,
-                actionName: hitActionName,
-                actionDamage: damage,
-              })
+              let record = true
+              if (mustHaveDamage.includes(hitActionId) && damage <= 0) {
+                record = false
+              }
+              if (record) {
+                badboys.push({
+                  happenTime: Date.now(),
+                  perpetratorName: perpetratorName,
+                  actionName: hitActionName,
+                  actionDamage: damage,
+                })
+              }
             }
           }
         }
@@ -428,6 +433,10 @@ export default function Home() {
       const _gc = parseGc(matchGc[1])
       setGc(_gc)
       setOnConflict(true)
+      Object.keys(playerLasthitMap).forEach(key => delete playerLasthitMap[key])
+      deaths.length = 0
+      goodboys.length = 0
+      badboys.length = 0
       if (frontline === Frontline.seize) setPtMax(4)
       else if (frontline === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
