@@ -350,7 +350,7 @@ export default function Home() {
             const goodActions = [
               '卫护'/**/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
               'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
-              '闭式舞姿'/**/,
+              '勇气'/**/, '光阴神的礼赞凯歌'/**/, '闭式舞姿'/**/,
               '73E6'/*守护之光*/,
             ]
             if (goodActions.includes(hitActionId) || goodActions.includes(hitActionName)) {
@@ -734,7 +734,7 @@ export default function Home() {
 
       {/* 主要内容区 */}
       {!collapsed && (
-        <main className="w-full flex flex-1 flex-col gap-1 items-center">
+        <main className="w-full flex flex-1 flex-col gap-1 items-center overflow-y-auto">
           {/* 战况 */}
           {activeTab === 'situation' && (
             <div className={PageStyle.panel}>
