@@ -782,6 +782,11 @@ export default function Home() {
                 )
               }
               {
+                (!!getKnockouts().length && (!onConflict && !frontline)) && (
+                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
+                )
+              }
+              {
                 getKnockouts().map((death, deathIndex) => (
                   <div key={'knockout' + deathIndex} className={PageStyle.title}>
                     <span>{formatTime(death.happenTime)}　</span>
