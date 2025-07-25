@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import PageStyle from '../page.module.css'
-import { getFrontlineNames } from '../tools';
+import { getFrontlineBackground, getFrontlineNames } from '../tools';
 import { Frontline } from '../types';
 
 const startDate = new Date('07/17/2025 23:00:00') // 此时间节点是 尘封秘岩
@@ -42,8 +42,17 @@ export default function CalendarTab() {
     switch (index) {
       case 0: return '#9F9E44' // 尘封秘岩
       case 1: return '#285FB7' // 荣誉野
-      case 2: return 'green' // 昂萨哈凯尔
+      case 2: return '#15803D' // 昂萨哈凯尔
       case 3: return '#942110' // 周边遗迹群
+      default: throw new Error('Invalid remainder value')
+    }
+  }
+  const getCardBackgroundImage = (index: number) => {
+    switch (index) {
+      case 0: return getFrontlineBackground(Frontline.seize)
+      case 1: return getFrontlineBackground(Frontline.shatter)
+      case 2: return getFrontlineBackground(Frontline.naadam)
+      case 3: return getFrontlineBackground(Frontline.secure)
       default: throw new Error('Invalid remainder value')
     }
   }
@@ -89,9 +98,13 @@ export default function CalendarTab() {
         </div>
       </div>
       <div
-        className="p-2 gap-1 rounded shadow-xl flex items-center"
+        className="relative p-2 gap-1 rounded shadow-xl flex items-center"
         style={{
           backgroundColor: getCardBackgroundColor(remainder),
+          backgroundImage: `url(${getCardBackgroundImage(remainder)})`,
+          backgroundSize: '70%',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: '1% center',
         }}
       >
         <div className="ml-auto">

@@ -12,11 +12,11 @@ export enum GrandCompany {
 
 export enum Frontline {
   /** 周边遗迹群（阵地战） */
-  secure = "Secure",
+  secure = "secure",
   /** 尘封秘岩（争夺战） */
-  seize = "Seize",
+  seize = "seize",
   /** 荣誉野（碎冰战） */
-  shatter = "Shatter",
+  shatter = "shatter",
   /** 昂萨哈凯尔（竞争战） */
-  naadam = "Naadam",
+  naadam = "naadam",
 }

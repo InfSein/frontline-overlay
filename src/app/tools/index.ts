@@ -33,6 +33,10 @@ export const getFrontlineNames = (fl: Frontline) => {
   }
 }
 
+export const getFrontlineBackground = (fl: Frontline) => {
+  return `./image/${fl}.webp`
+}
+
 /**
  * 从 ACT 网络日志行中获取技能伤害量
  * @returns hit: 是否命中, damage: 伤害量

@@ -620,6 +620,7 @@ export default function Home() {
     const result : {
       key: string,
       type: "active" | "neutrality" | "preparing"
+      specifyColor?: string
       ptLv?: string
       ptName: string
       ptProgress?: number
@@ -775,6 +776,7 @@ export default function Home() {
                         ptName={val.ptName}
                         ptProgress={val.ptProgress}
                         ptDescription={val.ptDescription}
+                        specifyColor={val.specifyColor}
                       />
                     )
                   })
