@@ -366,7 +366,7 @@ export default function Home() {
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
             ]
-            const mustHaveDamage = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
+            const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
               console.log(
                 'Action:', hitActionId, hitActionName, '\n',
@@ -375,7 +375,7 @@ export default function Home() {
               )
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true
-              if (mustHaveDamage.includes(hitActionId) && damage <= 0) {
+              if (mustHit.includes(hitActionId) && !hit) {
                 record = false
               }
               if (record) {
