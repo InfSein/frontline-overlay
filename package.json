@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "export": "next build && next export",
+    "postinstall": "node scripts/update-version.cjs",
     "lint": "next lint"
   },
   "dependencies": {
