@@ -366,7 +366,7 @@ export default function Home() {
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
             ]
-            const mustHaveDamage = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
+            const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
               console.log(
                 'Action:', hitActionId, hitActionName, '\n',
@@ -375,7 +375,7 @@ export default function Home() {
               )
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true
-              if (mustHaveDamage.includes(hitActionId) && damage <= 0) {
+              if (mustHit.includes(hitActionId) && !hit) {
                 record = false
               }
               if (record) {
@@ -707,18 +707,22 @@ export default function Home() {
       }}
     >
       {/* 顶部操作栏 */}
-      <div className="w-full flex justify-between items-center bg-white/10 p-1 px-2 rounded">
+      <div className="w-full flex justify-between items-center p-1 px-2 rounded"
+        style={{
+          backgroundColor: collapsed ? 'transparent' : 'rgb(255 255 255 / 0.1)',
+        }}
+      >
         <div className="flex gap-2">
-          {availableTabs.map((tab) => (
+          {!collapsed && availableTabs.map((tab) => (
             <div
               key={tab}
               onClick={() => setActiveTab(tab)}
               className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
               style={{
-                background: !collapsed && activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
+                background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
               }}
             >
-              {getTabName(tab)}
+              { getTabName(tab) }
             </div>
           ))}
         </div>
