@@ -957,11 +957,12 @@ export default function Home() {
                     >
                       <div>检测到新版本：{appNewVersion}</div>
                       <div
-                        className="bg-green-400 text-white rounded border border-transparent px-4 py-1 text-[20px] cursor-pointer text-shadow"
+                        className="bg-green-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
                         onClick={handleUpdateApp}
                       >
                         点此更新
                       </div>
+                      <div className="text-red-600">※当前数据将会丢失。建议在战场外进行更新。</div>
                     </div>
                   </>
                 )
