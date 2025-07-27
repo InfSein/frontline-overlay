@@ -1,3 +1,7 @@
+export interface AppVersionInfo {
+  app: string
+}
+
 /**
  * 大国防联军
  */

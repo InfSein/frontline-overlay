@@ -1,12 +1,12 @@
 {
   "name": "frontline-overlay",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "export": "next build && next export",
+    "postinstall": "node scripts/update-version.cjs",
     "lint": "next lint"
   },
   "dependencies": {

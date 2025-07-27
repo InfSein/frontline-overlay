@@ -13,6 +13,7 @@ import {
   getGrandCompanyColor,
   getActionDamageFromLogLine,
   getFrontlineNames,
+  checkAppUpdates,
 } from '@/app/tools'
 import CalendarTab from './components/CalendarTab';
 
@@ -103,6 +104,20 @@ const formatTime = (timestamp: number) => {
 
 export default function Home() {
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
+
+  const [appNewVersion, setAppNewVersion] = useState<string>('')
+  const checkAppUpdate = async () => {
+    const { needUpdate, latestVersion } = await checkAppUpdates()
+    if (needUpdate) setAppNewVersion(latestVersion)
+    else setAppNewVersion('')
+  }
+  const handleUpdateApp = async () => {
+    const cacheKeys = await caches.keys()
+    for (const name of cacheKeys) {
+      await caches.delete(name)
+    }
+    location.reload()
+  }
 
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
@@ -679,10 +694,14 @@ export default function Home() {
 
     startOverlayEvents()
 
+    checkAppUpdate()
+    const checkUpdateInterval = setInterval(checkAppUpdate, 30000)
+
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback)
       removeOverlayListener('ChangePrimaryPlayer', primaryPlayerChangeCallback)
       removeOverlayListener('LogLine', loglineCallback)
+      clearInterval(checkUpdateInterval)
     }
   }, [
     loglineCallback, primaryPlayerChangeCallback,
@@ -926,6 +945,28 @@ export default function Home() {
               <div className={PageStyle.title_info}>
                 当前版本：{process.env.APP_VERSION}
               </div>
+              {
+                !!appNewVersion && (
+                  <>
+                    <div
+                      className={PageStyle.title}
+                      style={{
+                        flexDirection: 'column',
+                        alignItems: 'start',
+                      }}
+                    >
+                      <div>检测到新版本：{appNewVersion}</div>
+                      <div
+                        className="bg-green-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                        onClick={handleUpdateApp}
+                      >
+                        点此更新
+                      </div>
+                      <div className="text-red-600">※当前数据将会丢失。建议在战场外进行更新。</div>
+                    </div>
+                  </>
+                )
+              }
             </div>
           )}
         </main>

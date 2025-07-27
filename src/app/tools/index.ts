@@ -1,4 +1,15 @@
-import { Frontline, GrandCompany } from '@/app/types'
+import { AppVersionInfo, Frontline, GrandCompany } from '@/app/types'
+
+export const checkAppUpdates = async () => {
+  let url = document?.location?.origin + document.location.pathname + 'version.json'
+  url += `?t=${new Date().getTime()}`
+  const response = await fetch(url).then(response => response.json()) as AppVersionInfo
+  const needUpdate = response.app !== process.env.APP_VERSION
+  return {
+    needUpdate,
+    latestVersion: response.app,
+  }
+}
 
 export const getGrandCompanyName = (gc: GrandCompany) => {
   switch (gc) {
