@@ -1,0 +1,35 @@
+name: Check version in package.json
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if version in package.json changed
+        id: check_version
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD package.json > diff.txt
+          if grep '"version":' diff.txt > /dev/null; then
+            echo "Version updated."
+            echo "updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version NOT updated!"
+            echo "updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fail if version not updated
+        if: steps.check_version.outputs.updated == 'false'
+        run: |
+          echo "Version field in package.json must be updated for each PR to master."
+          exit 1
