@@ -54,7 +54,7 @@ export const getActionDamageFromLogLine = (logline: string[]) => {
   return { hit, damage }
 
   function isDamage(logStr: string) {
-    return (logStr || '').toString().endsWith('3')
+    return (logStr || '').toString().endsWith('3') || logStr === '3D'
   }
   function parseDamage(damageStr: string) {
     const paddedDamageX16 = (damageStr || '').padStart(8, '0')
