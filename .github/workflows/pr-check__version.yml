@@ -30,6 +30,7 @@ jobs:
           else
             echo "Version NOT updated!"
             echo "updated=false" >> $GITHUB_OUTPUT
+            echo "::warning file=package.json,line=3::版本号未更新"
           fi
 
       - name: Manage version comment
