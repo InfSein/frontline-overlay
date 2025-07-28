@@ -26,8 +26,6 @@ const useOverlay = () => {
         })
 
         ws.addEventListener('open', () => {
-          console.log('Connected!')
-
           const q = queue ?? []
           queue = null
 
@@ -53,7 +51,6 @@ const useOverlay = () => {
         ws.addEventListener('close', () => {
           queue = []
 
-          console.log('Trying to reconnect...')
           // Don't spam the server with retries.
           setTimeout(() => {
             connectWs()
