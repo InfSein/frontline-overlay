@@ -48,7 +48,7 @@ jobs:
               comment.body.includes('[BotCheck:Version]')
             );
 
-            const versionUpdated = ${{ steps.check_version.outputs.updated }} === 'true';
+            const versionUpdated = ${{ steps.check_version.outputs.updated }};
 
             const newBody = versionUpdated
               ? '✅ `package.json` 已正确更新。\r\n<p align="right"><sub>[BotCheck:Version]</sub></p>'
