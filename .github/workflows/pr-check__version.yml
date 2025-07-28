@@ -50,8 +50,8 @@ jobs:
             const versionUpdated = ${{ steps.check_version.outputs.updated }} === 'true';
 
             const newBody = versionUpdated
-              ? '[BotCheck:Version] ✅ 检查通过：`package.json` 中的版本号已更新。'
-              : '[BotCheck:Version] ⚠️ 请在 `package.json` 中更新 `version` ，并注意执行一次 `npm i` 以更新 `version.json`。';
+              ? '[BotCheck:Version]\r\n✅**检查通过**\r\n`package.json` 已正确更新。'
+              : '[BotCheck:Version]\r\n⚠️**警告**\r\n请在 `package.json` 中更新 `version` 。';
 
             if (existingComment) {
               if (existingComment.body !== newBody) {
