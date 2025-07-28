@@ -302,7 +302,6 @@ export default function Home() {
   }
 
   const zoneChangeCallback = (data: ChangeZoneData) => {
-    console.log('Zone changed:', JSON.stringify(data))
     if (data.zoneID === 1273) {
       setFrontline(Frontline.secure)
     } else if (data.zoneID === 431) {
@@ -368,19 +367,28 @@ export default function Home() {
           if (hitActionId && victimId === playerId && perpetratorId !== playerId) {
             // 记录好人
             const goodActions = [
-              '卫护'/**/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
+              '718A'/*卫护*/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
               'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
               '勇气'/**/, '光阴神的礼赞凯歌'/**/, '闭式舞姿'/**/,
               '73E6'/*守护之光*/,
             ]
+            const mustHeal = [
+              '723B'/*吉星相位*/, '723F'/*吉星相位2*/,
+            ]
             if (goodActions.includes(hitActionId) || goodActions.includes(hitActionName)) {
               if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
-              goodboys.push({
-                happenTime: Date.now(),
-                perpetratorName: perpetratorName,
-                actionName: hitActionName,
-                actionDamage: damage,
-              })
+              let record = true
+              if (mustHeal.includes(hitActionId) && !hit) {
+                record = false
+              }
+              if (record) {
+                goodboys.push({
+                  happenTime: Date.now(),
+                  perpetratorName: perpetratorName,
+                  actionName: hitActionName,
+                  actionDamage: damage,
+                })
+              }
             }
             // 记录坏人
             const badActions = [
@@ -388,11 +396,6 @@ export default function Home() {
             ]
             const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
-              console.log(
-                'Action:', hitActionId, hitActionName, '\n',
-                'damage:', damage, '\n',
-                'log:', data.rawLine
-              )
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true
               if (mustHit.includes(hitActionId) && !hit) {
@@ -624,14 +627,6 @@ export default function Home() {
         setDummy(d => d + 1)
       }
     }
-
-    if (
-      data.rawLine.includes('参加了纷争前线')
-      || data.rawLine.includes('无垢的大地')
-      || data.rawLine.includes('亚拉戈石文')
-      || data.rawLine.includes('获得了50个亚拉戈诗学神典石。')
-    ) console.log(JSON.stringify(data))
-    // setLogs(val => val + '\r\n' + data.rawLine)
   }, [
     onConflict, frontline, ptMax, dummy, playerId,
   ])
@@ -947,7 +942,7 @@ export default function Home() {
           {/* 关于 */}
           {activeTab === 'about' && (
             <div className={PageStyle.panel}>
-              <AlertCard msg={'当前版本：' + process.env.APP_VERSION} />
+              <div className={PageStyle.title}>当前版本：{process.env.APP_VERSION}</div>
               {
                 !!appNewVersion && (
                   <>
