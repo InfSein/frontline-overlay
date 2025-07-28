@@ -108,9 +108,13 @@ export default function Home() {
 
   const [appNewVersion, setAppNewVersion] = useState<string>('')
   const checkAppUpdate = async () => {
-    const { needUpdate, latestVersion } = await checkAppUpdates()
-    if (needUpdate) setAppNewVersion(latestVersion)
-    else setAppNewVersion('')
+    try {
+      const { needUpdate, latestVersion } = await checkAppUpdates()
+      if (needUpdate) setAppNewVersion(latestVersion)
+      else setAppNewVersion('')
+    } catch (e) {
+      console.error('检查应用新版本时发生错误：', e)
+    }
   }
   const handleUpdateApp = async () => {
     const cacheKeys = await caches.keys()
