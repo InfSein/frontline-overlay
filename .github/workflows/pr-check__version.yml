@@ -14,12 +14,16 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Fetch base branch
+        run: git fetch origin master
 
       - name: Check if version in package.json changed
         id: check_version
         run: |
-          git diff origin/${{ github.base_ref }}...HEAD package.json > diff.txt
+          git diff origin/master...HEAD package.json > diff.txt
           if grep '"version":' diff.txt > /dev/null; then
             echo "Version updated."
             echo "updated=true" >> $GITHUB_OUTPUT
