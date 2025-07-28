@@ -381,6 +381,9 @@ export default function Home() {
               if (mustHeal.includes(hitActionId) && !hit) {
                 record = false
               }
+              if (hitActionName === '光阴神的礼赞凯歌' && data.line[10] === '0') {
+                record = false
+              }
               if (record) {
                 goodboys.push({
                   happenTime: Date.now(),
