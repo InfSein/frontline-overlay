@@ -44,18 +44,14 @@ jobs:
 
             const existingComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('package.json') &&
-              (
-                comment.body.includes('请在') || 
-                comment.body.includes('✅ 已通过')
-              )
+              comment.body.includes('[BotCheck:Version]')
             );
 
             const versionUpdated = ${{ steps.check_version.outputs.updated }} === 'true';
 
             const newBody = versionUpdated
-              ? '✅ 检查通过：`package.json` 中的版本号已更新。'
-              : '⚠️ 请在 `package.json` 中更新版本号（`version` 字段）以反映本次更改。';
+              ? '[BotCheck:Version] ✅ 检查通过：`package.json` 中的版本号已更新。'
+              : '[BotCheck:Version] ⚠️ 请在 `package.json` 中更新 `version` ，并注意执行一次 `npm i` 以更新 `version.json`。';
 
             if (existingComment) {
               if (existingComment.body !== newBody) {
