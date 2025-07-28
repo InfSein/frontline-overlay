@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import PageStyle from './page.module.css'
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
+import AlertCard from './components/AlertCard';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
@@ -817,7 +818,7 @@ export default function Home() {
               }
               {
                 (!!getKnockouts().length && (!onConflict && !frontline)) && (
-                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
               {
@@ -851,7 +852,7 @@ export default function Home() {
               }
               {
                 (!!getDeaths().length && (!onConflict && !frontline)) && (
-                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
               {
@@ -886,7 +887,7 @@ export default function Home() {
               }
               {
                 (!!goodboys.length && (!onConflict && !frontline)) && (
-                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
               {
@@ -911,7 +912,7 @@ export default function Home() {
               }
               {
                 (!!badboys.length && (!onConflict && !frontline)) && (
-                  <div className={PageStyle.title_info}>此处展示的是上一场的记录，下次进入战场时会被清除。</div>
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
               {
@@ -942,9 +943,7 @@ export default function Home() {
           {/* 关于 */}
           {activeTab === 'about' && (
             <div className={PageStyle.panel}>
-              <div className={PageStyle.title_info}>
-                当前版本：{process.env.APP_VERSION}
-              </div>
+              <AlertCard msg={'当前版本：' + process.env.APP_VERSION} />
               {
                 !!appNewVersion && (
                   <>
