@@ -32,14 +32,45 @@ jobs:
             echo "updated=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Warn if version not updated
-        if: steps.check_version.outputs.updated == 'false'
+      - name: Manage version comment
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "⚠️ 请在 `package.json` 中更新版本号（`version` 字段）以反映本次更改。"
-            })
+              repo: context.repo.repo
+            });
+
+            const existingComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('package.json') &&
+              (
+                comment.body.includes('请在') || 
+                comment.body.includes('✅ 已通过')
+              )
+            );
+
+            const versionUpdated = ${{ steps.check_version.outputs.updated }} === 'true';
+
+            const newBody = versionUpdated
+              ? '✅ 检查通过：`package.json` 中的版本号已更新。'
+              : '⚠️ 请在 `package.json` 中更新版本号（`version` 字段）以反映本次更改。';
+
+            if (existingComment) {
+              if (existingComment.body !== newBody) {
+                await github.rest.issues.updateComment({
+                  comment_id: existingComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: newBody
+                });
+              }
+            } else if (!versionUpdated) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: newBody
+              });
+            }
