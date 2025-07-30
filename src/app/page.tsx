@@ -715,13 +715,11 @@ export default function Home() {
     startOverlayEvents()
 
     checkAppUpdate()
-    const checkUpdateInterval = setInterval(checkAppUpdate, 30000)
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback)
       removeOverlayListener('ChangePrimaryPlayer', primaryPlayerChangeCallback)
       removeOverlayListener('LogLine', loglineCallback)
-      clearInterval(checkUpdateInterval)
     }
   }, [
     loglineCallback, primaryPlayerChangeCallback,
