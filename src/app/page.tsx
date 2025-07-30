@@ -386,7 +386,7 @@ export default function Home() {
             const goodActions = [
               '718A'/*卫护*/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
               'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
-              '勇气'/**/, '光阴神的礼赞凯歌'/**/, '闭式舞姿'/**/,
+              'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '闭式舞姿'/**/,
               '73E6'/*守护之光*/,
             ]
             const mustHeal = [
@@ -745,7 +745,7 @@ export default function Home() {
       {/* 顶部操作栏 */}
       <div className="w-full flex justify-between items-center p-1 px-2 rounded"
         style={{
-          backgroundColor: collapsed ? 'transparent' : 'rgb(255 255 255 / 0.1)',
+          backgroundColor: collapsed ? 'transparent' : 'rgb(0 0 0 / 0.3)',
         }}
       >
         <div className="flex gap-2">
