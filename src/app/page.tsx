@@ -6,6 +6,7 @@ import PageStyle from './page.module.css'
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
 import AlertCard from './components/AlertCard';
+import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
@@ -104,16 +105,32 @@ const formatTime = (timestamp: number) => {
 }
 
 export default function Home() {
+  const { showToast } = useToast()
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
 
   const [appNewVersion, setAppNewVersion] = useState<string>('')
+  const [checkingAppUpdate, setCheckingAppUpdate] = useState(false)
   const checkAppUpdate = async () => {
     try {
+      setCheckingAppUpdate(true)
       const { needUpdate, latestVersion } = await checkAppUpdates()
       if (needUpdate) setAppNewVersion(latestVersion)
       else setAppNewVersion('')
     } catch (e) {
       console.error('检查应用新版本时发生错误：', e)
+    } finally {
+      setCheckingAppUpdate(false)
+    }
+  }
+  const handleCheckAppUpdate = async () => {
+    if (checkingAppUpdate) {
+      showToast('正在检测中，请稍候'); return
+    }
+    await checkAppUpdate()
+    if (appNewVersion) {
+      showToast('检测到新版本')
+    } else {
+      showToast('已是最新版本')
     }
   }
   const handleUpdateApp = async () => {
@@ -379,6 +396,9 @@ export default function Home() {
               if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true
               if (mustHeal.includes(hitActionId) && !hit) {
+                record = false
+              }
+              if (hitActionName === '光阴神的礼赞凯歌' && data.line[10] === '0') {
                 record = false
               }
               if (record) {
@@ -695,13 +715,11 @@ export default function Home() {
     startOverlayEvents()
 
     checkAppUpdate()
-    const checkUpdateInterval = setInterval(checkAppUpdate, 30000)
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback)
       removeOverlayListener('ChangePrimaryPlayer', primaryPlayerChangeCallback)
       removeOverlayListener('LogLine', loglineCallback)
-      clearInterval(checkUpdateInterval)
     }
   }, [
     loglineCallback, primaryPlayerChangeCallback,
@@ -722,7 +740,6 @@ export default function Home() {
       className="flex flex-col h-full items-center justify-items-center gap-2 p-1 bg-transparent"
       style={{
         width: 'calc(100% - 8px)',
-        fontFamily: '"Cambria", "思源宋体 CN"',
       }}
     >
       {/* 顶部操作栏 */}
@@ -943,16 +960,17 @@ export default function Home() {
           {activeTab === 'about' && (
             <div className={PageStyle.panel}>
               <div className={PageStyle.title}>当前版本：{process.env.APP_VERSION}</div>
-              {
-                !!appNewVersion && (
-                  <>
-                    <div
-                      className={PageStyle.title}
-                      style={{
-                        flexDirection: 'column',
-                        alignItems: 'start',
-                      }}
-                    >
+              <div
+                className={PageStyle.title}
+                style={{
+                  flexDirection: 'column',
+                  alignItems: 'start',
+                  paddingBottom: '0.375rem',
+                }}
+              >
+                {
+                  !!appNewVersion ? (
+                    <>
                       <div>检测到新版本：{appNewVersion}</div>
                       <div
                         className="bg-green-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
@@ -961,10 +979,20 @@ export default function Home() {
                         点此更新
                       </div>
                       <div className="text-red-600">※当前数据将会丢失。建议在战场外进行更新。</div>
-                    </div>
-                  </>
-                )
-              }
+                    </>
+                  ) : (
+                    <>
+                      <div>已是最新版本</div>
+                      <div
+                        className="bg-blue-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                        onClick={handleCheckAppUpdate}
+                      >
+                        检查更新
+                      </div>
+                    </>
+                  )
+                }
+              </div>
             </div>
           )}
         </main>

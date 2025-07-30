@@ -28,7 +28,7 @@
 
 ### 记录击倒和死亡详情
 ![App Preview: Knockout](./docs/image/app_preview/knockout.png)
-![App Preview: Knockout](./docs/image/app_preview/death.png)
+![App Preview: Death](./docs/image/app_preview/death.png)
 
 ### 展示当前战场和未来战场
 ![App Preview: Calendar](./docs/image/app_preview/calendar.png)
@@ -38,3 +38,9 @@
 1. 在 `OverlayPlugin` 中新建悬浮窗，类型选择 `自定义悬浮窗`；
 2. 将悬浮窗地址设置为 `https://infsein.github.io/frontline-overlay/`；
 3. 按照喜好调整悬浮窗位置、大小和缩放。
+
+## 开源许可
+
+目前并未设置开源许可，仅供社区进行安全性审查。<br>
+未经特别授权，不得修改／再分发此项目。<br>
+严禁将此项目用于商业用途。
