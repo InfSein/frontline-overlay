@@ -28,51 +28,25 @@ export default function GcCard({
 
   const progress = ptProgress ?? 100
 
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: '8px',
-    gap: '4px',
-    borderRadius: '4px',
-    boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    border: `2px solid ${color}`,
-    overflow: 'hidden',
-  }
-
-  const progressBgStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    height: '100%',
-    width: `${progress}%`,
-    backgroundColor: color,
-    opacity: 0.3,
-    zIndex: 0,
-    transition: 'width 0.3s',
-    pointerEvents: 'none',
-  }
-
-  const contentStyle: React.CSSProperties = {
-    position: 'relative',
-    zIndex: 1,
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-  }
-
   return (
-    <div style={containerStyle}>
-      <div style={progressBgStyle}></div>
-      <div style={contentStyle}>
-        <div className="w-[30px] text-[20px] font-bold text-center">
-          {ptLv && <span>{ptLv}</span>}
+    <div
+      className="relative flex items-center gap-1 p-2 rounded overflow-hidden"
+      style={{
+        backgroundColor: 'transparent',
+        border: `2px solid ${color}`,
+        boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
+      }}
+    >
+      <div
+        className="absolute left-0 top-0 h-full opacity-30 z-0 transition-all pointer-events-none"
+        style={{ width: `${progress}%`, backgroundColor: color }}
+      />
+      <div className="relative z-10 px-1 flex items-center w-full text-[20px] text-white">
+        <div className="text-[22px]">
+          <span className="font-bold">{ptLv}</span>
+          <span>　{ptName}</span>
         </div>
-        <div className="text-[24px] leading-[1.5] font-bold text-white">
-          {ptName}
-        </div>
-        <div className="ml-auto mr-1 text-[24px] text-white">
+        <div className="ml-auto">
           {ptDescription}
         </div>
       </div>
