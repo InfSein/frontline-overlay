@@ -34,7 +34,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`bg-black/80 text-white text-2xl px-4 py-2 rounded shadow transition-opacity duration-500 ${
+            className={`bg-black/80 text-white text-2xl text-center px-4 py-2 rounded shadow transition-opacity duration-500 ${
               toast.visible ? 'opacity-100' : 'opacity-0'
             }`}
           >
