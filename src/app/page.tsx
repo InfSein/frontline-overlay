@@ -149,26 +149,24 @@ export default function Home() {
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
 
-  const availableTabs = ['situation', 'knockout', 'death', 'goodboy', 'badboy', 'calendar', 'about'] as const
-  const [activeTab, setActiveTab] = useState<typeof availableTabs[number]>('situation');
-  const [collapsed, setCollapsed] = useState(false);
-  const getTabName = (tab: typeof availableTabs[number]) => {
-    switch (tab) {
-      case 'situation': return '战况';
-      case 'knockout': return '击倒';
-      case 'death': return '阵亡';
-      case 'goodboy': return '好人';
-      case 'badboy': return '坏人';
-      case 'calendar': return '日历';
-      case 'about': return '关于';
-      default: return '???';
-    }
-  }
+  const tabPages = {
+    situation: '战况',
+    knockout: '击倒',
+    death: '阵亡',
+    goodboy: '好人',
+    badboy: '坏人',
+    calendar: '日历',
+    about: '关于',
+  } as const
+  type TabPage = keyof typeof tabPages
+  const availableTabs = Object.keys(tabPages) as TabPage[]
+  const [activeTab, setActiveTab] = useState<TabPage>('situation')
+  const [collapsed, setCollapsed] = useState(false)
 
   const getCurrPointCount = () => {
     return prePoints.length + Object.keys(pointMap).length
   }
-  const activePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
+  const activatePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
     if (pointMap[key] && pointMap[key].type !== 'initial') {
       pointMap[key].owner = owner
       pointMap[key].resume()
@@ -435,16 +433,18 @@ export default function Home() {
       } else if (msgType === '25') { // Death
         // 25|2025-07-21T20:04:08.8860000+08:00|10582BA7|卷饼|1058F1D5|浮|d94e2430f7a262f2
         const victimId = data.line[2]
-        const victimName = data.line[3]
+        const victimName = data.line[3] || '???'
         const perpetratorId = data.line[4]
-        const perpetratorName = data.line[5]
-        if (victimId && !victimId.startsWith('40')) { // 忽略场景物体
-          if (perpetratorId && perpetratorName && victimName) {
+        const perpetratorName = data.line[5] || '???'
+        if (victimId && !victimId.startsWith('40')) { // 忽略场景物体被打倒的信息
+          if (perpetratorId) {
             let summoner : string | undefined
             if (summonMap[perpetratorId]) {
               const summonerId = summonMap[perpetratorId]
               if (playerMap[summonerId]) {
                 summoner = playerMap[summonerId]
+              } else if (summonerId === playerId) {
+                summoner = playerName
               }
             }
             deaths.push({
@@ -457,7 +457,6 @@ export default function Home() {
             setDummy(d => d + 1)
           }
         }
-        
       } else if (msgType === '261' && data.line[2] === 'Add') { // Summon
         // 261|2025-07-21T20:19:36.6860000+08:00|Add|40007109|BNpcID|3951|BNpcNameID|E53|CastTargetID|E0000000|CurrentMP|10000|CurrentWorldID|65535|Heading|1.6445|Level|100|MaxHP|57000|MaxMP|10000|ModelStatus|3072|Name|象式浮空炮塔|NPCTargetID|E0000000|OwnerID|1058F1D5|PosX|95.1405|PosY|-7.4485|PosZ|2.3552|Radius|1.0000|Type|2|WorldID|65535|0ed50912a51e73d8
         const summonedId = data.line[3]
@@ -512,7 +511,7 @@ export default function Home() {
         const ptLv = matchConquer[2]
         const owner = parseGc(matchConquer[1])
         const [total, drop] = getFp(ptLv)
-        activePoint(pt, owner, ptLv, total, drop)
+        activatePoint(pt, owner, ptLv, total, drop)
         setDummy(d => d + 1)
         return
       }
@@ -619,7 +618,7 @@ export default function Home() {
         const ptLv = matchConquer[2]
         const owner = parseGc(matchConquer[1])
         const [total, drop] = getFp(ptLv)
-        activePoint(pt, owner, ptLv, total, drop)
+        activatePoint(pt, owner, ptLv, total, drop)
         setDummy(d => d + 1)
         return
       }
@@ -648,7 +647,7 @@ export default function Home() {
       }
     }
   }, [
-    onConflict, frontline, ptMax, dummy, playerId,
+    onConflict, frontline, ptMax, dummy, playerId, playerName,
   ])
 
   const getCards = () => {
@@ -758,7 +757,7 @@ export default function Home() {
                 background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
               }}
             >
-              { getTabName(tab) }
+              { tabPages[tab] }
             </div>
           ))}
         </div>
@@ -795,14 +794,18 @@ export default function Home() {
               }
               <div className={PageStyle.title}>剩余点分</div>
               <div className="w-full grid grid-cols-3 gap-2">
-                <GcCard gc={GrandCompany.maelstrom} me={gc === GrandCompany.maelstrom} floatPoints={getGcPoint(GrandCompany.maelstrom)} />
-                <GcCard gc={GrandCompany.twinadder} me={gc === GrandCompany.twinadder} floatPoints={getGcPoint(GrandCompany.twinadder)} />
-                <GcCard gc={GrandCompany.immoflame} me={gc === GrandCompany.immoflame} floatPoints={getGcPoint(GrandCompany.immoflame)} />
+                {
+                  Object.values(GrandCompany).map(company => (
+                    <GcCard key={company} gc={company} me={gc === company} floatPoints={getGcPoint(company)} />
+                  ))
+                }
               </div>
               <div className={PageStyle.title}>当前据点</div>
               {
                 (frontline === Frontline.shatter || frontline === Frontline.secure) && (
-                  <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">暂不支持解析{ getFrontlineNames(frontline)[1] }的当前据点数据。</div>
+                  <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
+                    暂不支持解析{ getFrontlineNames(frontline)[1] }的当前据点数据。
+                  </div>
                 )
               }
               <div className="w-full flex flex-col gap-0.5">
@@ -913,6 +916,15 @@ export default function Home() {
                     <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
                     <span>对你发动了</span>
                     <span style={{color: 'orangered'}}>{log.actionName}</span>
+                    {
+                      !!log.actionDamage && (
+                        <>
+                          <span>，回复了</span>
+                          <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                          <span>体力</span>
+                        </>
+                      )
+                    }
                   </div>
                 ))
               }
