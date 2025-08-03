@@ -47,11 +47,11 @@
   </tr>
   <tr>
     <th><strong>展示当前战场和未来战场</strong></th>
-    <th></th>
+    <th><strong>自由折叠以减少占用</strong></th>
   </tr>
   <tr>
     <td><img alt="App Preview: Calendar" src="./docs/image/app_preview/calendar.jpg" /></td>
-    <td></td>
+    <td><img alt="App Preview: Folded" src="./docs/image/app_preview/folded.jpg" /></td>
   </tr>
 </table>
 
