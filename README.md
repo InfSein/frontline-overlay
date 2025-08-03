@@ -11,7 +11,6 @@
 > 其他服务器／语言的客户端可能无法正常使用部分功能。
 
 ## 工作进度
-此项目仍在内测阶段，功能尚不完整。
 
 |          ＼          |          开发         |          测试         |
 | :------------------: | :-------------------: | :-------------------: |
@@ -20,22 +19,41 @@
 |     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
 |   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
 
-## 特色
+## 主要功能
 
-### 实时查看刷点状况和点分预估
-![App Preview: Situation 1](./docs/image/app_preview/situation_1.jpg)
-![App Preview: Situation 2](./docs/image/app_preview/situation_2.jpg)
-
-### 记录击倒和死亡详情
-![App Preview: Knockout](./docs/image/app_preview/knockout.jpg)
-![App Preview: Death](./docs/image/app_preview/death.jpg)
-
-### 记录受到的关键援护技能和阻碍技能
-![App Preview: Goodboy](./docs/image/app_preview/goodboy.jpg)
-![App Preview: Badboy](./docs/image/app_preview/badboy.jpg)
-
-### 展示当前战场和未来战场
-![App Preview: Calendar](./docs/image/app_preview/calendar.jpg)
+<table>
+  <tr>
+    <th colspan="2"><strong>实时查看刷点状况和点分预估</strong></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Situation 1" src="./docs/image/app_preview/situation_1.jpg" /></td>
+    <td><img alt="App Preview: Situation 2" src="./docs/image/app_preview/situation_2.jpg" /></td>
+  </tr>
+  <tr>
+    <th><strong>记录击倒详情</strong></th>
+    <th><strong>记录死亡详情</strong></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Knockout" src="./docs/image/app_preview/knockout.jpg" /></td>
+    <td><img alt="App Preview: Death" src="./docs/image/app_preview/death.jpg" /></td>
+  </tr>
+  <tr>
+    <th><strong>记录受到的关键援护技能</strong></th>
+    <th><strong>记录受到的关键阻碍技能</strong></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Goodboy" src="./docs/image/app_preview/goodboy.jpg" /></td>
+    <td><img alt="App Preview: Badboy" src="./docs/image/app_preview/badboy.jpg" /></td>
+  </tr>
+  <tr>
+    <th><strong>展示当前战场和未来战场</strong></th>
+    <th></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Calendar" src="./docs/image/app_preview/calendar.jpg" /></td>
+    <td></td>
+  </tr>
+</table>
 
 ## 使用方法
 
