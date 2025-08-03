@@ -722,12 +722,14 @@ export default function Home() {
     }
   }, [
     loglineCallback, primaryPlayerChangeCallback,
-    initialize, addOverlayListener, removeOverlayListener, startOverlayEvents
+    initialize, addOverlayListener, removeOverlayListener, startOverlayEvents,
   ])
 
   const lockSituationMsg = () => {
     if (!onConflict && !frontline){
       return '还未进入纷争前线'
+    } else if (!onConflict) {
+      return '正在等待战斗开始'
     } else if (frontline === Frontline.shatter || frontline === Frontline.secure) {
       return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据'
     }
@@ -843,19 +845,21 @@ export default function Home() {
               {
                 getKnockouts().map((death, deathIndex) => (
                   <div key={'knockout' + deathIndex} className={PageStyle.title}>
-                    <span>{formatTime(death.happenTime)}　</span>
-                    <span>使用</span>
-                    {
-                      death.summonedBy && (
-                        <>
-                          <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
-                          <span>发动的</span>
-                        </>
-                      )
-                    }
-                    <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
-                    <span>击倒了</span>
-                    <span style={{color: 'orangered'}}>{death.victimName}</span>
+                    <div>{formatTime(death.happenTime)}　</div>
+                    <div className="flex flex-wrap flex-1">
+                      <span>使用</span>
+                      {
+                        death.summonedBy && (
+                          <>
+                            <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                            <span>发动的</span>
+                          </>
+                        )
+                      }
+                      <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                      <span>击倒了</span>
+                      <span style={{color: 'orangered'}}>{death.victimName}</span>
+                    </div>
                   </div>
                 ))
               }
@@ -877,20 +881,22 @@ export default function Home() {
               {
                 getDeaths().map((death, deathIndex) => (
                   <div key={'death' + deathIndex} className={PageStyle.title}>
-                    <span>{formatTime(death.happenTime)}　</span>
-                    <span>被</span>
-                    <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
-                    {
-                      death.summonedBy && (
-                        <>
-                          <span>召唤的</span>
-                          <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
-                        </>
-                      )
-                    }
-                    <span>用</span>
-                    <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
-                    <span>击倒了</span>
+                    <div>{formatTime(death.happenTime)}　</div>
+                    <div className="flex flex-wrap flex-1">
+                      <span>被</span>
+                      <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
+                      {
+                        death.summonedBy && (
+                          <>
+                            <span>召唤的</span>
+                            <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                          </>
+                        )
+                      }
+                      <span>用</span>
+                      <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                      <span>击倒了</span>
+                    </div>
                   </div>
                 ))
               }
@@ -912,19 +918,21 @@ export default function Home() {
               {
                 goodboys.map((log, logIndex) => (
                   <div key={'goodboy' + logIndex} className={PageStyle.title}>
-                    <span>{formatTime(log.happenTime)}　</span>
-                    <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
-                    <span>对你发动了</span>
-                    <span style={{color: 'orangered'}}>{log.actionName}</span>
-                    {
-                      !!log.actionDamage && (
-                        <>
-                          <span>，回复了</span>
-                          <span style={{color: 'orangered'}}>{log.actionDamage}</span>
-                          <span>体力</span>
-                        </>
-                      )
-                    }
+                    <div>{formatTime(log.happenTime)}　</div>
+                    <div className="flex flex-wrap flex-1">
+                      <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                      <span>对你发动了</span>
+                      <span style={{color: 'orangered'}}>{log.actionName}</span>
+                      {
+                        !!log.actionDamage && (
+                          <>
+                            <span>，回复了</span>
+                            <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                            <span>体力</span>
+                          </>
+                        )
+                      }
+                    </div>
                   </div>
                 ))
               }
@@ -946,19 +954,21 @@ export default function Home() {
               {
                 badboys.map((log, logIndex) => (
                   <div key={'badboy' + logIndex} className={PageStyle.title}>
-                    <span>{formatTime(log.happenTime)}　</span>
-                    <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
-                    <span>对你发动了</span>
-                    <span style={{color: 'orangered'}}>{log.actionName}</span>
-                    {
-                      !!log.actionDamage && (
-                        <>
-                          <span>，造成了</span>
-                          <span style={{color: 'orangered'}}>{log.actionDamage}</span>
-                          <span>伤害</span>
-                        </>
-                      )
-                    }
+                    <div>{formatTime(log.happenTime)}　</div>
+                    <div className="flex flex-wrap flex-1">
+                      <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                      <span>对你发动了</span>
+                      <span style={{color: 'orangered'}}>{log.actionName}</span>
+                      {
+                        !!log.actionDamage && (
+                          <>
+                            <span>，造成了</span>
+                            <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                            <span>伤害</span>
+                          </>
+                        )
+                      }
+                    </div>
                   </div>
                 ))
               }

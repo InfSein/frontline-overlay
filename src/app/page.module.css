@@ -3,7 +3,7 @@
 }
 
 .title {
-  @apply w-full flex items-center text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-900/90 border border-black/50;
+  @apply w-full flex flex-wrap items-center text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-900/90 border border-black/50;
 }
 .title_info {
   @apply w-full flex items-center text-[20px] self-baseline text-white px-1 py-0.5 rounded border;
