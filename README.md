@@ -23,15 +23,19 @@
 ## 特色
 
 ### 实时查看刷点状况和点分预估
-![App Preview: Situation 1](./docs/image/app_preview/situation_1.png)
-![App Preview: Situation 2](./docs/image/app_preview/situation_2.png)
+![App Preview: Situation 1](./docs/image/app_preview/situation_1.jpg)
+![App Preview: Situation 2](./docs/image/app_preview/situation_2.jpg)
 
 ### 记录击倒和死亡详情
-![App Preview: Knockout](./docs/image/app_preview/knockout.png)
-![App Preview: Death](./docs/image/app_preview/death.png)
+![App Preview: Knockout](./docs/image/app_preview/knockout.jpg)
+![App Preview: Death](./docs/image/app_preview/death.jpg)
+
+### 记录受到的关键援护技能和阻碍技能
+![App Preview: Goodboy](./docs/image/app_preview/goodboy.jpg)
+![App Preview: Badboy](./docs/image/app_preview/badboy.jpg)
 
 ### 展示当前战场和未来战场
-![App Preview: Calendar](./docs/image/app_preview/calendar.png)
+![App Preview: Calendar](./docs/image/app_preview/calendar.jpg)
 
 ## 使用方法
 
@@ -39,6 +43,10 @@
 2. 将悬浮窗地址设置为 `https://infsein.github.io/frontline-overlay/`；
 3. 按照喜好调整悬浮窗位置、大小和缩放；
 4. 后续悬浮窗发布新版本时，在 `关于` 选项卡进行检查和更新。
+
+### 本地调试
+
+* 在第2步将悬浮窗地址设置为 `http://localhost:3000` 即可。
 
 ## 开源许可
 
