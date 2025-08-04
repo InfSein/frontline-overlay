@@ -3,12 +3,20 @@ import PageStyle from '../page.module.css'
 import { getFrontlineBackground, getFrontlineNames } from '../tools';
 import { Frontline } from '../types';
 
-const startDate = new Date('07/17/2025 23:00:00') // 此时间节点是 尘封秘岩
+/* 
+ * 轮换算法参考了 https://github.com/NekoWoods/what-zc-today/blob/main/sketch.js
+ */
+
+const startDate = new Date('2025-07-17T15:00:00Z') // 此时间节点是 尘封秘岩
 const showFuture = [0, 1, 2] as const
 
 function daysBetween(from: Date, to: Date) {
-  const diffMs = to.getTime() - from.getTime()
+  const diffMs = getDtVal(to) - getDtVal(from)
   return Math.floor(diffMs / (1000 * 3600 * 24))
+
+  function getDtVal(date: Date) {
+    return date.getTime() + date.getTimezoneOffset() * 1000 * 60
+  }
 }
 
 export default function CalendarTab() {
