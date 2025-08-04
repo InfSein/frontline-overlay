@@ -12,7 +12,8 @@
   "dependencies": {
     "next": "15.4.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "tdesign-react": "^1.13.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,6 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react'
+import { Button } from 'tdesign-react/lib/'
+import { CopyIcon } from 'tdesign-icons-react'
+import 'tdesign-react/dist/tdesign.css'
+import "tdesign-react/lib/_util/react-19-adapter"
 //import Image from "next/image";
 import PageStyle from './page.module.css'
 import GcCard from "./components/GcCard";
@@ -703,6 +707,11 @@ export default function Home() {
     return deaths.filter(death => death.victimName === playerName)
   }
 
+  const handleCopySituation = () => {
+    navigator.clipboard.writeText(`【剩余点分】黑涡${getGcPoint(GrandCompany.maelstrom)}／双蛇${getGcPoint(GrandCompany.twinadder)}／恒辉${getGcPoint(GrandCompany.immoflame)}`)
+    showToast('已复制！')
+  }
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     initialize(window)
@@ -826,6 +835,15 @@ export default function Home() {
                     )
                   })
                 }
+              </div>
+              <div className="absolute bottom-4 right-4">
+                <Button
+                  size="large"
+                  shape="circle"
+                  theme="success"
+                  icon={<CopyIcon />}
+                  onClick={handleCopySituation}
+                />
               </div>
             </div>
           )}
