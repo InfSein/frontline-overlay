@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'tdesign-react/lib/'
 import { CopyIcon } from 'tdesign-icons-react'
-import 'tdesign-react/dist/tdesign.css'
-import "tdesign-react/lib/_util/react-19-adapter"
 //import Image from "next/image";
 import PageStyle from './page.module.css'
 import GcCard from "./components/GcCard";
 import PointCard from "./components/PointCard";
 import AlertCard from './components/AlertCard';
+import CalendarTab from './components/CalendarTab';
+import FlogCard from './components/FlogCard';
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -20,8 +20,11 @@ import {
   getActionDamageFromLogLine,
   getFrontlineNames,
   checkAppUpdates,
+  deepCopy,
 } from '@/app/tools'
-import CalendarTab from './components/CalendarTab';
+
+
+const frontlineLog : FrontlineLog[] = []
 
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
@@ -73,13 +76,6 @@ interface LasthitInfo {
   victimName: string;
   hitActionName: string;
   hitActionDamage: number;
-}
-interface DeathInfo {
-  happenTime: number;
-  victimName: string;
-  perpetratorName: string;
-  summonedBy?: string;
-  lasthitActionName: string;
 }
 interface SelfActionLog {
   happenTime: number;
@@ -159,6 +155,7 @@ export default function Home() {
     death: '阵亡',
     goodboy: '好人',
     badboy: '坏人',
+    statistics: '统计',
     calendar: '日历',
     about: '关于',
   } as const
@@ -319,8 +316,14 @@ export default function Home() {
       return gcFp[gc]
     }
   }
+  const getKnockouts = useCallback(() => {
+    return deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName)
+  }, [playerName])
+  const getDeaths = useCallback(() => {
+    return deaths.filter(death => death.victimName === playerName)
+  }, [playerName])
 
-  const zoneChangeCallback = (data: ChangeZoneData) => {
+  const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
     if (data.zoneID === 1273) {
       setFrontline(Frontline.secure)
     } else if (data.zoneID === 431) {
@@ -330,6 +333,14 @@ export default function Home() {
     } else if (data.zoneID === 888) {
       setFrontline(Frontline.naadam)
     } else {
+      if (frontline) {
+        const log = deepCopy<FrontlineLog>({
+          frontline: frontline,
+          knockouts: getKnockouts(),
+          deaths: getDeaths()
+        })
+        frontlineLog.push(log)
+      }
       setOnConflict(false); setFrontline(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
       Object.entries(pointMap).forEach(([key, val]) => {
@@ -340,7 +351,9 @@ export default function Home() {
       playerMap = {}; summonMap = {}; playerLasthitMap = {}
       setDummy(0)
     }
-  }
+  }, [
+    frontline, getKnockouts, getDeaths
+  ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
     setPlayerName(data.charName)
@@ -700,12 +713,6 @@ export default function Home() {
     })
     return result
   }
-  const getKnockouts = () => {
-    return deaths.filter(death => death.perpetratorName === playerName || death.summonedBy === playerName)
-  }
-  const getDeaths = () => {
-    return deaths.filter(death => death.victimName === playerName)
-  }
 
   const handleCopySituation = () => {
     navigator.clipboard.writeText(`【剩余点分】黑涡${getGcPoint(GrandCompany.maelstrom)}／双蛇${getGcPoint(GrandCompany.twinadder)}／恒辉${getGcPoint(GrandCompany.immoflame)}`)
@@ -730,7 +737,7 @@ export default function Home() {
       removeOverlayListener('LogLine', loglineCallback)
     }
   }, [
-    loglineCallback, primaryPlayerChangeCallback,
+    zoneChangeCallback, loglineCallback, primaryPlayerChangeCallback,
     initialize, addOverlayListener, removeOverlayListener, startOverlayEvents,
   ])
 
@@ -988,6 +995,28 @@ export default function Home() {
                       }
                     </div>
                   </div>
+                ))
+              }
+            </div>
+          )}
+          {/* 统计 */}
+          {activeTab === 'statistics' && (
+            <div className={PageStyle.panel}>
+              {
+                !frontlineLog.length && (
+                  <AlertCard msg="暂无记录。请完成一场纷争前线后再来查看。" />
+                )
+              }
+              <div className={PageStyle.title}>
+                战绩
+                <div className="ml-auto mr-5 flex items-center gap-1">
+                  <div className="w-[72px] text-right">K</div>
+                  <div className="w-[72px] text-right">D</div>
+                </div>
+              </div>
+              {
+                frontlineLog.map((log, logIndex) => (
+                  <FlogCard key={logIndex} frontlineLog={log} />
                 ))
               }
             </div>

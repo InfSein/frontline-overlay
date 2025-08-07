@@ -1,5 +1,14 @@
 import { AppVersionInfo, Frontline, GrandCompany } from '@/app/types'
 
+export const deepCopy = <T>(obj: T): T => {
+  try {
+    return JSON.parse(JSON.stringify(obj))
+  } catch (e) {
+    console.warn('Deep copy failed due to', e, '\norigin:', obj)
+    return obj
+  }
+}
+
 export const checkAppUpdates = async () => {
   let url = document?.location?.origin + document.location.pathname + 'version.json'
   url += `?t=${new Date().getTime()}`
@@ -41,6 +50,16 @@ export const getFrontlineNames = (fl: Frontline) => {
     case Frontline.seize: return ['尘封', '尘封秘岩', '争夺战'] as const
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
+  }
+}
+
+export const getFrontlineBackgroundColor = (fl: Frontline) => {
+  switch (fl) {
+    case Frontline.secure: return '#942110' as const
+    case Frontline.seize: return '#9F9E44' as const
+    case Frontline.shatter: return '#285FB7' as const
+    case Frontline.naadam: return '#15803D' as const
+    default: throw new Error('Invalid remainder value')
   }
 }
 
