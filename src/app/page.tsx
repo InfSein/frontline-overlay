@@ -713,6 +713,22 @@ export default function Home() {
     })
     return result
   }
+  const resolveLog = () => {
+    const knockouts = frontlineLog.map(log => log.knockouts).flat()
+    const deaths = frontlineLog.map(log => log.deaths).flat()
+    let kd = 0
+    if (deaths.length) {
+      kd = Math.floor(knockouts.length / deaths.length * 100) / 100
+    }
+    const knockoutEachMatch = Math.floor(knockouts.length / frontlineLog.length)
+    const deathEachMatch = Math.floor(deaths.length / frontlineLog.length)
+
+    return {
+      knockouts, deaths, kd,
+      knockoutEachMatch, deathEachMatch,
+    }
+  }
+  const logInfo = resolveLog()
 
   const handleCopySituation = () => {
     navigator.clipboard.writeText(`【剩余点分】黑涡${getGcPoint(GrandCompany.maelstrom)}／双蛇${getGcPoint(GrandCompany.twinadder)}／恒辉${getGcPoint(GrandCompany.immoflame)}`)
@@ -876,14 +892,14 @@ export default function Home() {
                       {
                         death.summonedBy && (
                           <>
-                            <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                            <span className="text-orange-700">{death.perpetratorName}</span>
                             <span>发动的</span>
                           </>
                         )
                       }
-                      <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                      <span className="text-orange-700">{death.lasthitActionName}</span>
                       <span>击倒了</span>
-                      <span style={{color: 'orangered'}}>{death.victimName}</span>
+                      <span className="text-orange-700">{death.victimName}</span>
                     </div>
                   </div>
                 ))
@@ -909,17 +925,17 @@ export default function Home() {
                     <div>{formatTime(death.happenTime)}　</div>
                     <div className="flex flex-wrap flex-1">
                       <span>被</span>
-                      <span style={{color: 'orangered'}}>{death.summonedBy || death.perpetratorName}</span>
+                      <span className="text-orange-700">{death.summonedBy || death.perpetratorName}</span>
                       {
                         death.summonedBy && (
                           <>
                             <span>召唤的</span>
-                            <span style={{color: 'orangered'}}>{death.perpetratorName}</span>
+                            <span className="text-orange-700">{death.perpetratorName}</span>
                           </>
                         )
                       }
                       <span>用</span>
-                      <span style={{color: 'orangered'}}>{death.lasthitActionName}</span>
+                      <span className="text-orange-700">{death.lasthitActionName}</span>
                       <span>击倒了</span>
                     </div>
                   </div>
@@ -945,14 +961,14 @@ export default function Home() {
                   <div key={'goodboy' + logIndex} className={PageStyle.title}>
                     <div>{formatTime(log.happenTime)}　</div>
                     <div className="flex flex-wrap flex-1">
-                      <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                      <span className="text-orange-700">{log.perpetratorName}</span>
                       <span>对你发动了</span>
-                      <span style={{color: 'orangered'}}>{log.actionName}</span>
+                      <span className="text-orange-700">{log.actionName}</span>
                       {
                         !!log.actionDamage && (
                           <>
                             <span>，回复了</span>
-                            <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                            <span className="text-orange-700">{log.actionDamage}</span>
                             <span>体力</span>
                           </>
                         )
@@ -981,14 +997,14 @@ export default function Home() {
                   <div key={'badboy' + logIndex} className={PageStyle.title}>
                     <div>{formatTime(log.happenTime)}　</div>
                     <div className="flex flex-wrap flex-1">
-                      <span style={{color: 'orangered'}}>{log.perpetratorName}</span>
+                      <span className="text-orange-700">{log.perpetratorName}</span>
                       <span>对你发动了</span>
-                      <span style={{color: 'orangered'}}>{log.actionName}</span>
+                      <span className="text-orange-700">{log.actionName}</span>
                       {
                         !!log.actionDamage && (
                           <>
                             <span>，造成了</span>
-                            <span style={{color: 'orangered'}}>{log.actionDamage}</span>
+                            <span className="text-orange-700">{log.actionDamage}</span>
                             <span>伤害</span>
                           </>
                         )
@@ -1008,7 +1024,7 @@ export default function Home() {
                 )
               }
               <div className={PageStyle.title}>
-                战绩
+                参战统计
                 <div className="ml-auto mr-5 flex items-center gap-1">
                   <div className="w-[72px] text-right">K</div>
                   <div className="w-[72px] text-right">D</div>
@@ -1019,6 +1035,19 @@ export default function Home() {
                   <FlogCard key={logIndex} frontlineLog={log} />
                 ))
               }
+              <div className={PageStyle.title}>
+                K/D统计
+              </div>
+              <div className={PageStyle.content}>
+                <div className="w-full grid grid-cols-3">
+                  <div>参战<span className="text-orange-700">{frontlineLog.length}</span>场</div>
+                  <div>击倒数 <span className="text-orange-700">{logInfo.knockouts.length}</span></div>
+                  <div>死亡数 <span className="text-orange-700">{logInfo.deaths.length}</span></div>
+                  <div>K/D <span className="text-orange-700">{logInfo.kd}</span></div>
+                  <div>场均击倒 <span className="text-orange-700">{logInfo.knockoutEachMatch}</span></div>
+                  <div>场均死亡 <span className="text-orange-700">{logInfo.deathEachMatch}</span></div>
+                </div>
+              </div>
             </div>
           )}
           {/* 日历 */}
