@@ -28,6 +28,7 @@ export enum Frontline {
 export interface FrontlineLog {
   frontline: Frontline
   result?: "1st" | "2nd" | "3rd"
+  start_time: number
   knockouts: DeathInfo[]
   deaths: DeathInfo[]
 }

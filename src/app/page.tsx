@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'tdesign-react/lib/'
-import { CopyIcon } from 'tdesign-icons-react'
+import {
+  IconFont,
+  CopyIcon, ShareIcon,
+} from 'tdesign-icons-react'
 //import Image from "next/image";
 import PageStyle from './page.module.css'
-import GcCard from "./components/GcCard";
-import PointCard from "./components/PointCard";
 import AlertCard from './components/AlertCard';
 import CalendarTab from './components/CalendarTab';
 import FlogCard from './components/FlogCard';
+import GcCard from "./components/GcCard";
+import PieChart from './components/PieChart';
+import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline, FrontlineLog, DeathInfo } from './types'
@@ -21,10 +25,9 @@ import {
   getFrontlineNames,
   checkAppUpdates,
   deepCopy,
+  copyToClipboard,
+  captureAndCopy,
 } from '@/app/tools'
-
-
-const frontlineLog : FrontlineLog[] = []
 
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
@@ -148,6 +151,8 @@ export default function Home() {
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
+  const [frontlineLog, setFrontlineLog] = useState<FrontlineLog[]>([])
+  const [currFlStartTime, setCurrFlStartTime] = useState<number>(Date.now())
 
   const tabPages = {
     situation: '战况',
@@ -336,10 +341,11 @@ export default function Home() {
       if (frontline) {
         const log = deepCopy<FrontlineLog>({
           frontline: frontline,
+          start_time: currFlStartTime,
           knockouts: getKnockouts(),
           deaths: getDeaths()
         })
-        frontlineLog.push(log)
+        setFrontlineLog(prev => [...prev, log])
       }
       setOnConflict(false); setFrontline(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
@@ -352,7 +358,7 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    frontline, getKnockouts, getDeaths
+    frontline, currFlStartTime, getKnockouts, getDeaths
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -499,6 +505,7 @@ export default function Home() {
       if (frontline === Frontline.seize) setPtMax(4)
       else if (frontline === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
+      setCurrFlStartTime(Date.now())
       return
     }
     
@@ -714,28 +721,66 @@ export default function Home() {
     })
     return result
   }
-  const resolveLog = () => {
+  const resolveLog = useCallback(() => {
     const knockouts = frontlineLog.map(log => log.knockouts).flat()
     const deaths = frontlineLog.map(log => log.deaths).flat()
     let kd = 0
     if (deaths.length) {
       kd = Math.floor(knockouts.length / deaths.length * 100) / 100
     }
-    const knockoutEachMatch = Math.floor(knockouts.length / frontlineLog.length)
-    const deathEachMatch = Math.floor(deaths.length / frontlineLog.length)
+    const knockoutEachMatch = frontlineLog.length ? Math.floor(knockouts.length / frontlineLog.length * 100) / 100 : 0
+    const deathEachMatch = frontlineLog.length ? Math.floor(deaths.length / frontlineLog.length * 100) / 100 : 0
+
+    const knockoutSkillMap : Record<string, number> = {}
+    knockouts.forEach(knockout => {
+      if (!knockoutSkillMap[knockout.lasthitActionName]) knockoutSkillMap[knockout.lasthitActionName] = 0
+      knockoutSkillMap[knockout.lasthitActionName]++
+    })
+    const knockoutDataForPie = Object.entries(knockoutSkillMap).map(([skill, count]) => {
+      return { amount: count, label: skill }
+    })
+    const deathSkillMap : Record<string, number> = {}
+    deaths.forEach(death => {
+      if (!deathSkillMap[death.lasthitActionName]) deathSkillMap[death.lasthitActionName] = 0
+      deathSkillMap[death.lasthitActionName]++
+    })
+    const deathDataForPie = Object.entries(deathSkillMap).map(([skill, count]) => {
+      return { amount: count, label: skill }
+    })
 
     return {
       knockouts, deaths, kd,
       knockoutEachMatch, deathEachMatch,
+      knockoutDataForPie, deathDataForPie,
     }
-  }
+  },[
+    frontlineLog,
+  ])
   const logInfo = resolveLog()
 
   const handleCopySituation = () => {
-    navigator.clipboard.writeText(`【剩余点分】黑涡${getGcPoint(GrandCompany.maelstrom)}／双蛇${getGcPoint(GrandCompany.twinadder)}／恒辉${getGcPoint(GrandCompany.immoflame)}`)
+    const situation = {
+      hw: getGcPoint(GrandCompany.maelstrom),
+      ss: getGcPoint(GrandCompany.twinadder),
+      hh: getGcPoint(GrandCompany.immoflame),
+    }
+    const situationText = `【剩余点分】黑涡${situation.hw} / 双蛇${situation.ss} / 恒辉${situation.hh}`
+    copyToClipboard(situationText)
     showToast('已复制！')
   }
+  const handleCopyStatisticsImage = async () => {
+    const screenshotArea = document.getElementById('statistics-tab')
+    if (!screenshotArea) {
+      showToast('页面未加载，请等待……'); return
+    }
+    const err = await captureAndCopy(screenshotArea)
+    if (err) showToast(`复制失败：${err}`)
+    else showToast('已复制！')
+  }
 
+  useEffect(() => {
+    checkAppUpdate()
+  })
   useEffect(() => {
     if (typeof window === 'undefined') return
     initialize(window)
@@ -746,7 +791,83 @@ export default function Home() {
 
     startOverlayEvents()
 
-    checkAppUpdate()
+    if (process.env.NODE_ENV === 'development') {
+      ;(window as any).gen_demo_data = () => {
+        const min = 60 * 1000
+        setFrontlineLog([
+          {
+            frontline: Frontline.secure,
+            start_time: Date.now(),
+            knockouts: [
+              genDeath('其他玩家01', '星遁天诛'),
+              genDeath('其他玩家02', '星遁天诛'),
+              genDeath('其他玩家03', '星遁天诛'),
+              genDeath('其他玩家04', '星遁天诛'),
+              genDeath('其他玩家05', '冰晶乱流之术'),
+            ],
+            deaths: [
+              genDeath('其他玩家01', '魔弹射手'),
+              genDeath('其他玩家02', '百万核爆'),
+              genDeath('其他玩家03', '天穹破碎'),
+            ],
+          },
+          {
+            frontline: Frontline.secure,
+            start_time: Date.now() + min*15,
+            knockouts: [
+              genDeath('其他玩家01', '星遁天诛'),
+              genDeath('其他玩家02', '星遁天诛'),
+            ],
+            deaths: [
+              genDeath('其他玩家03', '天穹破碎'),
+            ],
+          },
+          {
+            frontline: Frontline.secure,
+            start_time: Date.now() + min*31,
+            knockouts: [
+              genDeath('其他玩家01', '星遁天诛'),
+            ],
+            deaths: [
+              genDeath('其他玩家03', '天穹破碎'),
+              genDeath('其他玩家05', '天穹破碎'),
+            ],
+          },
+          {
+            frontline: Frontline.secure,
+            start_time: Date.now() + min*48,
+            knockouts: [
+              genDeath('其他玩家01', '猛击'),
+              genDeath('其他玩家02', '冰晶乱流之术'),
+              genDeath('其他玩家03', '冰晶乱流之术'),
+              genDeath('其他玩家04', '猛击'),
+              genDeath('其他玩家05', '是生灭法'),
+              genDeath('其他玩家06', '是生灭法'),
+              genDeath('其他玩家05', '是生灭法'),
+              genDeath('其他玩家06', '是生灭法'),
+              genDeath('其他玩家05', '是生灭法'),
+              genDeath('其他玩家06', '是生灭法'),
+            ],
+            deaths: [
+              genDeath('其他玩家03', '夜昏'),
+              genDeath('其他玩家03', '夜昏'),
+              genDeath('其他玩家03', '夜昏'),
+              genDeath('其他玩家03', '夜昏'),
+              genDeath('其他玩家03', '夜昏'),
+            ],
+          },
+        ])
+
+        function genDeath(p: string, action: string) {
+          return {
+            happenTime: 0,
+            victimName: p,
+            perpetratorName: p,
+            lasthitActionName: action,
+          }
+        }
+      }
+    }
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback)
@@ -803,7 +924,7 @@ export default function Home() {
             background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
           }}
         >
-          点此{collapsed ? '展开' : '折叠'}
+          {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
         </div>
       </div>
 
@@ -860,7 +981,7 @@ export default function Home() {
                   })
                 }
               </div>
-              <div className="absolute bottom-4 right-4">
+              <div className="fixed bottom-4 right-8">
                 <Button
                   size="large"
                   shape="circle"
@@ -1018,10 +1139,10 @@ export default function Home() {
           )}
           {/* 统计 */}
           {activeTab === 'statistics' && (
-            <div className={PageStyle.panel}>
+            <div id="statistics-tab" className={PageStyle.panel}>
               {
                 !frontlineLog.length && (
-                  <AlertCard msg="暂无记录。请完成一场纷争前线后再来查看。" />
+                  <AlertCard msg="暂无记录。请完成至少一场纷争前线后再来查看。" />
                 )
               }
               <div className={PageStyle.title}>
@@ -1032,9 +1153,9 @@ export default function Home() {
                 </div>
               </div>
               {
-                frontlineLog.map((log, logIndex) => (
+                frontlineLog.length ? frontlineLog.map((log, logIndex) => (
                   <FlogCard key={logIndex} frontlineLog={log} />
-                ))
+                )) : <div className={PageStyle.content}>暂无数据</div>
               }
               <div className={PageStyle.title}>
                 K/D统计
@@ -1048,6 +1169,35 @@ export default function Home() {
                   <div>场均击倒 <span className="text-orange-700">{logInfo.knockoutEachMatch}</span></div>
                   <div>场均死亡 <span className="text-orange-700">{logInfo.deathEachMatch}</span></div>
                 </div>
+              </div>
+              <div className={PageStyle.title}>
+                击倒统计
+              </div>
+              <div className={PageStyle.content}>
+                {
+                  logInfo.knockoutDataForPie.length
+                    ? <PieChart data={logInfo.knockoutDataForPie} />
+                    : '暂无数据'
+                }
+              </div>
+              <div className={PageStyle.title}>
+                死亡统计
+              </div>
+              <div className={PageStyle.content}>
+                {
+                  logInfo.deathDataForPie.length
+                    ? <PieChart data={logInfo.deathDataForPie} />
+                    : '暂无数据'
+                }
+              </div>
+              <div className="fixed bottom-4 right-8 hidden">
+                <Button
+                  size="large"
+                  shape="circle"
+                  theme="success"
+                  icon={<ShareIcon />}
+                  onClick={handleCopyStatisticsImage}
+                />
               </div>
             </div>
           )}
