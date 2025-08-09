@@ -46,6 +46,13 @@
     <td><img alt="App Preview: Badboy" src="./docs/image/app_preview/badboy.jpg" /></td>
   </tr>
   <tr>
+    <th colspan="2"><strong>记录、统计和分析本日战绩</strong></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Statistics 1" src="./docs/image/app_preview/statistics_1.jpg" /></td>
+    <td><img alt="App Preview: Statistics 2" src="./docs/image/app_preview/statistics_2.jpg" /></td>
+  </tr>
+  <tr>
     <th><strong>展示当前战场和未来战场</strong></th>
     <th><strong>自由折叠以减少占用</strong></th>
   </tr>
