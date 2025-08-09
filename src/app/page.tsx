@@ -26,7 +26,6 @@ import {
   checkAppUpdates,
   deepCopy,
   copyToClipboard,
-  captureAndCopy,
 } from '@/app/tools'
 
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
@@ -769,6 +768,7 @@ export default function Home() {
     showToast('已复制！')
   }
   const handleCopyStatisticsImage = async () => {
+    /*
     const screenshotArea = document.getElementById('statistics-tab')
     if (!screenshotArea) {
       showToast('页面未加载，请等待……'); return
@@ -776,6 +776,7 @@ export default function Home() {
     const err = await captureAndCopy(screenshotArea)
     if (err) showToast(`复制失败：${err}`)
     else showToast('已复制！')
+    */
   }
 
   useEffect(() => {

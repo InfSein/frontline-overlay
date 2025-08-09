@@ -1,5 +1,4 @@
 import { AppVersionInfo, Frontline, GrandCompany } from '@/app/types'
-import html2canvas from 'html2canvas'
 
 export const deepCopy = <T>(obj: T): T => {
   try {
@@ -21,6 +20,7 @@ export const checkAppUpdates = async () => {
   }
 }
 
+/*
 export const captureAndCopy = async (element: HTMLElement) => {
   try {
     const canvas = await html2canvas(element)
@@ -34,6 +34,7 @@ export const captureAndCopy = async (element: HTMLElement) => {
     return err.message as string
   }
 }
+*/
 
 export const copyToClipboard = (text: string) => {
   const textarea = document.createElement('textarea')
