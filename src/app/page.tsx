@@ -706,6 +706,7 @@ export default function Home() {
       result.push({
         key: `prePoints-${val.key}`,
         type: 'preparing',
+        ptLv: '?',
         ptName: '即将刷新',
         ptProgress: val.remain / val.total * 100,
         ptDescription: '还需 ' + val.remain.toString() + 's',
