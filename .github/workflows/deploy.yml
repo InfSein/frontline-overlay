@@ -34,7 +34,9 @@ jobs:
 
       - name: Get version from package.json
         id: get_version
-        run: echo "version=v$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        run: |
+          version="v$(node -p 'require("./package.json").version')"
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Get last commit message
         id: get_commit
