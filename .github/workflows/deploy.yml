@@ -60,11 +60,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: 版本更新 ${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
           body: |
-            ## 更新内容
             ${{ steps.parse_changelog.outputs.changelog }}
 
-            **来自**： ${{ steps.parse_changelog.outputs.pr_number }}
+            **PR**: ${{ steps.parse_changelog.outputs.pr_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
