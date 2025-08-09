@@ -24,3 +24,19 @@ export enum Frontline {
   /** 昂萨哈凯尔（竞争战） */
   naadam = "naadam",
 }
+
+export interface FrontlineLog {
+  frontline: Frontline
+  result?: "1st" | "2nd" | "3rd"
+  start_time: number
+  knockouts: DeathInfo[]
+  deaths: DeathInfo[]
+}
+
+export interface DeathInfo {
+  happenTime: number;
+  victimName: string;
+  perpetratorName: string;
+  summonedBy?: string;
+  lasthitActionName: string;
+}

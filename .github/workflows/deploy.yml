@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build, Deploy and Release
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.17.1'
           cache: 'npm'
 
       - name: Install dependencies
@@ -31,3 +31,38 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
+
+      - name: Get version from package.json
+        id: get_version
+        run: echo "version=v$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+
+      - name: Get last commit message
+        id: get_commit
+        run: |
+          echo "msg<<EOF" >> $GITHUB_OUTPUT
+          echo "$(git log -1 --pretty=format:%B)" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Parse changelog and PR number
+        id: parse_changelog
+        run: |
+          msg="${{ steps.get_commit.outputs.msg }}"
+          pr_number=$(echo "$msg" | grep -oP '#\d+' | head -n 1 || true)
+          changelog=$(echo "$msg" | sed '1d')
+          echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: 版本更新 ${{ steps.get_version.outputs.version }}
+          body: |
+            ## 更新内容
+            ${{ steps.parse_changelog.outputs.changelog }}
+
+            **来自**： ${{ steps.parse_changelog.outputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

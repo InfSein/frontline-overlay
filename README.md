@@ -46,6 +46,13 @@
     <td><img alt="App Preview: Badboy" src="./docs/image/app_preview/badboy.jpg" /></td>
   </tr>
   <tr>
+    <th colspan="2"><strong>记录、统计和分析本日战绩</strong></th>
+  </tr>
+  <tr>
+    <td><img alt="App Preview: Statistics 1" src="./docs/image/app_preview/statistics_1.jpg" /></td>
+    <td><img alt="App Preview: Statistics 2" src="./docs/image/app_preview/statistics_2.jpg" /></td>
+  </tr>
+  <tr>
     <th><strong>展示当前战场和未来战场</strong></th>
     <th><strong>自由折叠以减少占用</strong></th>
   </tr>
@@ -69,5 +76,6 @@
 ## 开源许可
 
 目前并未设置开源许可，仅供社区进行安全性审查。<br>
-未经特别授权，不得修改／再分发此项目。<br>
-严禁将此项目用于商业用途。
+未经特别授权，不得修改／再分发此项目。
+> [!CAUTION]\
+> 严禁商用。

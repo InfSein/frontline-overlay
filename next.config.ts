@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   basePath: process.env.NODE_ENV === 'production' ? '/frontline-overlay' : '',
   env: {
     APP_VERSION: PackageInfo.version,
-  }
+  },
+  transpilePackages: ['tdesign-react'],
 };
 
 export default nextConfig;

@@ -1,4 +1,7 @@
-import type { Metadata } from "next"
+'use client';
+import 'tdesign-react/dist/tdesign.css';
+import "tdesign-react/lib/_util/react-19-adapter";
+
 import { Geist, Geist_Mono } from "next/font/google"
 import './globals.css'
 import { ToastProvider } from "./components/ToastContext"
@@ -12,11 +15,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-export const metadata: Metadata = {
-  title: "Frontline overlay",
-  description: "ACT Overlay for FFXIV PvP Frontline",
-};
 
 export default function RootLayout({
   children,

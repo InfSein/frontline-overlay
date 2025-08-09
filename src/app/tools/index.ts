@@ -1,5 +1,14 @@
 import { AppVersionInfo, Frontline, GrandCompany } from '@/app/types'
 
+export const deepCopy = <T>(obj: T): T => {
+  try {
+    return JSON.parse(JSON.stringify(obj))
+  } catch (e) {
+    console.warn('Deep copy failed due to', e, '\norigin:', obj)
+    return obj
+  }
+}
+
 export const checkAppUpdates = async () => {
   let url = document?.location?.origin + document.location.pathname + 'version.json'
   url += `?t=${new Date().getTime()}`
@@ -9,6 +18,78 @@ export const checkAppUpdates = async () => {
     needUpdate,
     latestVersion: response.app,
   }
+}
+
+/*
+export const captureAndCopy = async (element: HTMLElement) => {
+  try {
+    const canvas = await html2canvas(element)
+    const dataUrl = canvas.toDataURL('image/png')
+    console.log('dataUrl:', dataUrl)
+    const res  = await copyImageToClipboard(dataUrl)
+    console.log('res:', res)
+    return ''
+  } catch (err: any) {
+    console.error('captureAndCopy failed:', err)
+    return err.message as string
+  }
+}
+*/
+
+export const copyToClipboard = (text: string) => {
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  document.body.appendChild(textarea)
+  textarea.select()
+  document.execCommand('copy')
+}
+export const copyImageToClipboard = async (src: string) => {
+  return new Promise<"OK">((resolve, reject) => {
+    const img = document.createElement('img')
+
+    img.onload = () => {
+      const div = document.createElement('div')
+      div.style.position = 'fixed'
+      div.style.left = '-9999px'
+      div.appendChild(img)
+      document.body.appendChild(div)
+
+      const range = document.createRange()
+      range.selectNode(img)
+      const selection = window.getSelection()
+      if (!selection) {
+        reject(new Error('无法获取 selection 对象'))
+        return
+      }
+      selection.removeAllRanges()
+      selection.addRange(range)
+
+      const ok = document.execCommand('copy')
+      document.body.removeChild(div)
+      selection.removeAllRanges()
+
+      if (ok) resolve("OK")
+      else reject(new Error('execCommand copy 失败'))
+    }
+
+    img.onerror = () => reject(new Error('图片加载失败'))
+
+    img.src = src
+  })
+}
+
+export const formatTimestamp = (ts: number) => {
+  const date = new Date(ts)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  const year = date.getFullYear()
+  const month = pad(date.getMonth() + 1)
+  const day = pad(date.getDate())
+  const hour = pad(date.getHours())
+  const minute = pad(date.getMinutes())
+  const second = pad(date.getSeconds())
+
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 
 export const getGrandCompanyName = (gc: GrandCompany) => {
@@ -41,6 +122,16 @@ export const getFrontlineNames = (fl: Frontline) => {
     case Frontline.seize: return ['尘封', '尘封秘岩', '争夺战'] as const
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
+  }
+}
+
+export const getFrontlineBackgroundColor = (fl: Frontline) => {
+  switch (fl) {
+    case Frontline.secure: return '#942110' as const
+    case Frontline.seize: return '#9F9E44' as const
+    case Frontline.shatter: return '#285FB7' as const
+    case Frontline.naadam: return '#15803D' as const
+    default: throw new Error('Invalid remainder value')
   }
 }
 
