@@ -42,6 +42,7 @@ export const copyToClipboard = (text: string) => {
   document.body.appendChild(textarea)
   textarea.select()
   document.execCommand('copy')
+  document.body.removeChild(textarea)
 }
 export const copyImageToClipboard = async (src: string) => {
   return new Promise<"OK">((resolve, reject) => {
