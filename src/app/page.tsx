@@ -919,13 +919,25 @@ export default function Home() {
           ))}
         </div>
         <div
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
-          style={{
-            background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-          }}
+          className="flex gap-2"
         >
-          {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
+          {!collapsed && (
+            <div
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
+              onClick={() => window.open('./config', '悬浮窗设置 frontline-overlay', 'width=800,height=600')}
+            >
+              <IconFont name="setting-1" />
+            </div>
+          )}
+          <div
+            className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
+            }}
+          >
+            {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
+          </div>
         </div>
       </div>
 
