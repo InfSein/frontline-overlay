@@ -937,7 +937,7 @@ export default function Home() {
             <div className={PageStyle.panel}>
               {
                 lockSituationMsg() && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-black/30">
+                  <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-sm bg-black/30">
                     <div className="text-center text-white">
                       <div className="text-4xl mb-2">
                         ⛓️🔒⛓️
