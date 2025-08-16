@@ -4,11 +4,23 @@ import { Button, Layout, Menu } from 'tdesign-react'
 import {
   SaveIcon,
 } from 'tdesign-icons-react'
+import { useEffect, useState } from 'react'
+import { AppConfig, fixAppConfig } from '../types/config'
+import { deepCopy } from '../tools'
+import { loadConfig } from '../tools/config'
 
 const { Content, Footer, Aside } = Layout
 const { MenuItem } = Menu
 
 export default function ConfigPage() {
+  const [formConfig, setFormConfig] = useState<AppConfig>(fixAppConfig())
+
+  useEffect(() => {
+    const cachedConfig = loadConfig()
+    setFormConfig(deepCopy(cachedConfig))
+  },[
+    setFormConfig
+  ])
 
   return (
     <main className="p-6 w-full h-full">

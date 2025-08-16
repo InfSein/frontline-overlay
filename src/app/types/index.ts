@@ -2,6 +2,12 @@ export interface AppVersionInfo {
   app: string
 }
 
+export interface AppTextUi {
+  content: string
+  className?: string
+  style?: React.CSSProperties
+}
+
 /**
  * 大国防联军
  */
