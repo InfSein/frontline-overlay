@@ -27,6 +27,8 @@ import {
   deepCopy,
   copyToClipboard,
 } from '@/app/tools'
+import { AppConfig, fixAppConfig } from './types/config';
+import { loadConfig } from './tools/config';
 
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
@@ -142,6 +144,8 @@ export default function Home() {
     }
     location.reload()
   }
+
+  const [appConfig, setAppConfig] = useState<AppConfig>(fixAppConfig())
 
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
@@ -781,7 +785,25 @@ export default function Home() {
 
   useEffect(() => {
     checkAppUpdate()
-  })
+    const config = loadConfig()
+    setAppConfig(config)
+
+    if (config.auto_collapse_when_launch) {
+      setCollapsed(true)
+    }
+
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      if (event.data.type === "config:update") {
+        console.log('update config')
+        setAppConfig(loadConfig())
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => {
+      window.removeEventListener('message', handler)
+    }
+  }, [])
   useEffect(() => {
     if (typeof window === 'undefined') return
     initialize(window)
@@ -924,7 +946,7 @@ export default function Home() {
           {!collapsed && (
             <div
               className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
-              onClick={() => window.open('./config', '悬浮窗设置 frontline-overlay', 'width=800,height=600')}
+              onClick={() => window.open('./config', '悬浮窗设置', 'width=800,height=600')}
             >
               <IconFont name="setting-1" />
             </div>

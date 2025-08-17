@@ -1,4 +1,4 @@
-import { Component } from "react"
+import { ReactElement } from "react"
 import { assignDefaults } from "../tools"
 import { AppTextUi } from "."
 
@@ -25,11 +25,25 @@ export const fixAppConfig = (appConfig?: AppConfig) => {
 export interface ConfigGroup {
   key: string
   name: string
-  icon: Component
+  icon: ReactElement
   items: ConfigItem[]
 }
-export interface ConfigItem {
+export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSelect
+interface ConfigItemBase {
   key: keyof AppConfig
   name: string
-  desc: (AppTextUi | string)[]
+  desc?: (AppTextUi | string)[]
+}
+interface ConfigItemSwitch extends ConfigItemBase {
+  type: "switch"
+}
+interface ConfigItemString extends ConfigItemBase {
+  type: "string"
+}
+interface ConfigItemNumber extends ConfigItemBase {
+  type: "number"
+}
+interface ConfigItemSelect extends ConfigItemBase {
+  type: "select"
+  options: { label: string; value: string | number }[]
 }
