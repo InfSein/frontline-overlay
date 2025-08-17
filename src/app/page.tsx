@@ -1017,13 +1017,16 @@ export default function Home() {
                 }
               </div>
               <div className="fixed bottom-4 right-8 z-10">
-                <Button
-                  size="large"
-                  shape="circle"
-                  theme="success"
-                  icon={<CopyIcon />}
-                  onClick={handleCopySituation}
-                />
+                {
+                  !appConfig.hide_situation_copy_btn
+                  && <Button
+                    size="large"
+                    shape="circle"
+                    theme="success"
+                    icon={<CopyIcon />}
+                    onClick={handleCopySituation}
+                  />
+                }
               </div>
             </div>
           )}

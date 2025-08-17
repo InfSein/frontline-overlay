@@ -5,11 +5,13 @@ import { AppTextUi } from "."
 export interface AppConfig {
   // #region 通用
   auto_collapse_when_launch: boolean
+  hide_situation_copy_btn: boolean
   // #endregion
 }
 
 const defaultAppConfig : AppConfig = {
   auto_collapse_when_launch: false,
+  hide_situation_copy_btn: false,
 }
 
 export const fixAppConfig = (appConfig?: AppConfig) => {

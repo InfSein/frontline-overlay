@@ -25,6 +25,14 @@ const groups: ConfigGroup[] = [
         ],
         type: 'switch',
       },
+      {
+        key: 'hide_situation_copy_btn',
+        name: '隐藏复制点分按钮',
+        desc: [
+          '如果你不需要战况选项卡中的复制点分按钮，可以打开此选项将其隐藏。',
+        ],
+        type: 'switch',
+      }
     ]
   },
 ]
