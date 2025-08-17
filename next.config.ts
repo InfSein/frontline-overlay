@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 import PackageInfo from "./package.json";
 
+const isGitHubPages = process.env.GITHUB_PAGES === '1'
+
 const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/frontline-overlay' : '',
+  output: isGitHubPages ? 'export' : undefined,
+  basePath: isGitHubPages ? '/frontline-overlay' : '',
   env: {
     APP_VERSION: PackageInfo.version,
   },
