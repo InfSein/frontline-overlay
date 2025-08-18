@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button, Switch, Input, InputNumber, Select, Card, Divider } from 'tdesign-react'
 import {
   IconFont,
-  SaveIcon, SettingIcon,
+  SaveIcon,
 } from 'tdesign-icons-react'
 import { AppConfig, ConfigGroup, ConfigItem, fixAppConfig } from '../types/config'
 import { deepCopy } from '../tools'
@@ -13,8 +13,8 @@ import { loadConfig, saveConfig } from '../tools/config'
 const groups: ConfigGroup[] = [
   {
     key: 'general',
-    name: '通用设置',
-    icon: (<SettingIcon />),
+    name: '通用',
+    icon: 'system-setting',
     items: [
       {
         key: 'auto_collapse_when_launch',
@@ -25,6 +25,13 @@ const groups: ConfigGroup[] = [
         ],
         type: 'switch',
       },
+    ]
+  },
+  {
+    key: 'situation',
+    name: '战况',
+    icon: 'map-distance',
+    items: [
       {
         key: 'hide_situation_copy_btn',
         name: '隐藏复制点分按钮',
@@ -32,9 +39,9 @@ const groups: ConfigGroup[] = [
           '如果你不需要战况选项卡中的复制点分按钮，可以打开此选项将其隐藏。',
         ],
         type: 'switch',
-      }
+      },
     ]
-  },
+  }
 ]
 
 export default function ConfigPage() {
@@ -142,7 +149,7 @@ export default function ConfigPage() {
           headerBordered
           title={
             <div className="flex items-center gap-2">
-              {group.icon}
+              <IconFont name={group.icon} />
               <span className="font-semibold">{group.name}</span>
             </div>
           }
@@ -161,10 +168,10 @@ export default function ConfigPage() {
                   className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex flex-col">
-                    <span className="font-medium">{item.name}</span>
+                    <span className="text-base font-medium">{item.name}</span>
                     {!!item.desc && item.desc.map((d, i) =>
                       typeof d === "string" ? (
-                        <span key={i} className="text-sm text-gray-500">
+                        <span key={i} className="text-xs text-gray-500">
                           {d}
                         </span>
                       ) : (

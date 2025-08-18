@@ -1,4 +1,3 @@
-import { ReactElement } from "react"
 import { assignDefaults } from "../tools"
 import { AppTextUi } from "."
 
@@ -27,7 +26,7 @@ export const fixAppConfig = (appConfig?: AppConfig) => {
 export interface ConfigGroup {
   key: string
   name: string
-  icon: ReactElement
+  icon: string
   items: ConfigItem[]
 }
 export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSelect
