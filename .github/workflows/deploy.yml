@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build static site
-        run: npm run build
+        run: GITHUB_PAGES=1 npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -60,10 +60,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: Release v${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
           body: |
             ${{ steps.parse_changelog.outputs.changelog }}
 
-            **PR**: ${{ steps.parse_changelog.outputs.pr_number }}
+            **PR(s)**: ${{ steps.parse_changelog.outputs.pr_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

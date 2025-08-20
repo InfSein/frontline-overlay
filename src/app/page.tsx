@@ -27,6 +27,8 @@ import {
   deepCopy,
   copyToClipboard,
 } from '@/app/tools'
+import { AppConfig, fixAppConfig } from './types/config';
+import { loadConfig } from './tools/config';
 
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
@@ -142,6 +144,8 @@ export default function Home() {
     }
     location.reload()
   }
+
+  const [appConfig, setAppConfig] = useState<AppConfig>(fixAppConfig())
 
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
@@ -781,7 +785,25 @@ export default function Home() {
 
   useEffect(() => {
     checkAppUpdate()
-  })
+    const config = loadConfig()
+    setAppConfig(config)
+
+    if (config.auto_collapse_when_launch) {
+      setCollapsed(true)
+    }
+
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      if (event.data.type === "config:update") {
+        console.log('update config')
+        setAppConfig(loadConfig())
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => {
+      window.removeEventListener('message', handler)
+    }
+  }, [])
   useEffect(() => {
     if (typeof window === 'undefined') return
     initialize(window)
@@ -919,13 +941,25 @@ export default function Home() {
           ))}
         </div>
         <div
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
-          style={{
-            background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-          }}
+          className="flex gap-2"
         >
-          {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
+          {!collapsed && (
+            <div
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
+              onClick={() => window.open('./config', '悬浮窗设置', 'width=800,height=600')}
+            >
+              <IconFont name="setting-1" />
+            </div>
+          )}
+          <div
+            className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
+            }}
+          >
+            {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
+          </div>
         </div>
       </div>
 
@@ -937,7 +971,7 @@ export default function Home() {
             <div className={PageStyle.panel}>
               {
                 lockSituationMsg() && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-black/30">
+                  <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-sm bg-black/30">
                     <div className="text-center text-white">
                       <div className="text-4xl mb-2">
                         ⛓️🔒⛓️
@@ -983,13 +1017,16 @@ export default function Home() {
                 }
               </div>
               <div className="fixed bottom-4 right-8 z-10">
-                <Button
-                  size="large"
-                  shape="circle"
-                  theme="success"
-                  icon={<CopyIcon />}
-                  onClick={handleCopySituation}
-                />
+                {
+                  !appConfig.hide_situation_copy_btn
+                  && <Button
+                    size="large"
+                    shape="circle"
+                    theme="success"
+                    icon={<CopyIcon />}
+                    onClick={handleCopySituation}
+                  />
+                }
               </div>
             </div>
           )}
