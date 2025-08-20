@@ -30,9 +30,21 @@ export enum Frontline {
   /** 昂萨哈凯尔（竞争战） */
   naadam = "naadam",
 }
+export enum CrystalConflict {
+  /** 角力学校 */
+  palaistra = "palaistra",
+  /** 九霄云上 */
+  cloudnine = "cloudnine",
+  /** 火山之心 */
+  volcanic = "volcanic",
+  /** 机关大殿 */
+  castletown = "castletown",
+  /** 赤土红沙 */
+  redsands = "redsands",
+}
 
 export interface FrontlineLog {
-  frontline: Frontline
+  zone: Frontline | CrystalConflict
   result?: "1st" | "2nd" | "3rd"
   start_time: number
   knockouts: DeathInfo[]

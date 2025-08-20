@@ -24,8 +24,8 @@ const FlogCard : React.FC<FlogCardProps> = ({
     <div
       className="relative p-2 gap-1 rounded shadow-xl flex items-center"
       style={{
-        backgroundColor: getFrontlineBackgroundColor(frontlineLog.frontline),
-        backgroundImage: `url(${getFrontlineBackground(frontlineLog.frontline)})`,
+        backgroundColor: getFrontlineBackgroundColor(frontlineLog.zone),
+        backgroundImage: `url(${getFrontlineBackground(frontlineLog.zone)})`,
         backgroundSize: '70%',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: '1% center',
@@ -33,7 +33,7 @@ const FlogCard : React.FC<FlogCardProps> = ({
     >
       <div className="">
         <div className="text-[24px] leading-[1] font-medium text-white text-shadow">
-          { getFrontlineNames(frontlineLog.frontline)[1] }
+          { getFrontlineNames(frontlineLog.zone)[1] }
         </div>
         <p className="text-[16px] text-[#cad5e2] leading-[1] m-0 mr-1 text-shadow">
           { formatTimestamp(frontlineLog.start_time) }

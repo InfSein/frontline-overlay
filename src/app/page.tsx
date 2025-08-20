@@ -16,7 +16,7 @@ import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline, FrontlineLog, DeathInfo } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -150,7 +150,7 @@ export default function Home() {
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
-  const [frontline, setFrontline] = useState<Frontline | "">('')
+  const [zone, setZone] = useState<Frontline | CrystalConflict | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
@@ -314,7 +314,7 @@ export default function Home() {
   }
 
   const getGcPoint = (gc: GrandCompany) => {
-    if (frontline === Frontline.seize || frontline === Frontline.naadam) {
+    if (zone === Frontline.seize || zone === Frontline.naadam) {
       const arr = Object.values(pointMap)
         .filter(val => val.type !== 'initial' && val.owner === gc)
         .map(val => (val as PointInfo).remain)
@@ -333,24 +333,38 @@ export default function Home() {
 
   const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
     if (data.zoneID === 1273) {
-      setFrontline(Frontline.secure)
+      setZone(Frontline.secure)
     } else if (data.zoneID === 431) {
-      setFrontline(Frontline.seize)
+      setZone(Frontline.seize)
     } else if (data.zoneID === 554) {
-      setFrontline(Frontline.shatter)
+      setZone(Frontline.shatter)
     } else if (data.zoneID === 888) {
-      setFrontline(Frontline.naadam)
+      setZone(Frontline.naadam)
+    } else if (data.zoneName === '角力学校') {
+      console.log(JSON.stringify(data))
+      setZone(CrystalConflict.palaistra)
+    } else if (data.zoneName === '九霄云上') {
+      console.log(JSON.stringify(data))
+      setZone(CrystalConflict.cloudnine)
+    } else if (data.zoneID === 1033) {
+      setZone(CrystalConflict.volcanic)
+    } else if (data.zoneName === '机关大殿') {
+      console.log(JSON.stringify(data))
+      setZone(CrystalConflict.castletown)
+    } else if (data.zoneName === '赤土红沙') {
+      console.log(JSON.stringify(data))
+      setZone(CrystalConflict.redsands)
     } else {
-      if (frontline) {
+      if (zone) {
         const log = deepCopy<FrontlineLog>({
-          frontline: frontline,
+          zone: zone,
           start_time: currFlStartTime,
           knockouts: getKnockouts(),
           deaths: getDeaths()
         })
         setFrontlineLog(prev => [...prev, log])
       }
-      setOnConflict(false); setFrontline(''); setGc('')
+      setOnConflict(false); setZone(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
       Object.entries(pointMap).forEach(([key, val]) => {
         if (val.type === 'initial') delete pointMap[key]
@@ -361,7 +375,7 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    frontline, currFlStartTime, getKnockouts, getDeaths
+    zone, currFlStartTime, getKnockouts, getDeaths
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -374,7 +388,7 @@ export default function Home() {
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
-    if (onConflict || frontline) { // * 为了减轻负载，仅在纷争前线期间解析战斗
+    if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
         const charId = data.line[2]
@@ -496,25 +510,27 @@ export default function Home() {
     if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
     if (!msg) return
 
-    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
-    if (matchGc && matchGc[1]) {
-      const _gc = parseGc(matchGc[1])
-      setGc(_gc)
+    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/) // 战斗即将开始！
+    if (matchGc || msg === '战斗即将开始！') {
+      if (matchGc && matchGc[1]) {
+        const _gc = parseGc(matchGc[1])
+        setGc(_gc)
+      }
       setOnConflict(true)
       Object.keys(playerLasthitMap).forEach(key => delete playerLasthitMap[key])
       deaths.length = 0
       goodboys.length = 0
       badboys.length = 0
-      if (frontline === Frontline.seize) setPtMax(4)
-      else if (frontline === Frontline.naadam) setPtMax(6)
+      if (zone === Frontline.seize) setPtMax(4)
+      else if (zone === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
       setCurrFlStartTime(Date.now())
       return
     }
     
-    if (!onConflict && !frontline) return
+    if (!onConflict && !zone) return
 
-    if (frontline === Frontline.seize) {
+    if (zone === Frontline.seize) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [160, 4]
         else if (ptLv === 'A') return [120, 3]
@@ -574,7 +590,7 @@ export default function Home() {
         setDummy(d => d + 1)
       }
     }
-    else if (frontline === Frontline.shatter) {
+    else if (zone === Frontline.shatter) {
       /*
       const getFp = (ptLv: string) => {
         if (ptLv === 'A') return 200
@@ -611,7 +627,7 @@ export default function Home() {
       }
       */
     }
-    else if (frontline === Frontline.naadam) {
+    else if (zone === Frontline.naadam) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [200, 20]
         else if (ptLv === 'A') return [100, 10]
@@ -674,7 +690,7 @@ export default function Home() {
       }
     }
   }, [
-    onConflict, frontline, ptMax, dummy, playerId, playerName,
+    onConflict, zone, ptMax, dummy, playerId, playerName,
   ])
 
   const getCards = () => {
@@ -688,9 +704,9 @@ export default function Home() {
       ptDescription: string
     }[] = Object.entries(pointMap).map(([key, val]) => {
       let ptName = ''
-      if (frontline === Frontline.seize) ptName = '亚拉戈石文'
-      else if (frontline === Frontline.shatter) ptName = '冰封的石文'
-      else if (frontline === Frontline.naadam) ptName = '无垢的大地'
+      if (zone === Frontline.seize) ptName = '亚拉戈石文'
+      else if (zone === Frontline.shatter) ptName = '冰封的石文'
+      else if (zone === Frontline.naadam) ptName = '无垢的大地'
       ptName += key
       if (val.type === 'initial') {
         return {
@@ -819,7 +835,7 @@ export default function Home() {
         const min = 60 * 1000
         setFrontlineLog([
           {
-            frontline: Frontline.secure,
+            zone: Frontline.secure,
             start_time: Date.now(),
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -835,7 +851,7 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: Frontline.secure,
             start_time: Date.now() + min*15,
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -846,7 +862,7 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: Frontline.secure,
             start_time: Date.now() + min*31,
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -857,7 +873,7 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: Frontline.secure,
             start_time: Date.now() + min*48,
             knockouts: [
               genDeath('其他玩家01', '猛击'),
@@ -903,12 +919,12 @@ export default function Home() {
   ])
 
   const lockSituationMsg = () => {
-    if (!onConflict && !frontline){
+    if (!onConflict && !zone){
       return '还未进入纷争前线'
     } else if (!onConflict) {
       return '正在等待战斗开始'
-    } else if (frontline === Frontline.shatter || frontline === Frontline.secure) {
-      return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据'
+    } else if (zone === Frontline.shatter || zone === Frontline.secure) {
+      return '暂不支持解析 ' + getFrontlineNames(zone)[1] + ' 的战况数据'
     }
     return false
   }
@@ -993,9 +1009,9 @@ export default function Home() {
               </div>
               <div className={PageStyle.title}>当前据点</div>
               {
-                (frontline === Frontline.shatter || frontline === Frontline.secure) && (
+                (zone === Frontline.shatter || zone === Frontline.secure) && (
                   <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
-                    暂不支持解析{ getFrontlineNames(frontline)[1] }的当前据点数据。
+                    暂不支持解析{ getFrontlineNames(zone)[1] }的当前据点数据。
                   </div>
                 )
               }
@@ -1039,7 +1055,7 @@ export default function Home() {
                 )
               }
               {
-                (!!getKnockouts().length && (!onConflict && !frontline)) && (
+                (!!getKnockouts().length && (!onConflict && !zone)) && (
                   <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
@@ -1075,7 +1091,7 @@ export default function Home() {
                 )
               }
               {
-                (!!getDeaths().length && (!onConflict && !frontline)) && (
+                (!!getDeaths().length && (!onConflict && !zone)) && (
                   <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
@@ -1112,7 +1128,7 @@ export default function Home() {
                 )
               }
               {
-                (!!goodboys.length && (!onConflict && !frontline)) && (
+                (!!goodboys.length && (!onConflict && !zone)) && (
                   <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
@@ -1148,7 +1164,7 @@ export default function Home() {
                 )
               }
               {
-                (!!badboys.length && (!onConflict && !frontline)) && (
+                (!!badboys.length && (!onConflict && !zone)) && (
                   <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
                 )
               }
