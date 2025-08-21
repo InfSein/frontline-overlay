@@ -1,6 +1,6 @@
 import React from 'react'
 import { FrontlineLog } from '@/app/types'
-import { formatTimestamp, getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames } from '@/app/tools'
+import { formatTimestamp, getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames, getFrontlineResultBackgroundColor } from '@/app/tools'
 
 interface FlogCardProps {
   frontlineLog: FrontlineLog
@@ -32,9 +32,21 @@ const FlogCard : React.FC<FlogCardProps> = ({
         backgroundPosition: '1% center',
       }}
     >
-      <div className="">
+      <div>
         <div className="text-[24px] leading-[1] font-medium text-white text-shadow">
           { getFrontlineNames(frontlineLog.zone)[1] }
+          {
+            frontlineLog.result &&
+            <span
+              data-color={frontlineLog.result === 'win' ? 'green' : 'red'}
+              className="text-[16px] text-white ml-2 rounded"
+              style={{
+                backgroundColor: getFrontlineResultBackgroundColor(frontlineLog.result)
+              }}
+            >
+              { frontlineLog.result === 'win' ? '胜' : frontlineLog.result === 'lose' ? '负' : frontlineLog.result }
+            </span>
+          }
         </div>
         <p className="text-[16px] text-[#cad5e2] leading-[1] m-0 mr-1 text-shadow">
           { formatTimestamp(frontlineLog.start_time) }

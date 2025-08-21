@@ -1,4 +1,4 @@
-import { AppVersionInfo, CrystalConflict, Frontline, GrandCompany } from '@/app/types'
+import { AppVersionInfo, CrystalConflict, Frontline, FrontlineResult, GrandCompany } from '@/app/types'
 
 export const deepCopy = <T>(obj: T): T => {
   try {
@@ -165,6 +165,17 @@ export const getFrontlineBackgroundColor = (fl: Frontline | CrystalConflict) => 
     case CrystalConflict.volcanic: return '#976E5A' as const
     case CrystalConflict.castletown: return '#211B19' as const
     case CrystalConflict.redsands: return '#EAC38C' as const
+  }
+}
+
+export const getFrontlineResultBackgroundColor = (result: FrontlineResult) => {
+  switch (result) {
+    case '1st': return '#FFD700'
+    case '2nd': return '#C0C0C0'
+    case '3rd': return '#CD7F32'
+    case 'win': return '#4CAF50'
+    case 'lose': return '#F44336'
+    default: return '#FFFFFF'
   }
 }
 
