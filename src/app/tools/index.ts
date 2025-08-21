@@ -146,17 +146,25 @@ export const getFrontlineNames = (fl: Frontline | CrystalConflict) => {
   }
 }
 
+export const getFrontlineForeColor = (fl: Frontline | CrystalConflict) => {
+  switch (fl) {
+    case Frontline.shatter:
+    case CrystalConflict.redsands:
+      return 'black' as const
+    default: return undefined
+  }
+}
 export const getFrontlineBackgroundColor = (fl: Frontline | CrystalConflict) => {
   switch (fl) {
-    case Frontline.secure: return '#942110' as const
-    case Frontline.seize: return '#9F9E44' as const
-    case Frontline.shatter: return '#285FB7' as const
-    case Frontline.naadam: return '#15803D' as const
-    case CrystalConflict.palaistra: return '#FBBF24' as const
-    case CrystalConflict.cloudnine: return '#F472B6' as const
-    case CrystalConflict.volcanic: return '#EF4444' as const
-    case CrystalConflict.castletown: return '#8B5CF6' as const
-    case CrystalConflict.redsands: return '#F59E0B' as const
+    case Frontline.secure: return '#776154' as const
+    case Frontline.seize: return '#44756A' as const
+    case Frontline.shatter: return '#F6F9F6' as const
+    case Frontline.naadam: return '#616D22' as const
+    case CrystalConflict.palaistra: return '#1E3743' as const
+    case CrystalConflict.cloudnine: return '#56849B' as const
+    case CrystalConflict.volcanic: return '#976E5A' as const
+    case CrystalConflict.castletown: return '#211B19' as const
+    case CrystalConflict.redsands: return '#EAC38C' as const
   }
 }
 

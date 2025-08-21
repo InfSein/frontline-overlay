@@ -1,6 +1,6 @@
 import React from 'react'
 import { FrontlineLog } from '@/app/types'
-import { formatTimestamp, getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineNames } from '@/app/tools'
+import { formatTimestamp, getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames } from '@/app/tools'
 
 interface FlogCardProps {
   frontlineLog: FrontlineLog
@@ -24,6 +24,7 @@ const FlogCard : React.FC<FlogCardProps> = ({
     <div
       className="relative p-2 gap-1 rounded shadow-xl flex items-center"
       style={{
+        color: getFrontlineForeColor(frontlineLog.zone),
         backgroundColor: getFrontlineBackgroundColor(frontlineLog.zone),
         backgroundImage: `url(${getFrontlineBackground(frontlineLog.zone)})`,
         backgroundSize: '70%',
