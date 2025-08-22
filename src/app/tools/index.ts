@@ -139,7 +139,7 @@ export const getFrontlineNames = (fl: Frontline | CrystalConflict) => {
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
     case CrystalConflict.palaistra: return ['学校', '角力学校', '水晶冲突'] as const
-    case CrystalConflict.cloudnine: return ['云端', '九霄云上', '水晶冲突'] as const
+    case CrystalConflict.cloudnine: return ['九霄', '九霄云上', '水晶冲突'] as const
     case CrystalConflict.volcanic: return ['火山', '火山之心', '水晶冲突'] as const
     case CrystalConflict.castletown: return ['大殿', '机关大殿', '水晶冲突'] as const
     case CrystalConflict.redsands: return ['沙漠', '赤土红沙', '水晶冲突'] as const

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'tdesign-react/lib/'
 import {
   IconFont,
-  CopyIcon, ShareIcon,
+  CopyIcon, ShareIcon, LogoGithubIcon, SystemLogIcon,
 } from 'tdesign-icons-react'
 //import Image from "next/image";
 import PageStyle from './page.module.css'
@@ -16,7 +16,7 @@ import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -97,6 +97,9 @@ let playerLasthitMap : Record<string, LasthitInfo> = {}
 const deaths : DeathInfo[] = []
 const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
+const reactive = {
+  currFrontlineResult: undefined as FrontlineResult | undefined,
+}
 
 const parseGc = (gc_name: string) => {
   if (gc_name === '黑涡团') return GrandCompany.maelstrom
@@ -156,7 +159,6 @@ export default function Home() {
   const [dummy, setDummy] = useState(0) // 手动刷新
   const [frontlineLog, setFrontlineLog] = useState<FrontlineLog[]>([])
   const [currFlStartTime, setCurrFlStartTime] = useState<number>(Date.now())
-  const [currFlResult, setCurrFlResult] = useState<FrontlineResult | undefined>(undefined)
 
   const tabPages = {
     situation: '战况',
@@ -333,32 +335,15 @@ export default function Home() {
   }, [playerName])
 
   const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
-    if (data.zoneID === 1273) {
-      setZone(Frontline.secure)
-    } else if (data.zoneID === 431) {
-      setZone(Frontline.seize)
-    } else if (data.zoneID === 554) {
-      setZone(Frontline.shatter)
-    } else if (data.zoneID === 888) {
-      setZone(Frontline.naadam)
-    } else if (data.zoneName === '角力学校') {
-      console.log(JSON.stringify(data))
-      setZone(CrystalConflict.palaistra)
-    } else if (data.zoneID === 1034) {
-      setZone(CrystalConflict.cloudnine)
-    } else if (data.zoneID === 1033) {
-      setZone(CrystalConflict.volcanic)
-    } else if (data.zoneName === '机关大殿') {
-      console.log(JSON.stringify(data))
-      setZone(CrystalConflict.castletown)
-    } else if (data.zoneID === 1138) {
-      setZone(CrystalConflict.redsands)
+    const conflictZone = GameZonesMap.get(data.zoneID)
+    if (conflictZone) {
+      setZone(conflictZone)
     } else {
       if (zone) {
         let result = undefined
-        if (currFlResult && Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
-          result = currFlResult
-          setCurrFlResult(undefined)
+        if (reactive.currFrontlineResult && Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
+          result = reactive.currFrontlineResult
+          reactive.currFrontlineResult = undefined
         }
         const log = deepCopy<FrontlineLog>({
           zone: zone,
@@ -380,7 +365,7 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    zone, currFlStartTime, currFlResult, getKnockouts, getDeaths
+    zone, currFlStartTime, getKnockouts, getDeaths
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -512,10 +497,11 @@ export default function Home() {
       }
     }
 
-    if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
+    const validChannels = ['0839', '0840', '083E']
+    if (msgType !== '00' || !validChannels.includes(msgChannel)) return
     if (!msg) return
 
-    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/) // 战斗即将开始！
+    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
     if (matchGc || msg === '战斗即将开始！') {
       if (matchGc && matchGc[1]) {
         const _gc = parseGc(matchGc[1])
@@ -696,13 +682,15 @@ export default function Home() {
         setPtMax(2)
         setDummy(d => d + 1)
       }
-    } else { // 55
+    }
+    else {
+      // 55
       const matchRewardSeriesExp = msg.match(/获得了(\d+)点系列赛经验值。/)
       if (matchRewardSeriesExp && matchRewardSeriesExp[1]) {
         if (matchRewardSeriesExp[1] === '900') {
-          setCurrFlResult('win')
+          reactive.currFrontlineResult = 'win'
         } else if (matchRewardSeriesExp[1] === '700') {
-          setCurrFlResult('lose')
+          reactive.currFrontlineResult = 'lose'
         }
       }
     }
@@ -757,6 +745,36 @@ export default function Home() {
       })
     })
     return result
+  }
+  const getConnectionButtons = () => {
+    const list = [
+      { key: 'githubRepo', icon: (<LogoGithubIcon />), label: 'Github' },
+      { key: 'changelogDoc', icon: (<SystemLogIcon />), label: '更新日志' },
+    ] as const
+    return list.map(item => (
+      <div key={item.key} className="flex gap-1">
+        <Button
+          size="large"
+          icon={item.icon}
+          onClick={() => window.open(AppConstants[item.key])}
+          style={{
+            fontFamily: 'unset',
+            fontSize: '20px',
+            paddingLeft: 'auto',
+            paddingRight: 'auto',
+            width: '200px',
+          }}
+        >{item.label}</Button>
+        <Button
+          size="large"
+          icon={<CopyIcon />}
+          onClick={() => {
+            copyToClipboard(AppConstants[item.key])
+            showToast('已复制链接')
+          }}
+        />
+      </div>
+    ))
   }
   const resolveLog = useCallback(() => {
     const knockouts = frontlineLog.map(log => log.knockouts).flat()
@@ -849,6 +867,9 @@ export default function Home() {
     startOverlayEvents()
 
     if (process.env.NODE_ENV === 'development') {
+      ;(window as any).test_zone = (zone: number) => {
+        console.log('zone:', GameZonesMap.get(zone))
+      }
       ;(window as any).gen_demo_data = () => {
         const min = 60 * 1000
         setFrontlineLog([
@@ -997,7 +1018,7 @@ export default function Home() {
           {!collapsed && (
             <div
               className="text-[20px] px-2 py-1 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer text-shadow transition-colors duration-200"
-              onClick={() => window.open('./config', '悬浮窗设置', 'width=800,height=600')}
+              onClick={() => window.open('./config')}
             >
               <IconFont name="setting-1" />
             </div>
@@ -1090,7 +1111,7 @@ export default function Home() {
               }
               {
                 (!!getKnockouts().length && (!onConflict && !zone)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1126,7 +1147,7 @@ export default function Home() {
               }
               {
                 (!!getDeaths().length && (!onConflict && !zone)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1163,7 +1184,7 @@ export default function Home() {
               }
               {
                 (!!goodboys.length && (!onConflict && !zone)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1199,7 +1220,7 @@ export default function Home() {
               }
               {
                 (!!badboys.length && (!onConflict && !zone)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1296,9 +1317,12 @@ export default function Home() {
           {/* 关于 */}
           {activeTab === 'about' && (
             <div className={PageStyle.panel}>
-              <div className={PageStyle.title}>当前版本：{process.env.APP_VERSION}</div>
+              <div className={PageStyle.title}>
+                <span>当前版本：</span>
+                <span className="text-orange-700 font-bold">{process.env.APP_VERSION}</span>
+              </div>
               <div
-                className={PageStyle.title}
+                className={PageStyle.content}
                 style={{
                   flexDirection: 'column',
                   alignItems: 'start',
@@ -1309,26 +1333,49 @@ export default function Home() {
                   !!appNewVersion ? (
                     <>
                       <div>检测到新版本：{appNewVersion}</div>
-                      <div
-                        className="bg-green-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                      <Button
+                        size="large"
+                        theme="success"
+                        loading={checkingAppUpdate}
                         onClick={handleUpdateApp}
+                        style={{
+                          fontFamily: 'unset',
+                          fontSize: '20px',
+                          paddingLeft: '36px',
+                          paddingRight: '36px',
+                        }}
                       >
                         点此更新
-                      </div>
-                      <div className="text-red-600">※当前数据将会丢失。建议在战场外进行更新。</div>
+                      </Button>
+                      <div className="text-red-600">※当前数据和已记录的场次统计将会丢失。</div>
                     </>
                   ) : (
                     <>
                       <div>已是最新版本</div>
-                      <div
-                        className="bg-blue-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                      <Button
+                        size="large"
+                        theme="primary"
+                        loading={checkingAppUpdate}
                         onClick={handleCheckAppUpdate}
+                        style={{
+                          fontFamily: 'unset',
+                          fontSize: '20px',
+                          paddingLeft: '36px',
+                          paddingRight: '36px',
+                        }}
                       >
                         检查更新
-                      </div>
+                      </Button>
                     </>
                   )
                 }
+              </div>
+              <div className={PageStyle.title}>保持联系</div>
+              <div className={PageStyle.content}>
+                <div>点击左侧按钮来打开子窗口访问，或是点击右侧按钮复制链接。</div>
+                <div className="flex flex-col gap-1">
+                  { getConnectionButtons() }
+                </div>
               </div>
             </div>
           )}

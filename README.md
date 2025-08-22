@@ -1,4 +1,4 @@
-# FFXIV 纷争前线悬浮窗
+# FFXIV PvP悬浮窗
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.1-000?logo=next.js)
 ![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react&logoColor=white)
@@ -6,11 +6,16 @@
 
 专为纷争前线制作的 ACT OverlayPlugin 悬浮窗插件。
 
+在 ![Version 1.3.0](https://img.shields.io/badge/Version-1.3.0-blue) 之后也支持解析水晶冲突。
+
 > [!TIP]\
-> 仅为国服简体中文客户端设计。
+> 仅为国服简体中文客户端设计。<br>
 > 其他服务器／语言的客户端可能无法正常使用部分功能。
 
 ## 工作进度
+
+这里的进度指的是「战况」面板解析的开发进度。<br>
+「击倒」「阵亡」「好人」「坏人」「统计」面板支持所有纷争前线和水晶冲突的解析。
 
 |          ＼          |          开发         |          测试         |
 | :------------------: | :-------------------: | :-------------------: |
@@ -18,6 +23,7 @@
 |   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
 |     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
 |   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
+|       水晶冲突       | :black_square_button: | :black_square_button: |
 
 ## 主要功能
 
@@ -67,7 +73,8 @@
 1. 在 `OverlayPlugin` 中新建悬浮窗，类型选择 `自定义悬浮窗`；
 2. 将悬浮窗地址设置为 `https://infsein.github.io/frontline-overlay/`；
 3. 按照喜好调整悬浮窗位置、大小和缩放；
-4. 后续悬浮窗发布新版本时，在 `关于` 选项卡进行检查和更新。
+4. 可以点击右上方的设置按钮调整一些你需要或喜欢的选项；
+5. 后续悬浮窗发布新版本时，在 `关于` 选项卡进行检查和更新。
 
 ### 本地调试
 

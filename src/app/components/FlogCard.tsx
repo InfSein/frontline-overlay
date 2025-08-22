@@ -33,13 +33,13 @@ const FlogCard : React.FC<FlogCardProps> = ({
       }}
     >
       <div>
-        <div className="text-[24px] leading-[1] font-medium text-white text-shadow">
+        <div className="flex items-center text-[24px] leading-[1] font-medium text-white text-shadow">
           { getFrontlineNames(frontlineLog.zone)[1] }
           {
             frontlineLog.result &&
             <span
               data-color={frontlineLog.result === 'win' ? 'green' : 'red'}
-              className="text-[16px] text-white ml-2 rounded"
+              className="text-[16px] leading-[1] font-normal p-1 text-white ml-1 rounded"
               style={{
                 backgroundColor: getFrontlineResultBackgroundColor(frontlineLog.result)
               }}

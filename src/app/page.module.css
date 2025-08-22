@@ -11,5 +11,5 @@
   border-color: rgba(56, 137, 197, 0.35);
 }
 .content {
-  @apply w-full items-center text-[20px] self-baseline text-black px-3 py-1 rounded bg-white/50 border border-white;
+  @apply w-full items-center text-[20px] self-baseline text-black px-3 py-1 rounded bg-white/60 border border-white;
 }

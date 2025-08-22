@@ -8,6 +8,11 @@ export interface AppTextUi {
   style?: React.CSSProperties
 }
 
+export const AppConstants = {
+  githubRepo: 'https://github.com/InfSein/frontline-overlay',
+  changelogDoc: 'https://github.com/InfSein/frontline-overlay/blob/master/CHANGELOG.md',
+} as const
+
 /**
  * 大国防联军
  */
@@ -42,6 +47,45 @@ export enum CrystalConflict {
   /** 赤土红沙 */
   redsands = "redsands",
 }
+
+const GameZones = {
+  frontline: {
+    /** 周边遗迹群（阵地战） */
+    secure: 1273,
+    /** 尘封秘岩（争夺战） */
+    seize: 431,
+    /** 荣誉野（碎冰战） */
+    shatter: 554,
+    /** 昂萨哈凯尔（竞争战） */
+    naadam: 888,
+  },
+  crystalConflict: {
+    /** 角力学校 */
+    palaistra: [1032, 1058],
+    /** 九霄云上 */
+    cloudnine: [1034, 1060],
+    /** 火山之心 */
+    volcanic: [1033, 1059],
+    /** 机关大殿 */
+    castletown: [1116, 1117],
+    /** 赤土红沙 */
+    redsands: [1138, 1139],
+  }
+}
+export const GameZonesMap = new Map<number, Frontline | CrystalConflict>([
+  // frontline
+  [GameZones.frontline.secure, Frontline.secure],
+  [GameZones.frontline.seize, Frontline.seize],
+  [GameZones.frontline.shatter, Frontline.shatter],
+  [GameZones.frontline.naadam, Frontline.naadam],
+
+  // crystalConflict
+  ...Object.entries(GameZones.crystalConflict).flatMap(([key, ids]) =>
+    ids.map(
+      (id): [number, CrystalConflict] => [id, CrystalConflict[key as keyof typeof CrystalConflict]]
+    )
+  ),
+])
 
 export type FrontlineResult = "1st" | "2nd" | "3rd" | "win" | "lose"
 export interface FrontlineLog {
