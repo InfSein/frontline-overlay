@@ -1,4 +1,4 @@
-# FFXIV PvP悬浮窗
+# FFXIV 纷争前线悬浮窗
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.1-000?logo=next.js)
 ![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react&logoColor=white)
@@ -6,7 +6,7 @@
 
 专为纷争前线制作的 ACT OverlayPlugin 悬浮窗插件。
 
-在 ![Version 1.3.0](https://img.shields.io/badge/Version-1.3.0-blue) 之后也支持解析水晶冲突。
+在 `v1.3.0` 之后也支持解析水晶冲突。
 
 > [!TIP]\
 > 仅为国服简体中文客户端设计。<br>
@@ -15,7 +15,7 @@
 ## 工作进度
 
 这里的进度指的是「战况」面板解析的开发进度。<br>
-「击倒」「阵亡」「好人」「坏人」「统计」面板支持所有纷争前线和水晶冲突的解析。
+「击倒」「阵亡」「好人」「坏人」「统计」面板已经支持解析全部的纷争前线／水晶冲突。
 
 |          ＼          |          开发         |          测试         |
 | :------------------: | :-------------------: | :-------------------: |
@@ -23,9 +23,11 @@
 |   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
 |     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
 |   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
-|       水晶冲突       | :black_square_button: | :black_square_button: |
+|        水晶冲突        | :black_square_button: | :black_square_button: |
 
 ## 主要功能
+
+下方截图部分来自早期版本，实际安装后的UI细节可能与其有所差异。
 
 <table>
   <tr>
