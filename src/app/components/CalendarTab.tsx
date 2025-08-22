@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import PageStyle from '../page.module.css'
-import { getFrontlineBackground, getFrontlineNames } from '../tools';
+import { getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames } from '../tools';
 import { Frontline } from '../types';
 
 /* 
@@ -46,12 +46,21 @@ export default function CalendarTab() {
       default: throw new Error('Invalid remainder value')
     }
   }
+  const getCardForeColor = (index: number) => {
+    switch (index) {
+      case 0: return getFrontlineForeColor(Frontline.seize)
+      case 1: return getFrontlineForeColor(Frontline.shatter)
+      case 2: return getFrontlineForeColor(Frontline.naadam)
+      case 3: return getFrontlineForeColor(Frontline.secure)
+      default: throw new Error('Invalid remainder value')
+    }
+  }
   const getCardBackgroundColor = (index: number) => {
     switch (index) {
-      case 0: return '#9F9E44' // 尘封秘岩
-      case 1: return '#285FB7' // 荣誉野
-      case 2: return '#15803D' // 昂萨哈凯尔
-      case 3: return '#942110' // 周边遗迹群
+      case 0: return getFrontlineBackgroundColor(Frontline.seize)
+      case 1: return getFrontlineBackgroundColor(Frontline.shatter)
+      case 2: return getFrontlineBackgroundColor(Frontline.naadam)
+      case 3: return getFrontlineBackgroundColor(Frontline.secure)
       default: throw new Error('Invalid remainder value')
     }
   }
@@ -108,6 +117,7 @@ export default function CalendarTab() {
       <div
         className="relative p-2 gap-1 rounded shadow-xl flex items-center"
         style={{
+          color: getCardForeColor(remainder),
           backgroundColor: getCardBackgroundColor(remainder),
           backgroundImage: `url(${getCardBackgroundImage(remainder)})`,
           backgroundSize: '70%',
@@ -128,17 +138,19 @@ export default function CalendarTab() {
       <div className="flex flex-col gap-[2px] text-[18px]">
         {
           showFuture.map(val => {
+            const rm = (remainder + val + 1) % 4
             return (
               <div
                 key={'future' + val}
                 className="flex items-center border border-black/50 rounded px-1 py-0.5"
                 style={{
-                  backgroundColor: getCardBackgroundColor((remainder + val + 1) % 4),
+                  color: getCardForeColor(rm),
+                  backgroundColor: getCardBackgroundColor(rm),
                 }}
               >
                 <div>
                   <span className="mx-[0.3em] ml-[0.5em]"> · </span>
-                  <span>{ getFrontline((remainder + val + 1) % 4)[1] }</span>
+                  <span>{ getFrontline(rm)[1] }</span>
                 </div>
                 <div className="ml-auto">
                   {`　(${formatDate(getNext23(now, val))}／${timeUntilNext23(now, val)}后)`}

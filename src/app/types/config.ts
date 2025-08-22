@@ -3,13 +3,20 @@ import { AppTextUi } from "."
 
 export interface AppConfig {
   // #region 通用
+  /** 启动时自动折叠 */
   auto_collapse_when_launch: boolean
+  /** 进入对战时自动展开 */
+  auto_expand_when_enter_battlefield: boolean
+  // #endregion
+  // #region 战况
+  /** 隐藏复制点分按钮 */
   hide_situation_copy_btn: boolean
   // #endregion
 }
 
 const defaultAppConfig : AppConfig = {
   auto_collapse_when_launch: false,
+  auto_expand_when_enter_battlefield: false,
   hide_situation_copy_btn: false,
 }
 

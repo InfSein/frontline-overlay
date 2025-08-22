@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from 'tdesign-react/lib/'
 import {
   IconFont,
-  CopyIcon, ShareIcon,
+  CopyIcon, ShareIcon, LogoGithubIcon, SystemLogIcon,
 } from 'tdesign-icons-react'
 //import Image from "next/image";
 import PageStyle from './page.module.css'
@@ -16,7 +16,7 @@ import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline, FrontlineLog, DeathInfo } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -97,6 +97,9 @@ let playerLasthitMap : Record<string, LasthitInfo> = {}
 const deaths : DeathInfo[] = []
 const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
+const reactive = {
+  currFrontlineResult: undefined as FrontlineResult | undefined,
+}
 
 const parseGc = (gc_name: string) => {
   if (gc_name === '黑涡团') return GrandCompany.maelstrom
@@ -150,7 +153,7 @@ export default function Home() {
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
-  const [frontline, setFrontline] = useState<Frontline | "">('')
+  const [zone, setZone] = useState<Frontline | CrystalConflict | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
@@ -314,7 +317,7 @@ export default function Home() {
   }
 
   const getGcPoint = (gc: GrandCompany) => {
-    if (frontline === Frontline.seize || frontline === Frontline.naadam) {
+    if (zone === Frontline.seize || zone === Frontline.naadam) {
       const arr = Object.values(pointMap)
         .filter(val => val.type !== 'initial' && val.owner === gc)
         .map(val => (val as PointInfo).remain)
@@ -332,25 +335,26 @@ export default function Home() {
   }, [playerName])
 
   const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
-    if (data.zoneID === 1273) {
-      setFrontline(Frontline.secure)
-    } else if (data.zoneID === 431) {
-      setFrontline(Frontline.seize)
-    } else if (data.zoneID === 554) {
-      setFrontline(Frontline.shatter)
-    } else if (data.zoneID === 888) {
-      setFrontline(Frontline.naadam)
+    const conflictZone = GameZonesMap.get(data.zoneID)
+    if (conflictZone) {
+      setZone(conflictZone)
     } else {
-      if (frontline) {
+      if (zone) {
+        let result = undefined
+        if (reactive.currFrontlineResult && Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
+          result = reactive.currFrontlineResult
+          reactive.currFrontlineResult = undefined
+        }
         const log = deepCopy<FrontlineLog>({
-          frontline: frontline,
+          zone: zone,
+          result,
           start_time: currFlStartTime,
           knockouts: getKnockouts(),
           deaths: getDeaths()
         })
         setFrontlineLog(prev => [...prev, log])
       }
-      setOnConflict(false); setFrontline(''); setGc('')
+      setOnConflict(false); setZone(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
       Object.entries(pointMap).forEach(([key, val]) => {
         if (val.type === 'initial') delete pointMap[key]
@@ -361,7 +365,7 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    frontline, currFlStartTime, getKnockouts, getDeaths
+    zone, currFlStartTime, getKnockouts, getDeaths
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -374,7 +378,7 @@ export default function Home() {
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
-    if (onConflict || frontline) { // * 为了减轻负载，仅在纷争前线期间解析战斗
+    if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
         const charId = data.line[2]
@@ -410,8 +414,8 @@ export default function Home() {
             const goodActions = [
               '718A'/*卫护*/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
               'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
-              'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '闭式舞姿'/**/,
-              '73E6'/*守护之光*/, '命水'/**/,
+              'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '72F7'/*闭式舞姿*/,
+              '73E6'/*守护之光*/, '7344'/*命水*/,
             ]
             const mustHeal = [
               '723B'/*吉星相位*/, '723F'/*吉星相位2*/,
@@ -493,28 +497,34 @@ export default function Home() {
       }
     }
 
-    if (msgType !== '00' || (msgChannel !== '0839' && msgChannel !== '083E')) return
+    const validChannels = ['0839', '0840', '083E']
+    if (msgType !== '00' || !validChannels.includes(msgChannel)) return
     if (!msg) return
 
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
-    if (matchGc && matchGc[1]) {
-      const _gc = parseGc(matchGc[1])
-      setGc(_gc)
+    if (matchGc || msg === '战斗即将开始！') {
+      if (matchGc && matchGc[1]) {
+        const _gc = parseGc(matchGc[1])
+        setGc(_gc)
+      }
       setOnConflict(true)
       Object.keys(playerLasthitMap).forEach(key => delete playerLasthitMap[key])
       deaths.length = 0
       goodboys.length = 0
       badboys.length = 0
-      if (frontline === Frontline.seize) setPtMax(4)
-      else if (frontline === Frontline.naadam) setPtMax(6)
+      if (zone === Frontline.seize) setPtMax(4)
+      else if (zone === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
       setCurrFlStartTime(Date.now())
+      if (appConfig.auto_expand_when_enter_battlefield) {
+        setCollapsed(false)
+      }
       return
     }
     
-    if (!onConflict && !frontline) return
+    if (!onConflict && !zone) return
 
-    if (frontline === Frontline.seize) {
+    if (zone === Frontline.seize) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [160, 4]
         else if (ptLv === 'A') return [120, 3]
@@ -574,7 +584,7 @@ export default function Home() {
         setDummy(d => d + 1)
       }
     }
-    else if (frontline === Frontline.shatter) {
+    else if (zone === Frontline.shatter) {
       /*
       const getFp = (ptLv: string) => {
         if (ptLv === 'A') return 200
@@ -611,7 +621,7 @@ export default function Home() {
       }
       */
     }
-    else if (frontline === Frontline.naadam) {
+    else if (zone === Frontline.naadam) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [200, 20]
         else if (ptLv === 'A') return [100, 10]
@@ -673,8 +683,20 @@ export default function Home() {
         setDummy(d => d + 1)
       }
     }
+    else {
+      // 55
+      const matchRewardSeriesExp = msg.match(/获得了(\d+)点系列赛经验值。/)
+      if (matchRewardSeriesExp && matchRewardSeriesExp[1]) {
+        if (matchRewardSeriesExp[1] === '900') {
+          reactive.currFrontlineResult = 'win'
+        } else if (matchRewardSeriesExp[1] === '700') {
+          reactive.currFrontlineResult = 'lose'
+        }
+      }
+    }
   }, [
-    onConflict, frontline, ptMax, dummy, playerId, playerName,
+    onConflict, zone, ptMax, dummy, playerId, playerName,
+    appConfig.auto_expand_when_enter_battlefield,
   ])
 
   const getCards = () => {
@@ -688,9 +710,9 @@ export default function Home() {
       ptDescription: string
     }[] = Object.entries(pointMap).map(([key, val]) => {
       let ptName = ''
-      if (frontline === Frontline.seize) ptName = '亚拉戈石文'
-      else if (frontline === Frontline.shatter) ptName = '冰封的石文'
-      else if (frontline === Frontline.naadam) ptName = '无垢的大地'
+      if (zone === Frontline.seize) ptName = '亚拉戈石文'
+      else if (zone === Frontline.shatter) ptName = '冰封的石文'
+      else if (zone === Frontline.naadam) ptName = '无垢的大地'
       ptName += key
       if (val.type === 'initial') {
         return {
@@ -723,6 +745,36 @@ export default function Home() {
       })
     })
     return result
+  }
+  const getConnectionButtons = () => {
+    const list = [
+      { key: 'githubRepo', icon: (<LogoGithubIcon />), label: 'Github' },
+      { key: 'changelogDoc', icon: (<SystemLogIcon />), label: '更新日志' },
+    ] as const
+    return list.map(item => (
+      <div key={item.key} className="flex gap-1">
+        <Button
+          size="large"
+          icon={item.icon}
+          onClick={() => window.open(AppConstants[item.key])}
+          style={{
+            fontFamily: 'unset',
+            fontSize: '20px',
+            paddingLeft: 'auto',
+            paddingRight: 'auto',
+            width: '200px',
+          }}
+        >{item.label}</Button>
+        <Button
+          size="large"
+          icon={<CopyIcon />}
+          onClick={() => {
+            copyToClipboard(AppConstants[item.key])
+            showToast('已复制链接')
+          }}
+        />
+      </div>
+    ))
   }
   const resolveLog = useCallback(() => {
     const knockouts = frontlineLog.map(log => log.knockouts).flat()
@@ -815,11 +867,15 @@ export default function Home() {
     startOverlayEvents()
 
     if (process.env.NODE_ENV === 'development') {
+      ;(window as any).test_zone = (zone: number) => {
+        console.log('zone:', GameZonesMap.get(zone))
+      }
       ;(window as any).gen_demo_data = () => {
         const min = 60 * 1000
         setFrontlineLog([
           {
-            frontline: Frontline.secure,
+            zone: Frontline.seize,
+            result: 'win',
             start_time: Date.now(),
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -835,7 +891,8 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: Frontline.shatter,
+            result: 'lose',
             start_time: Date.now() + min*15,
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -846,7 +903,8 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: CrystalConflict.palaistra,
+            result: 'win',
             start_time: Date.now() + min*31,
             knockouts: [
               genDeath('其他玩家01', '星遁天诛'),
@@ -857,7 +915,8 @@ export default function Home() {
             ],
           },
           {
-            frontline: Frontline.secure,
+            zone: CrystalConflict.volcanic,
+            result: 'lose',
             start_time: Date.now() + min*48,
             knockouts: [
               genDeath('其他玩家01', '猛击'),
@@ -877,6 +936,18 @@ export default function Home() {
               genDeath('其他玩家03', '夜昏'),
               genDeath('其他玩家03', '夜昏'),
               genDeath('其他玩家03', '夜昏'),
+            ],
+          },
+          {
+            zone: CrystalConflict.castletown,
+            result: 'win',
+            start_time: Date.now() + min*31,
+            knockouts: [
+              genDeath('其他玩家01', '星遁天诛'),
+            ],
+            deaths: [
+              genDeath('其他玩家03', '天穹破碎'),
+              genDeath('其他玩家05', '天穹破碎'),
             ],
           },
         ])
@@ -903,12 +974,14 @@ export default function Home() {
   ])
 
   const lockSituationMsg = () => {
-    if (!onConflict && !frontline){
+    if (!onConflict && !zone){
       return '还未进入纷争前线'
     } else if (!onConflict) {
       return '正在等待战斗开始'
-    } else if (frontline === Frontline.shatter || frontline === Frontline.secure) {
-      return '暂不支持解析 ' + getFrontlineNames(frontline)[1] + ' 的战况数据'
+    } else if (zone === Frontline.shatter || zone === Frontline.secure) {
+      return '暂不支持解析 ' + getFrontlineNames(zone)[1] + ' 的战况数据'
+    } else if (Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
+      return '暂不支持解析 水晶冲突 的战况数据'
     }
     return false
   }
@@ -931,10 +1004,9 @@ export default function Home() {
             <div
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
-              style={{
-                background: activeTab === tab ? 'rgba(255,255,255,0.3)' : 'transparent',
-              }}
+              data-active={activeTab === tab}
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
+              hover:bg-gray-700 data-[active=true]:bg-white/30 transition-colors duration-200"
             >
               { tabPages[tab] }
             </div>
@@ -945,18 +1017,17 @@ export default function Home() {
         >
           {!collapsed && (
             <div
-              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
-              onClick={() => window.open('./config', '悬浮窗设置', 'width=800,height=600')}
+              className="text-[20px] px-2 py-1 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer text-shadow transition-colors duration-200"
+              onClick={() => window.open('./config')}
             >
               <IconFont name="setting-1" />
             </div>
           )}
           <div
-            className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow"
+            data-active={collapsed}
+            className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
+            hover:bg-gray-700 data-[active=true]:bg-white/30 transition-colors duration-200"
             onClick={() => setCollapsed(!collapsed)}
-            style={{
-              background: collapsed ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
-            }}
           >
             {collapsed ? <IconFont name="chevron-down" /> : <IconFont name="chevron-up" />}
           </div>
@@ -993,9 +1064,9 @@ export default function Home() {
               </div>
               <div className={PageStyle.title}>当前据点</div>
               {
-                (frontline === Frontline.shatter || frontline === Frontline.secure) && (
+                (zone === Frontline.shatter || zone === Frontline.secure) && (
                   <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
-                    暂不支持解析{ getFrontlineNames(frontline)[1] }的当前据点数据。
+                    暂不支持解析{ getFrontlineNames(zone)[1] }的当前据点数据。
                   </div>
                 )
               }
@@ -1039,8 +1110,8 @@ export default function Home() {
                 )
               }
               {
-                (!!getKnockouts().length && (!onConflict && !frontline)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                (!!getKnockouts().length && (!onConflict && !zone)) && (
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1075,8 +1146,8 @@ export default function Home() {
                 )
               }
               {
-                (!!getDeaths().length && (!onConflict && !frontline)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                (!!getDeaths().length && (!onConflict && !zone)) && (
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1112,8 +1183,8 @@ export default function Home() {
                 )
               }
               {
-                (!!goodboys.length && (!onConflict && !frontline)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                (!!goodboys.length && (!onConflict && !zone)) && (
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1148,8 +1219,8 @@ export default function Home() {
                 )
               }
               {
-                (!!badboys.length && (!onConflict && !frontline)) && (
-                  <AlertCard msg="此处展示的是上一场的记录，下次进入战场时会被清除。" />
+                (!!badboys.length && (!onConflict && !zone)) && (
+                  <AlertCard msg="此处展示的是上一场的记录，下次进入对战时会被清除。" />
                 )
               }
               {
@@ -1246,9 +1317,12 @@ export default function Home() {
           {/* 关于 */}
           {activeTab === 'about' && (
             <div className={PageStyle.panel}>
-              <div className={PageStyle.title}>当前版本：{process.env.APP_VERSION}</div>
+              <div className={PageStyle.title}>
+                <span>当前版本：</span>
+                <span className="text-orange-700 font-bold">{process.env.APP_VERSION}</span>
+              </div>
               <div
-                className={PageStyle.title}
+                className={PageStyle.content}
                 style={{
                   flexDirection: 'column',
                   alignItems: 'start',
@@ -1259,26 +1333,49 @@ export default function Home() {
                   !!appNewVersion ? (
                     <>
                       <div>检测到新版本：{appNewVersion}</div>
-                      <div
-                        className="bg-green-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                      <Button
+                        size="large"
+                        theme="success"
+                        loading={checkingAppUpdate}
                         onClick={handleUpdateApp}
+                        style={{
+                          fontFamily: 'unset',
+                          fontSize: '20px',
+                          paddingLeft: '36px',
+                          paddingRight: '36px',
+                        }}
                       >
                         点此更新
-                      </div>
-                      <div className="text-red-600">※当前数据将会丢失。建议在战场外进行更新。</div>
+                      </Button>
+                      <div className="text-red-600">※当前数据和已记录的场次统计将会丢失。</div>
                     </>
                   ) : (
                     <>
                       <div>已是最新版本</div>
-                      <div
-                        className="bg-blue-400 text-white rounded border border-transparent px-12 py-1 text-[20px] cursor-pointer text-shadow"
+                      <Button
+                        size="large"
+                        theme="primary"
+                        loading={checkingAppUpdate}
                         onClick={handleCheckAppUpdate}
+                        style={{
+                          fontFamily: 'unset',
+                          fontSize: '20px',
+                          paddingLeft: '36px',
+                          paddingRight: '36px',
+                        }}
                       >
                         检查更新
-                      </div>
+                      </Button>
                     </>
                   )
                 }
+              </div>
+              <div className={PageStyle.title}>保持联系</div>
+              <div className={PageStyle.content}>
+                <div>点击左侧按钮来打开子窗口访问，或是点击右侧按钮复制链接。</div>
+                <div className="flex flex-col gap-1">
+                  { getConnectionButtons() }
+                </div>
               </div>
             </div>
           )}

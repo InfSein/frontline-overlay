@@ -25,6 +25,14 @@ const groups: ConfigGroup[] = [
         ],
         type: 'switch',
       },
+      {
+        key: 'auto_expand_when_enter_battlefield',
+        name: '进入对战时自动展开',
+        desc: [
+          '在对战开始时自动展开悬浮窗。',
+        ],
+        type: 'switch',
+      }
     ]
   },
   {

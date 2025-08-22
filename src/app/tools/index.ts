@@ -1,4 +1,4 @@
-import { AppVersionInfo, Frontline, GrandCompany } from '@/app/types'
+import { AppVersionInfo, CrystalConflict, Frontline, FrontlineResult, GrandCompany } from '@/app/types'
 
 export const deepCopy = <T>(obj: T): T => {
   try {
@@ -132,26 +132,54 @@ export const getGrandCompanyFlag = (gc: GrandCompany) => {
  * 获取纷争前线的名称信息
  * @returns [简称, 全称, 类型]
  */
-export const getFrontlineNames = (fl: Frontline) => {
+export const getFrontlineNames = (fl: Frontline | CrystalConflict) => {
   switch (fl) {
     case Frontline.secure: return ['阵地', '周边遗迹群', '阵地战'] as const
     case Frontline.seize: return ['尘封', '尘封秘岩', '争夺战'] as const
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
+    case CrystalConflict.palaistra: return ['学校', '角力学校', '水晶冲突'] as const
+    case CrystalConflict.cloudnine: return ['九霄', '九霄云上', '水晶冲突'] as const
+    case CrystalConflict.volcanic: return ['火山', '火山之心', '水晶冲突'] as const
+    case CrystalConflict.castletown: return ['大殿', '机关大殿', '水晶冲突'] as const
+    case CrystalConflict.redsands: return ['沙漠', '赤土红沙', '水晶冲突'] as const
   }
 }
 
-export const getFrontlineBackgroundColor = (fl: Frontline) => {
+export const getFrontlineForeColor = (fl: Frontline | CrystalConflict) => {
   switch (fl) {
-    case Frontline.secure: return '#942110' as const
-    case Frontline.seize: return '#9F9E44' as const
-    case Frontline.shatter: return '#285FB7' as const
-    case Frontline.naadam: return '#15803D' as const
-    default: throw new Error('Invalid remainder value')
+    case Frontline.shatter:
+    case CrystalConflict.redsands:
+      return 'black' as const
+    default: return undefined
+  }
+}
+export const getFrontlineBackgroundColor = (fl: Frontline | CrystalConflict) => {
+  switch (fl) {
+    case Frontline.secure: return '#776154' as const
+    case Frontline.seize: return '#44756A' as const
+    case Frontline.shatter: return '#F6F9F6' as const
+    case Frontline.naadam: return '#616D22' as const
+    case CrystalConflict.palaistra: return '#1E3743' as const
+    case CrystalConflict.cloudnine: return '#56849B' as const
+    case CrystalConflict.volcanic: return '#976E5A' as const
+    case CrystalConflict.castletown: return '#211B19' as const
+    case CrystalConflict.redsands: return '#EAC38C' as const
   }
 }
 
-export const getFrontlineBackground = (fl: Frontline) => {
+export const getFrontlineResultBackgroundColor = (result: FrontlineResult) => {
+  switch (result) {
+    case '1st': return '#FFD700'
+    case '2nd': return '#C0C0C0'
+    case '3rd': return '#CD7F32'
+    case 'win': return '#4CAF50'
+    case 'lose': return '#F44336'
+    default: return '#FFFFFF'
+  }
+}
+
+export const getFrontlineBackground = (fl: Frontline | CrystalConflict) => {
   return `./image/${fl}.webp`
 }
 
