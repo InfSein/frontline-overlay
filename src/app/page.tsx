@@ -16,7 +16,7 @@ import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants, PvPBattle, RivalWings } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -153,7 +153,7 @@ export default function Home() {
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
-  const [zone, setZone] = useState<Frontline | CrystalConflict | "">('')
+  const [zone, setZone] = useState<PvPBattle | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
@@ -341,7 +341,13 @@ export default function Home() {
     } else {
       if (zone) {
         let result = undefined
-        if (reactive.currFrontlineResult && Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
+        if (
+          reactive.currFrontlineResult
+          && (
+            Object.values(CrystalConflict).includes(zone as CrystalConflict)
+            || zone === RivalWings.hiddengorge
+          )
+        ) {
           result = reactive.currFrontlineResult
           reactive.currFrontlineResult = undefined
         }
@@ -497,12 +503,16 @@ export default function Home() {
       }
     }
 
-    const validChannels = ['0839', '0840', '083E']
+    const validChannels = ['0039', '0839', '0840', '083E']
     if (msgType !== '00' || !validChannels.includes(msgChannel)) return
     if (!msg) return
 
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
-    if (matchGc || msg === '战斗即将开始！') {
+    if (
+      matchGc
+      || msg === '战斗即将开始！'
+      || (zone === RivalWings.hiddengorge && msg === "进入了对战区域。 当前职业为可以进行对战的特职时， 状态参数和热键栏会被切换为对战专用版。")
+    ) {
       if (matchGc && matchGc[1]) {
         const _gc = parseGc(matchGc[1])
         setGc(_gc)
@@ -512,9 +522,11 @@ export default function Home() {
       deaths.length = 0
       goodboys.length = 0
       badboys.length = 0
+
       if (zone === Frontline.seize) setPtMax(4)
       else if (zone === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
+
       setCurrFlStartTime(Date.now())
       if (appConfig.auto_expand_when_enter_battlefield) {
         setCollapsed(false)
@@ -681,6 +693,17 @@ export default function Home() {
       if (msg === '距离战斗开始已经过15分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(2)
         setDummy(d => d + 1)
+      }
+    }
+    else if (zone === RivalWings.hiddengorge) {
+      // 隐塞
+      const matchRewardSeriesExp = msg.match(/获得了([\d,]+)点系列赛经验值。/)
+      if (matchRewardSeriesExp && matchRewardSeriesExp[1]) {
+        if (matchRewardSeriesExp[1] === '1,250') {
+          reactive.currFrontlineResult = 'win'
+        } else if (matchRewardSeriesExp[1] === '750') {
+          reactive.currFrontlineResult = 'lose'
+        }
       }
     }
     else {
@@ -975,11 +998,13 @@ export default function Home() {
 
   const lockSituationMsg = () => {
     if (!onConflict && !zone){
-      return '还未进入纷争前线'
+      return '还未进入对战'
     } else if (!onConflict) {
       return '正在等待战斗开始'
     } else if (zone === Frontline.shatter || zone === Frontline.secure) {
       return '暂不支持解析 ' + getFrontlineNames(zone)[1] + ' 的战况数据'
+    } else if (zone === RivalWings.hiddengorge) {
+      return '暂不支持解析 烈羽争锋 的战况数据'
     } else if (Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
       return '暂不支持解析 水晶冲突 的战况数据'
     }
