@@ -99,6 +99,7 @@ const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
 const reactive = {
   currFrontlineResult: undefined as FrontlineResult | undefined,
+  currFrontlineStartTime: 0,
 }
 
 const parseGc = (gc_name: string) => {
@@ -158,7 +159,6 @@ export default function Home() {
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
   const [frontlineLog, setFrontlineLog] = useState<FrontlineLog[]>([])
-  const [currFlStartTime, setCurrFlStartTime] = useState<number>(Date.now())
 
   const tabPages = {
     situation: '战况',
@@ -354,11 +354,14 @@ export default function Home() {
         const log = deepCopy<FrontlineLog>({
           zone: zone,
           result,
-          start_time: currFlStartTime,
+          start_time: reactive.currFrontlineStartTime,
           knockouts: getKnockouts(),
           deaths: getDeaths()
         })
         setFrontlineLog(prev => [...prev, log])
+        if (appConfig.auto_collapse_when_leave_battlefield) {
+          setCollapsed(true)
+        }
       }
       setOnConflict(false); setZone(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
@@ -371,7 +374,8 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    zone, currFlStartTime, getKnockouts, getDeaths
+    zone, getKnockouts, getDeaths,
+    appConfig.auto_collapse_when_leave_battlefield,
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -527,7 +531,7 @@ export default function Home() {
       else if (zone === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
 
-      setCurrFlStartTime(Date.now())
+      reactive.currFrontlineStartTime = Date.now()
       if (appConfig.auto_expand_when_enter_battlefield) {
         setCollapsed(false)
       }
