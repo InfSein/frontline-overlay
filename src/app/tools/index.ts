@@ -1,4 +1,4 @@
-import { AppVersionInfo, CrystalConflict, Frontline, FrontlineResult, GrandCompany } from '@/app/types'
+import { AppVersionInfo, CrystalConflict, Frontline, FrontlineResult, GrandCompany, PvPBattle, RivalWings } from '@/app/types'
 
 export const deepCopy = <T>(obj: T): T => {
   try {
@@ -132,12 +132,13 @@ export const getGrandCompanyFlag = (gc: GrandCompany) => {
  * 获取纷争前线的名称信息
  * @returns [简称, 全称, 类型]
  */
-export const getFrontlineNames = (fl: Frontline | CrystalConflict) => {
+export const getFrontlineNames = (fl: PvPBattle) => {
   switch (fl) {
     case Frontline.secure: return ['阵地', '周边遗迹群', '阵地战'] as const
     case Frontline.seize: return ['尘封', '尘封秘岩', '争夺战'] as const
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
+    case RivalWings.hiddengorge: return ['隐塞', '隐塞', '机动战'] as const
     case CrystalConflict.palaistra: return ['学校', '角力学校', '水晶冲突'] as const
     case CrystalConflict.cloudnine: return ['九霄', '九霄云上', '水晶冲突'] as const
     case CrystalConflict.volcanic: return ['火山', '火山之心', '水晶冲突'] as const
@@ -146,7 +147,7 @@ export const getFrontlineNames = (fl: Frontline | CrystalConflict) => {
   }
 }
 
-export const getFrontlineForeColor = (fl: Frontline | CrystalConflict) => {
+export const getFrontlineForeColor = (fl: PvPBattle) => {
   switch (fl) {
     case Frontline.shatter:
     case CrystalConflict.redsands:
@@ -154,12 +155,13 @@ export const getFrontlineForeColor = (fl: Frontline | CrystalConflict) => {
     default: return undefined
   }
 }
-export const getFrontlineBackgroundColor = (fl: Frontline | CrystalConflict) => {
+export const getFrontlineBackgroundColor = (fl: PvPBattle) => {
   switch (fl) {
     case Frontline.secure: return '#776154' as const
     case Frontline.seize: return '#44756A' as const
     case Frontline.shatter: return '#F6F9F6' as const
     case Frontline.naadam: return '#616D22' as const
+    case RivalWings.hiddengorge: return '#946141' as const
     case CrystalConflict.palaistra: return '#1E3743' as const
     case CrystalConflict.cloudnine: return '#56849B' as const
     case CrystalConflict.volcanic: return '#976E5A' as const
@@ -179,7 +181,7 @@ export const getFrontlineResultBackgroundColor = (result: FrontlineResult) => {
   }
 }
 
-export const getFrontlineBackground = (fl: Frontline | CrystalConflict) => {
+export const getFrontlineBackground = (fl: PvPBattle) => {
   return `./image/${fl}.webp`
 }
 

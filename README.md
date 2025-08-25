@@ -1,12 +1,14 @@
-# FFXIV 纷争前线悬浮窗
+# FFXIV PvP悬浮窗
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.1-000?logo=next.js)
 ![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4.3-06b6d4?logo=tailwindcss)
 
-专为纷争前线制作的 ACT OverlayPlugin 悬浮窗插件。
+专为 最终幻想XIV PvP 玩法制作的 ACT OverlayPlugin 悬浮窗插件。
 
-在 `v1.3.0` 之后也支持解析水晶冲突。
+一开始只支持纷争前线，所以叫 <code>**frontline**-overlay</code> 。<br>
+在 `v1.3.0` 之后支持解析水晶冲突。<br>
+在 `v1.4.0` 之后支持解析烈羽争锋。
 
 > [!TIP]\
 > 仅为国服简体中文客户端设计。<br>
@@ -15,7 +17,7 @@
 ## 工作进度
 
 这里的进度指的是「战况」面板解析的开发进度。<br>
-「击倒」「阵亡」「好人」「坏人」「统计」面板已经支持解析全部的纷争前线／水晶冲突。
+「击倒」「阵亡」「好人」「坏人」「统计」面板已经支持解析全部的纷争前线／烈羽争锋／水晶冲突。
 
 |          ＼          |          开发         |          测试         |
 | :------------------: | :-------------------: | :-------------------: |
@@ -23,6 +25,7 @@
 |   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
 |     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
 |   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
+|        烈羽争锋        | :black_square_button: | :black_square_button: |
 |        水晶冲突        | :black_square_button: | :black_square_button: |
 
 ## 主要功能
