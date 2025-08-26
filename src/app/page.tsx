@@ -388,6 +388,7 @@ export default function Home() {
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
+    // 处理战斗日志
     if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
@@ -507,10 +508,12 @@ export default function Home() {
       }
     }
 
+    // 过滤无关频道
     const validChannels = ['0039', '0839', '0840', '083E']
     if (msgType !== '00' || !validChannels.includes(msgChannel)) return
     if (!msg) return
 
+    // 处理战斗开始信息
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
     if (
       matchGc
@@ -540,6 +543,7 @@ export default function Home() {
     
     if (!onConflict && !zone) return
 
+    // 处理刷点信息
     if (zone === Frontline.seize) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [160, 4]
@@ -698,6 +702,11 @@ export default function Home() {
         setPtMax(2)
         setDummy(d => d + 1)
       }
+    }
+
+    // 处理结算信息，尝试获取比赛结果
+    if (Object.values(Frontline).includes(zone as Frontline)) {
+
     }
     else if (zone === RivalWings.hiddengorge) {
       // 隐塞
