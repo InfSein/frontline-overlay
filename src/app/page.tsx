@@ -16,7 +16,7 @@ import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
 import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
-import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants } from './types'
+import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants, PvPBattle, RivalWings } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
 import {
   getGrandCompanyName,
@@ -99,6 +99,7 @@ const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
 const reactive = {
   currFrontlineResult: undefined as FrontlineResult | undefined,
+  currFrontlineStartTime: 0,
 }
 
 const parseGc = (gc_name: string) => {
@@ -153,12 +154,11 @@ export default function Home() {
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
   const [onConflict, setOnConflict] = useState<boolean>(false)
-  const [zone, setZone] = useState<Frontline | CrystalConflict | "">('')
+  const [zone, setZone] = useState<PvPBattle | "">('')
   const [gc, setGc] = useState<GrandCompany | "">('')
   const [ptMax, setPtMax] = useState<number>(0)
   const [dummy, setDummy] = useState(0) // 手动刷新
   const [frontlineLog, setFrontlineLog] = useState<FrontlineLog[]>([])
-  const [currFlStartTime, setCurrFlStartTime] = useState<number>(Date.now())
 
   const tabPages = {
     situation: '战况',
@@ -341,18 +341,27 @@ export default function Home() {
     } else {
       if (zone) {
         let result = undefined
-        if (reactive.currFrontlineResult && Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
+        if (
+          reactive.currFrontlineResult
+          && (
+            Object.values(CrystalConflict).includes(zone as CrystalConflict)
+            || zone === RivalWings.hiddengorge
+          )
+        ) {
           result = reactive.currFrontlineResult
           reactive.currFrontlineResult = undefined
         }
         const log = deepCopy<FrontlineLog>({
           zone: zone,
           result,
-          start_time: currFlStartTime,
+          start_time: reactive.currFrontlineStartTime,
           knockouts: getKnockouts(),
           deaths: getDeaths()
         })
         setFrontlineLog(prev => [...prev, log])
+        if (appConfig.auto_collapse_when_leave_battlefield) {
+          setCollapsed(true)
+        }
       }
       setOnConflict(false); setZone(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
@@ -365,7 +374,8 @@ export default function Home() {
       setDummy(0)
     }
   }, [
-    zone, currFlStartTime, getKnockouts, getDeaths
+    zone, getKnockouts, getDeaths,
+    appConfig.auto_collapse_when_leave_battlefield,
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
     setPlayerId(data.charID.toString(16).toUpperCase())
@@ -378,6 +388,7 @@ export default function Home() {
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
+    // 处理战斗日志
     if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
@@ -394,7 +405,17 @@ export default function Home() {
         const victimId = data.line[6]
         const victimName = data.line[7] || '???'
 
-        const isValidAction = data.line[8] !== '0'
+        let isValidAction = data.line[8] !== '0'
+        if (hitActionId === '72D3'/*默者的夜曲*/) {
+          isValidAction = data.line[10] !== '0'
+        }
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
+            '\ndetail:', data.rawLine
+          )
+        }
 
         if (isValidAction && perpetratorId && victimId) {
           const { hit, damage } = getActionDamageFromLogLine(data.line)
@@ -413,7 +434,8 @@ export default function Home() {
             // 记录好人
             const goodActions = [
               '718A'/*卫护*/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
-              'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
+              'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/,
+              '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
               'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '72F7'/*闭式舞姿*/,
               '73E6'/*守护之光*/, '7344'/*命水*/,
             ]
@@ -441,6 +463,8 @@ export default function Home() {
             // 记录坏人
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
+              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/,
+              'A226'/*昏沉*/,
             ]
             const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
@@ -497,12 +521,18 @@ export default function Home() {
       }
     }
 
-    const validChannels = ['0839', '0840', '083E']
+    // 过滤无关频道
+    const validChannels = ['0039', '0839', '0840', '083E']
     if (msgType !== '00' || !validChannels.includes(msgChannel)) return
     if (!msg) return
 
+    // 处理战斗开始信息
     const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
-    if (matchGc || msg === '战斗即将开始！') {
+    if (
+      matchGc
+      || msg === '战斗即将开始！'
+      || (zone === RivalWings.hiddengorge && msg === "进入了对战区域。 当前职业为可以进行对战的特职时， 状态参数和热键栏会被切换为对战专用版。")
+    ) {
       if (matchGc && matchGc[1]) {
         const _gc = parseGc(matchGc[1])
         setGc(_gc)
@@ -512,10 +542,12 @@ export default function Home() {
       deaths.length = 0
       goodboys.length = 0
       badboys.length = 0
+
       if (zone === Frontline.seize) setPtMax(4)
       else if (zone === Frontline.naadam) setPtMax(6)
       else setPtMax(0)
-      setCurrFlStartTime(Date.now())
+
+      reactive.currFrontlineStartTime = Date.now()
       if (appConfig.auto_expand_when_enter_battlefield) {
         setCollapsed(false)
       }
@@ -524,6 +556,7 @@ export default function Home() {
     
     if (!onConflict && !zone) return
 
+    // 处理刷点信息
     if (zone === Frontline.seize) {
       const getFp = (ptLv: string) => {
         if (ptLv === 'S') return [160, 4]
@@ -681,6 +714,22 @@ export default function Home() {
       if (msg === '距离战斗开始已经过15分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(2)
         setDummy(d => d + 1)
+      }
+    }
+
+    // 处理结算信息，尝试获取比赛结果
+    if (Object.values(Frontline).includes(zone as Frontline)) {
+
+    }
+    else if (zone === RivalWings.hiddengorge) {
+      // 隐塞
+      const matchRewardSeriesExp = msg.match(/获得了([\d,]+)点系列赛经验值。/)
+      if (matchRewardSeriesExp && matchRewardSeriesExp[1]) {
+        if (matchRewardSeriesExp[1] === '1,250') {
+          reactive.currFrontlineResult = 'win'
+        } else if (matchRewardSeriesExp[1] === '750') {
+          reactive.currFrontlineResult = 'lose'
+        }
       }
     }
     else {
@@ -975,11 +1024,13 @@ export default function Home() {
 
   const lockSituationMsg = () => {
     if (!onConflict && !zone){
-      return '还未进入纷争前线'
+      return '还未进入对战'
     } else if (!onConflict) {
       return '正在等待战斗开始'
     } else if (zone === Frontline.shatter || zone === Frontline.secure) {
       return '暂不支持解析 ' + getFrontlineNames(zone)[1] + ' 的战况数据'
+    } else if (zone === RivalWings.hiddengorge) {
+      return '暂不支持解析 烈羽争锋 的战况数据'
     } else if (Object.values(CrystalConflict).includes(zone as CrystalConflict)) {
       return '暂不支持解析 水晶冲突 的战况数据'
     }

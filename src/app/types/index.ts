@@ -25,6 +25,7 @@ export enum GrandCompany {
   immoflame = "immoflame",
 }
 
+export type PvPBattle = Frontline | RivalWings | CrystalConflict
 export enum Frontline {
   /** 周边遗迹群（阵地战） */
   secure = "secure",
@@ -34,6 +35,10 @@ export enum Frontline {
   shatter = "shatter",
   /** 昂萨哈凯尔（竞争战） */
   naadam = "naadam",
+}
+export enum RivalWings {
+  /** 隐塞（机动战） */
+  hiddengorge = "hiddengorge",
 }
 export enum CrystalConflict {
   /** 角力学校 */
@@ -59,6 +64,10 @@ const GameZones = {
     /** 昂萨哈凯尔（竞争战） */
     naadam: 888,
   },
+  rivalWings: {
+    /** 隐塞（机动战） */
+    hiddengorge: 791,
+  },
   crystalConflict: {
     /** 角力学校 */
     palaistra: [1032, 1058],
@@ -72,12 +81,15 @@ const GameZones = {
     redsands: [1138, 1139],
   }
 }
-export const GameZonesMap = new Map<number, Frontline | CrystalConflict>([
+export const GameZonesMap = new Map<number, PvPBattle>([
   // frontline
   [GameZones.frontline.secure, Frontline.secure],
   [GameZones.frontline.seize, Frontline.seize],
   [GameZones.frontline.shatter, Frontline.shatter],
   [GameZones.frontline.naadam, Frontline.naadam],
+
+  // rivalWings
+  [GameZones.rivalWings.hiddengorge, RivalWings.hiddengorge],
 
   // crystalConflict
   ...Object.entries(GameZones.crystalConflict).flatMap(([key, ids]) =>
@@ -89,7 +101,7 @@ export const GameZonesMap = new Map<number, Frontline | CrystalConflict>([
 
 export type FrontlineResult = "1st" | "2nd" | "3rd" | "win" | "lose"
 export interface FrontlineLog {
-  zone: Frontline | CrystalConflict
+  zone: PvPBattle
   result?: FrontlineResult
   start_time: number
   knockouts: DeathInfo[]

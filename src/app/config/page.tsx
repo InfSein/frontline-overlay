@@ -32,7 +32,16 @@ const groups: ConfigGroup[] = [
           '在对战开始时自动展开悬浮窗。',
         ],
         type: 'switch',
-      }
+      },
+      {
+        key: 'auto_collapse_when_leave_battlefield',
+        name: '离开对战时自动折叠',
+        desc: [
+          '在离开对战区域时自动折叠悬浮窗。',
+          '初次加载或是在PvE区域内切换地图时不会触发。',
+        ],
+        type: 'switch',
+      },
     ]
   },
   {
