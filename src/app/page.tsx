@@ -405,7 +405,17 @@ export default function Home() {
         const victimId = data.line[6]
         const victimName = data.line[7] || '???'
 
-        const isValidAction = data.line[8] !== '0'
+        let isValidAction = data.line[8] !== '0'
+        if (hitActionId === '72D3'/*默者的夜曲*/) {
+          isValidAction = data.line[10] !== '0'
+        }
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
+            '\ndetail:', data.rawLine
+          )
+        }
 
         if (isValidAction && perpetratorId && victimId) {
           const { hit, damage } = getActionDamageFromLogLine(data.line)
@@ -424,7 +434,8 @@ export default function Home() {
             // 记录好人
             const goodActions = [
               '718A'/*卫护*/, '71A5'/*至黑之夜*/, 'A1E3'/*刚玉之心*/,
-              'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/, '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
+              'A8F7'/*疗愈*/, '7228'/*救疗*/, '722B'/*水流幕*/, '7230'/*鼓舞激励之策*/,
+              '723B'/*吉星相位*/, '723F'/*吉星相位2*/, '7250'/*心关*/,
               'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '72F7'/*闭式舞姿*/,
               '73E6'/*守护之光*/, '7344'/*命水*/,
             ]
@@ -452,6 +463,8 @@ export default function Home() {
             // 记录坏人
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
+              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/,
+              'A226'/*昏沉*/,
             ]
             const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
