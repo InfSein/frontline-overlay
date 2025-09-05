@@ -66,11 +66,11 @@ export default function Preference(props: {
 const labelStyle = {
   display: 'flex',
   flexDirection: 'column' as const,
-  gap: '4px',
+  gap: '0.25rem',
 };
 
 const inputStyle = {
-  padding: '4px',
+  padding: '0.25rem',
   borderRadius: '4px',
   border: 'none',
 };

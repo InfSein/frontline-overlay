@@ -33,13 +33,13 @@ const FlogCard : React.FC<FlogCardProps> = ({
       }}
     >
       <div>
-        <div className="flex items-center text-[24px] leading-[1] font-medium text-white text-shadow">
+        <div className="flex items-center text-[1.5rem] leading-[1] font-medium text-white text-shadow">
           { getFrontlineNames(frontlineLog.zone)[1] }
           {
             frontlineLog.result &&
             <span
               data-color={frontlineLog.result === 'win' ? 'green' : 'red'}
-              className="text-[16px] leading-[1] font-normal p-1 text-white ml-1 rounded"
+              className="text-[1rem] leading-[1] font-normal p-1 text-white ml-1 rounded"
               style={{
                 backgroundColor: getFrontlineResultBackgroundColor(frontlineLog.result)
               }}
@@ -48,13 +48,13 @@ const FlogCard : React.FC<FlogCardProps> = ({
             </span>
           }
         </div>
-        <p className="text-[16px] text-[#cad5e2] leading-[1] m-0 mr-1 text-shadow">
+        <p className="text-[1rem] text-[#cad5e2] leading-[1] m-0 mr-1 text-shadow">
           { formatTimestamp(frontlineLog.start_time) }
         </p>
       </div>
-      <div className="ml-auto mr-4 flex items-center gap-1 text-[24px] font-bold">
-        <div className="w-[72px] text-right">{ frontlineLog.knockouts.length }</div>
-        <div className="w-[72px] text-right">{ frontlineLog.deaths.length }</div>
+      <div className="ml-auto mr-4 flex items-center gap-1 text-[1.5rem] font-bold">
+        <div className="w-[4.5rem] text-right">{ frontlineLog.knockouts.length }</div>
+        <div className="w-[4.5rem] text-right">{ frontlineLog.deaths.length }</div>
       </div>
     </div>
   )

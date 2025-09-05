@@ -16,8 +16,8 @@ body {
  * modified from https://blog.csdn.net/weixin_43972992/article/details/107898707
  */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 0.3125rem;
+  height: 0.3125rem;
   background-color: #FFF;
 }
 ::-webkit-scrollbar-track {
