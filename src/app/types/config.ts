@@ -3,6 +3,8 @@ import { AppTextUi } from "."
 
 export interface AppConfig {
   // #region 通用
+  /** 悬浮窗缩放 */
+  app_scale: number
   /** 启动时自动折叠 */
   auto_collapse_when_launch: boolean
   /** 进入对战时自动展开 */
@@ -17,6 +19,7 @@ export interface AppConfig {
 }
 
 const defaultAppConfig : AppConfig = {
+  app_scale: 1,
   auto_collapse_when_launch: false,
   auto_expand_when_enter_battlefield: false,
   auto_collapse_when_leave_battlefield: false,
@@ -39,7 +42,7 @@ export interface ConfigGroup {
   icon: string
   items: ConfigItem[]
 }
-export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSelect
+export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSliderNumber | ConfigItemSelect
 interface ConfigItemBase {
   key: keyof AppConfig
   name: string
@@ -53,6 +56,12 @@ interface ConfigItemString extends ConfigItemBase {
 }
 interface ConfigItemNumber extends ConfigItemBase {
   type: "number"
+}
+interface ConfigItemSliderNumber extends ConfigItemBase {
+  type: "slider-number"
+  min: number
+  max: number
+  step: number
 }
 interface ConfigItemSelect extends ConfigItemBase {
   type: "select"

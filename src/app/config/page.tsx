@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { Button, Switch, Input, InputNumber, Select, Card, Divider } from 'tdesign-react'
+import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider } from 'tdesign-react'
 import {
   IconFont,
   SaveIcon,
@@ -16,6 +16,16 @@ const groups: ConfigGroup[] = [
     name: '通用',
     icon: 'system-setting',
     items: [
+      {
+        key: 'app_scale',
+        name: '悬浮窗缩放',
+        desc: [
+          '调整悬浮窗的显示大小倍数。',
+          '当你使用infsein.github.io提供的其他悬浮窗时，请使用此处的设置而非ACT的设置来调整缩放。',
+        ],
+        type: 'slider-number',
+        min: 0.5, max: 2, step: 0.1,
+      },
       {
         key: 'auto_collapse_when_launch',
         name: '启动时自动折叠',
@@ -121,6 +131,16 @@ export default function ConfigPage() {
             onChange={(v) => handleChange(item.key, v)}
             min={0}
             className="w-40"
+          />
+        )
+      case "slider-number":
+        return (
+          <Slider
+            value={(formConfig as any)[item.key]}
+            onChange={(v) => handleChange(item.key, v)}
+            min={item.min} max={item.max}
+            step={item.step}
+            className="min-w-[9rem]"
           />
         )
       case "select":
