@@ -2,8 +2,9 @@
 
 ## v1.5.0 (2025-09-07)
 * 增加设置项“悬浮窗缩放” <br>
-  当你使用了infsein.github.io提供的其他悬浮窗(如 [pvp-lb-monitor](https://github.com/InfSein/pvp-lb-monitor) )时，请使用 悬浮窗提供的设置项而非Overlay->高级中的设置 来调整缩放。
-* 坏人统计中增加对 机工“空气锚” 的监控
+  当你使用了infsein.github.io提供的其他悬浮窗(如 [pvp-lb-monitor](https://github.com/InfSein/pvp-lb-monitor) )时 <br>
+  请使用 悬浮窗提供的设置项而非Overlay->高级中的设置 来调整缩放。
+* 坏人统计中增加对 机工“空气锚” 和 诗人“爆破箭” 的监控
 
 ## v1.4.0 (2025-08-27)
 * 增加对烈羽争锋的解析 (暂不包括“战况”解析)
