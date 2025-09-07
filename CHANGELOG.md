@@ -1,6 +1,6 @@
 # 更新日志
 
-## v1.5.0 (2025-09-??)
+## v1.5.0 (2025-09-07)
 * 增加设置项“悬浮窗缩放”
   当你使用infsein.github.io提供的其他悬浮窗(比如[pvp-lb-monitor](https://github.com/InfSein/pvp-lb-monitor))时，请使用自带的缩放来调整缩放。
   ACT似乎有bug，使用多个同域名悬浮窗时缩放设置初次启动会不生效。
