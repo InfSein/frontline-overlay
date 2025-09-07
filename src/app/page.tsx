@@ -392,7 +392,7 @@ export default function Home() {
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
     // 处理战斗日志
-    if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
+    if (onConflict || zone || true) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
         const charId = data.line[2]
@@ -466,11 +466,14 @@ export default function Home() {
             // 记录坏人
             const badActions = [
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/,
-              '72E7'/*魔弹射手*/, '空气锚',
-              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '爆破箭',
+              '72E7'/*魔弹射手*/, '72DF'/*空气锚*/,
+              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '72D2'/*爆破箭*/,
               'A226'/*昏沉*/,
             ]
-            const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
+            const mustHit = [
+              '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
+              '72DF'/*空气锚*/, '72D2'/*爆破箭*/,
+            ]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true

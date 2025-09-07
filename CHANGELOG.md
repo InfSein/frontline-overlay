@@ -1,5 +1,10 @@
 # 更新日志
 
+## v1.5.1 (2025-09-??)
+* 修复坏人统计会重复地记录以下技能的问题
+  - 机工“空气锚”
+  - 诗人“爆破箭”
+
 ## v1.5.0 (2025-09-07)
 * 增加设置项“悬浮窗缩放” <br>
   当你使用了infsein.github.io提供的其他悬浮窗(如 [pvp-lb-monitor](https://github.com/InfSein/pvp-lb-monitor) )时 <br>
