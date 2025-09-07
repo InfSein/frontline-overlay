@@ -22,8 +22,8 @@ export default function GcCard({
 
   const containerStyle: React.CSSProperties = {
     //width: '100%',
-    padding: '8px',
-    gap: '4px',
+    padding: '0.5rem',
+    gap: '0.25rem',
     borderRadius: '4px',
     boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
     display: 'flex',
@@ -39,7 +39,7 @@ export default function GcCard({
     <div style={containerStyle}>
       <div>
         <div
-          className="text-[28px] leading-[1.5] font-medium text-white"
+          className="text-[1.75rem] leading-[1.5] font-medium text-white"
           style={{ textShadow: '1px 1px 2px black' }}
         >
           {getGrandCompanyName(gc)}
@@ -48,7 +48,7 @@ export default function GcCard({
           {me ? '⭐我方' : '　敌方'}
         </p>
       </div>
-      <div className="ml-auto mr-1 text-[42px] font-bold text-white">
+      <div className="ml-auto mr-1 text-[2.625rem] font-bold text-white">
         {floatPoints}
       </div>
     </div>

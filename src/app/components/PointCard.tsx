@@ -41,8 +41,8 @@ export default function GcCard({
         className="absolute left-0 top-0 h-full opacity-30 z-0 transition-all pointer-events-none"
         style={{ width: `${progress}%`, backgroundColor: color }}
       />
-      <div className="relative z-10 px-1 flex items-center w-full text-[20px] text-white">
-        <div className="text-[22px]">
+      <div className="relative z-10 px-1 flex items-center w-full text-[1.25rem] text-white">
+        <div className="text-[1.375rem]">
           <span className="font-bold">{ptLv}</span>
           <span>　{ptName}</span>
         </div>

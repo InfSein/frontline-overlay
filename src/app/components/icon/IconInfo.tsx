@@ -8,7 +8,7 @@ interface IconInfoProps {
 
 const IconInfo : React.FC<IconInfoProps> = ({
   color = 'rgb(56, 137, 197)',
-  size = '20px',
+  size = '1.25rem',
   className = '',
 }) => {
   return (

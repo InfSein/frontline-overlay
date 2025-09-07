@@ -372,6 +372,9 @@ export default function Home() {
       prePoints.length = 0
       playerMap = {}; summonMap = {}; playerLasthitMap = {}
       setDummy(0)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Zone] ', data.zoneID, ' / ', data.zoneName)
+      }
     }
   }, [
     zone, getKnockouts, getDeaths,
@@ -462,8 +465,9 @@ export default function Home() {
             }
             // 记录坏人
             const badActions = [
-              'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
-              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/,
+              'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/,
+              '72E7'/*魔弹射手*/, '空气锚',
+              '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '爆破箭',
               'A226'/*昏沉*/,
             ]
             const mustHit = ['732D'/*陨石冲击*/, '72E7'/*魔弹射手*/]
@@ -808,10 +812,10 @@ export default function Home() {
           onClick={() => window.open(AppConstants[item.key])}
           style={{
             fontFamily: 'unset',
-            fontSize: '20px',
+            fontSize: '1.25rem',
             paddingLeft: 'auto',
             paddingRight: 'auto',
-            width: '200px',
+            width: '12.5rem',
           }}
         >{item.label}</Button>
         <Button
@@ -1056,7 +1060,7 @@ export default function Home() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               data-active={activeTab === tab}
-              className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
+              className="text-[1.25rem] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
               hover:bg-gray-700 data-[active=true]:bg-white/30 transition-colors duration-200"
             >
               { tabPages[tab] }
@@ -1068,7 +1072,7 @@ export default function Home() {
         >
           {!collapsed && (
             <div
-              className="text-[20px] px-2 py-1 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer text-shadow transition-colors duration-200"
+              className="text-[1.25rem] px-2 py-1 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer text-shadow transition-colors duration-200"
               onClick={() => window.open('./config')}
             >
               <IconFont name="setting-1" />
@@ -1076,7 +1080,7 @@ export default function Home() {
           )}
           <div
             data-active={collapsed}
-            className="text-[20px] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
+            className="text-[1.25rem] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
             hover:bg-gray-700 data-[active=true]:bg-white/30 transition-colors duration-200"
             onClick={() => setCollapsed(!collapsed)}
           >
@@ -1116,7 +1120,7 @@ export default function Home() {
               <div className={PageStyle.title}>当前据点</div>
               {
                 (zone === Frontline.shatter || zone === Frontline.secure) && (
-                  <div className="w-full text-[20px] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
+                  <div className="w-full text-[1.25rem] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
                     暂不支持解析{ getFrontlineNames(zone)[1] }的当前据点数据。
                   </div>
                 )
@@ -1308,8 +1312,8 @@ export default function Home() {
               <div className={PageStyle.title}>
                 参战统计
                 <div className="ml-auto mr-5 flex items-center gap-1">
-                  <div className="w-[72px] text-right">K</div>
-                  <div className="w-[72px] text-right">D</div>
+                  <div className="w-[4.5rem] text-right">K</div>
+                  <div className="w-[4.5rem] text-right">D</div>
                 </div>
               </div>
               {
@@ -1391,9 +1395,9 @@ export default function Home() {
                         onClick={handleUpdateApp}
                         style={{
                           fontFamily: 'unset',
-                          fontSize: '20px',
-                          paddingLeft: '36px',
-                          paddingRight: '36px',
+                          fontSize: '1.25rem',
+                          paddingLeft: '2.25rem',
+                          paddingRight: '2.25rem',
                         }}
                       >
                         点此更新
@@ -1410,9 +1414,9 @@ export default function Home() {
                         onClick={handleCheckAppUpdate}
                         style={{
                           fontFamily: 'unset',
-                          fontSize: '20px',
-                          paddingLeft: '36px',
-                          paddingRight: '36px',
+                          fontSize: '1.25rem',
+                          paddingLeft: '2.25rem',
+                          paddingRight: '2.25rem',
                         }}
                       >
                         检查更新

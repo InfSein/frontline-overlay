@@ -126,7 +126,7 @@ export default function CalendarTab() {
         }}
       >
         <div className="ml-auto">
-          <div className="text-[28px] leading-[1.5] font-medium text-white text-shadow">
+          <div className="text-[1.75rem] leading-[1.5] font-medium text-white text-shadow">
             { getFrontline(remainder)[1] }
           </div>
           <p className="text-[#cad5e2] m-0 mr-1 text-right">
@@ -135,7 +135,7 @@ export default function CalendarTab() {
         </div>
       </div>
       <div className={PageStyle.title}>未来战场</div>
-      <div className="flex flex-col gap-[2px] text-[18px]">
+      <div className="flex flex-col gap-0.5 text-[1.125rem]">
         {
           showFuture.map(val => {
             const rm = (remainder + val + 1) % 4
