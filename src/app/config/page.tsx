@@ -21,7 +21,7 @@ const groups: ConfigGroup[] = [
         name: '悬浮窗缩放',
         desc: [
           '调整悬浮窗的显示大小倍数。',
-          '当你使用infsein.github.io提供的其他悬浮窗时，请使用此处的设置而非ACT的设置来调整缩放。',
+          '当你使用了infsein.github.io提供的其他悬浮窗时，请使用此处而非ACT的设置来调整缩放。',
         ],
         type: 'slider-number',
         min: 0.5, max: 2, step: 0.1,
