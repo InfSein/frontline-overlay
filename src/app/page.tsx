@@ -470,14 +470,20 @@ export default function Home() {
               '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '72D2'/*爆破箭*/,
               'A226'/*昏沉*/,
             ]
+            const mustUnhit = [
+              '732D'/*陨石冲击*/, 
+            ]
             const mustHit = [
-              '732D'/*陨石冲击*/, '72E7'/*魔弹射手*/,
+              '72E7'/*魔弹射手*/,
               '72DF'/*空气锚*/, '72D2'/*爆破箭*/,
             ]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
               if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
               let record = true
-              if (mustHit.includes(hitActionId) && !hit) {
+              if (
+                (mustUnhit.includes(hitActionId) && hit)
+                || (mustHit.includes(hitActionId) && !hit)
+              ) {
                 record = false
               }
               if (record) {
