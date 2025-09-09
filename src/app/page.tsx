@@ -392,7 +392,7 @@ export default function Home() {
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
     // 处理战斗日志
-    if (onConflict || zone || true) { // * 为了减轻负载，仅在纷争前线期间解析战斗
+    if (onConflict || zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       if (msgType === '03') { // 添加战斗成员
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
         const charId = data.line[2]
