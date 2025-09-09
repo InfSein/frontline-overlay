@@ -10,7 +10,7 @@ export interface AppTextUi {
 
 export const AppConstants = {
   githubRepo: 'https://github.com/InfSein/frontline-overlay',
-  changelogDoc: 'https://github.com/InfSein/frontline-overlay/blob/master/CHANGELOG.md',
+  changelogDoc: 'https://infsein.github.io/frontline-overlay/changelog',
 } as const
 
 /**

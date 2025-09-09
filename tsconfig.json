@@ -23,6 +23,7 @@
     }
   },
   "include": [
+    "env.markdown.d.ts",
     "env.overlay.d.ts",
     "next-env.d.ts",
     "**/*.ts", "**/*.tsx",
