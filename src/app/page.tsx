@@ -5,6 +5,7 @@ import { Button } from 'tdesign-react/lib/'
 import {
   IconFont,
   CopyIcon, ShareIcon, LogoGithubIcon, SystemLogIcon,
+  BrowseIcon, BrowseOffIcon
 } from 'tdesign-icons-react'
 //import Image from "next/image";
 import PageStyle from './page.module.css'
@@ -150,6 +151,8 @@ export default function Home() {
   }
 
   const [appConfig, setAppConfig] = useState<AppConfig>(fixAppConfig())
+
+  const [showDamageInKD, setShowDamageInKD] = useState(false)
 
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
@@ -520,6 +523,7 @@ export default function Home() {
               perpetratorName: perpetratorName,
               summonedBy: summoner,
               lasthitActionName: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
+              lasthitActionDamage: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
             })
             setDummy(d => d + 1)
           }
@@ -808,6 +812,19 @@ export default function Home() {
     })
     return result
   }
+  const getShowDamageInKdButton = () => {
+    return <Button
+      size="large"
+      shape="circle"
+      theme="primary"
+      icon={showDamageInKD ? <BrowseOffIcon /> : <BrowseIcon />}
+      onClick={() => {
+        const action = showDamageInKD ? '隐藏' : '显示'
+        showToast('已' + action + '伤害')
+        setShowDamageInKD(val => val = !val)
+      }}
+    />
+  }
   const getConnectionButtons = () => {
     const list = [
       { key: 'githubRepo', icon: (<LogoGithubIcon />), label: 'Github' },
@@ -1014,12 +1031,13 @@ export default function Home() {
           },
         ])
 
-        function genDeath(p: string, action: string) {
+        function genDeath(p: string, action: string, damage?: number) {
           return {
             happenTime: 0,
             victimName: p,
             perpetratorName: p,
             lasthitActionName: action,
+            lasthitActionDamage: damage ?? 0,
           }
         }
       }
@@ -1193,12 +1211,25 @@ export default function Home() {
                         )
                       }
                       <span className="text-orange-700">{death.lasthitActionName}</span>
+                      {
+                        showDamageInKD && <>
+                          <span>造成了</span>
+                          <span className="text-orange-700">{death.lasthitActionDamage.toLocaleString()}</span>
+                          <span>伤害，</span>
+                        </>
+                      }
                       <span>击倒了</span>
                       <span className="text-orange-700">{death.victimName}</span>
                     </div>
                   </div>
                 ))
               }
+              <div className="fixed bottom-4 right-8 z-10">
+                {
+                  !!getKnockouts().length
+                  && getShowDamageInKdButton()
+                }
+              </div>
             </div>
           )}
           {/* 死亡 */}
@@ -1231,11 +1262,23 @@ export default function Home() {
                       }
                       <span>用</span>
                       <span className="text-orange-700">{death.lasthitActionName}</span>
-                      <span>击倒了</span>
+                      {
+                        showDamageInKD ? <>
+                          <span>造成了</span>
+                          <span className="text-orange-700">{death.lasthitActionDamage.toLocaleString()}</span>
+                          <span>伤害，因此死亡</span>
+                        </> : <span>击倒了</span>
+                      }
                     </div>
                   </div>
                 ))
               }
+              <div className="fixed bottom-4 right-8 z-10">
+                {
+                  !!getDeaths().length
+                  && getShowDamageInKdButton()
+                }
+              </div>
             </div>
           )}
           {/* 好人 */}

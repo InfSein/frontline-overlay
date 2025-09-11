@@ -114,4 +114,5 @@ export interface DeathInfo {
   perpetratorName: string;
   summonedBy?: string;
   lasthitActionName: string;
+  lasthitActionDamage: number;
 }
