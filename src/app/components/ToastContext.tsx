@@ -1,5 +1,10 @@
 'use client'
 
+/*
+ * This file is deprecated.
+ * Use `TDesign` ’s `MessagePlugin` instead.
+ */
+
 import React, { createContext, useContext, useState, useCallback } from 'react'
 
 type Toast = { id: number; message: string; visible: boolean }

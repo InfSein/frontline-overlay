@@ -1,7 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react'
-import { Button } from 'tdesign-react/lib/'
+import {
+  Button,
+  MessagePlugin,
+} from 'tdesign-react/lib/'
 import {
   IconFont,
   CopyIcon, ShareIcon, LogoGithubIcon, SystemLogIcon,
@@ -15,7 +18,6 @@ import FlogCard from './components/FlogCard';
 import GcCard from "./components/GcCard";
 import PieChart from './components/PieChart';
 import PointCard from "./components/PointCard";
-import { useToast } from './components/ToastContext';
 import useOverlay from "./tools/overlay";
 import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, AppConstants, PvPBattle, RivalWings } from './types'
 import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from './types/overlay';
@@ -114,7 +116,16 @@ const formatTime = (timestamp: number) => {
 }
 
 export default function Home() {
-  const { showToast } = useToast()
+  const showToast = (
+    msg: string,
+    type: "info" | "success" | "warning" | "error" | "question" = 'info'
+  ) => {
+    MessagePlugin[type]({
+      content: msg,
+      duration: 1500,
+      placement: 'bottom',
+    })
+  }
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
 
   const [appNewVersion, setAppNewVersion] = useState<string>('')
@@ -139,7 +150,7 @@ export default function Home() {
     if (appNewVersion) {
       showToast('检测到新版本')
     } else {
-      showToast('已是最新版本')
+      showToast('已是最新版本', 'success')
     }
   }
   const handleUpdateApp = async () => {

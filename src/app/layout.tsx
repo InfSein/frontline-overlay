@@ -5,7 +5,6 @@ import "tdesign-react/lib/_util/react-19-adapter";
 import { useEffect, useState } from 'react';
 import { Geist, Geist_Mono } from "next/font/google"
 import './globals.css'
-import { ToastProvider } from "./components/ToastContext"
 import { loadConfig } from './tools/config';
 import { AppConfig, fixAppConfig } from './types/config';
 
@@ -53,9 +52,7 @@ export default function RootLayout({
       }}
     >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        {children}
       </body>
     </html>
   );
