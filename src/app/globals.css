@@ -7,6 +7,9 @@ body {
   font-family: Cambria, "思源宋体 CN", Arial, Helvetica, sans-serif;
 }
 
+.text {
+  font-family: Cambria, "思源宋体 CN", Arial, Helvetica, sans-serif;
+}
 .text-shadow {
   text-shadow: 1px 1px 2px black;
 }
