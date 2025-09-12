@@ -4,6 +4,7 @@
 * “击倒”／“死亡”选项卡的右下角增加了一个按钮，点击它可以切换是否显示最后一击造成的伤害 <br>
   按钮只会在有击倒／死亡记录时显示。 <br>
   ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/1.6.0.png)
+* 优化了一些界面细节
 
 ## v1.5.1 (2025-09-09)
 * 增加了内置的更新日志页面
