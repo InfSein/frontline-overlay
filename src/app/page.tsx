@@ -92,7 +92,9 @@ interface SelfActionLog {
 }
 
 /** 玩家表 | `key:charID` | `val:charName` */
-let playerMap : Record<string, string> = {}
+let playerMap : Record<string, string> = {
+  'E0000000': '(场地)',
+}
 /** 召唤物表 | `key:召唤物ID` | `val:召唤者ID` */
 let summonMap : Record<string, string> = {}
 /** 上次受击表 | `key:施害者ID+受害者ID` */
@@ -124,6 +126,7 @@ export default function Home() {
       content: msg,
       duration: 1500,
       placement: 'bottom',
+      className: 'text text-[1.375rem]',
     })
   }
   const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
@@ -384,7 +387,9 @@ export default function Home() {
         else val.cancel()
       })
       prePoints.length = 0
-      playerMap = {}; summonMap = {}; playerLasthitMap = {}
+      playerMap = {
+        'E0000000': '(场地)',
+      }; summonMap = {}; playerLasthitMap = {}
       setDummy(0)
       if (process.env.NODE_ENV === 'development') {
         console.log('[Zone] ', data.zoneID, ' / ', data.zoneName)
@@ -435,10 +440,10 @@ export default function Home() {
         }
 
         if (isValidAction && perpetratorId && victimId) {
-          const { hit, damage } = getActionDamageFromLogLine(data.line)
+          const { hit, damageType, damage } = getActionDamageFromLogLine(data.line)
 
           // 记录上次伤害表
-          if (hit) {
+          if (hit && damageType === 'damage') {
             const key = `${perpetratorId}-${victimId}`
             playerLasthitMap[key] = {
               perpetratorName: perpetratorName,
@@ -1317,7 +1322,7 @@ export default function Home() {
                         !!log.actionDamage && (
                           <>
                             <span>，回复了</span>
-                            <span className="text-orange-700">{log.actionDamage}</span>
+                            <span className="text-orange-700">{log.actionDamage.toLocaleString()}</span>
                             <span>体力</span>
                           </>
                         )
@@ -1353,7 +1358,7 @@ export default function Home() {
                         !!log.actionDamage && (
                           <>
                             <span>，造成了</span>
-                            <span className="text-orange-700">{log.actionDamage}</span>
+                            <span className="text-orange-700">{log.actionDamage.toLocaleString()}</span>
                             <span>伤害</span>
                           </>
                         )
