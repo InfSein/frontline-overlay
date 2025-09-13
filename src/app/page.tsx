@@ -439,9 +439,9 @@ export default function Home() {
             console.log(
               `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
               '\nhit:', hit,
-              '\ndamageType:', damageType,
+              '\tdamageType:', damageType,
               '\ndamage:', damage,
-              '\nheal:', heal,
+              '\theal:', heal,
               '\ndetail:', data.rawLine,
             )
           }
