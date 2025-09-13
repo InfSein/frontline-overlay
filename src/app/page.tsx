@@ -432,18 +432,22 @@ export default function Home() {
           isValidAction = data.line[10] !== '0'
         }
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
-            '\ndetail:', data.rawLine
-          )
-        }
-
         if (isValidAction && perpetratorId && victimId) {
-          const { hit, damageType, damage } = getActionDamageFromLogLine(data.line)
+          const { hit, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
+
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
+              '\nhit:', hit,
+              '\ndamageType:', damageType,
+              '\ndamage:', damage,
+              '\nheal:', heal,
+              '\ndetail:', data.rawLine,
+            )
+          }
 
           // 记录上次伤害表
-          if (hit && damageType === 'damage') {
+          if (hit && (damageType === 'damage' || damageType === 'both')) {
             const key = `${perpetratorId}-${victimId}`
             playerLasthitMap[key] = {
               perpetratorName: perpetratorName,
@@ -478,7 +482,7 @@ export default function Home() {
                   happenTime: Date.now(),
                   perpetratorName: perpetratorName,
                   actionName: hitActionName,
-                  actionDamage: damage,
+                  actionDamage: heal,
                 })
               }
             }
@@ -521,7 +525,7 @@ export default function Home() {
         const victimId = data.line[2]
         const victimName = data.line[3] || '???'
         const perpetratorId = data.line[4]
-        const perpetratorName = data.line[5] || '???'
+        let perpetratorName = data.line[5]
         if (victimId && !victimId.startsWith('40')) { // 忽略场景物体被打倒的信息
           if (perpetratorId) {
             let summoner : string | undefined
@@ -532,6 +536,9 @@ export default function Home() {
               } else if (summonerId === playerId) {
                 summoner = playerName
               }
+            }
+            if (!perpetratorName) {
+              perpetratorName = playerMap[perpetratorId] || '???'
             }
             deaths.push({
               happenTime: Date.now(),
