@@ -190,21 +190,35 @@ export const getFrontlineBackground = (fl: PvPBattle) => {
  * @returns hit: 是否命中, damage: 伤害量
  */
 export const getActionDamageFromLogLine = (logline: string[]) => {
-  let hit = false; let damageType : "damage" | "heal" = 'damage'; let damage = 0
+  let hit = false
+  let damageType : "damage" | "heal" | "both" | undefined = undefined
+  let damage = 0, heal = 0
   const mightIndex = [8, 10, 12, 14, 16, 18, 20, 22] as const
   mightIndex.forEach(index => {
-    const { dodgeOrMiss, damaged, healed } = parseLog(logline[index])
-    if (!dodgeOrMiss && (damaged || healed)) {
+    const logType = logline[index]; const logVal = logline[index + 1]
+    if (logType === '0') return
+
+    const { dodgeOrMiss, damaged, healed } = parseLog(logType)
+    if (!dodgeOrMiss) {
       hit = true
-      damage = parseDamage(logline[index + 1])
-      if (healed) damageType = 'heal'
+      if (damaged) {
+        if (!damageType) damageType = 'damage'
+        else if (damageType === 'heal') damageType = 'both'
+        damage = parseDamage(logVal)
+      }
+      if (healed) {
+        if (!damageType) damageType = 'heal'
+        else if (damageType === 'damage') damageType = 'both'
+        heal = parseDamage(logVal)
+      }
       return
     }
   })
-  return { hit, damageType, damage }
+  damageType ??= 'damage' as "damage" | "heal" | "both"
+  return { hit, damageType, damage, heal }
 
-  function parseLog(logStr: string) {
-    const effectType = parseInt((logStr || '0'), 16)
+  function parseLog(logType: string) {
+    const effectType = parseInt((logType || '0'), 16)
     return {
       dodgeOrMiss: (effectType & 0xF) === 0x01,
       damaged: (effectType & 0xF) === 0x03,
