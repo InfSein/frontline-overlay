@@ -881,10 +881,7 @@ export default function Home() {
   const resolveLog = useCallback(() => {
     const knockouts = frontlineLog.map(log => log.knockouts).flat()
     const deaths = frontlineLog.map(log => log.deaths).flat()
-    let kd = 0
-    if (deaths.length) {
-      kd = Math.floor(knockouts.length / deaths.length * 100) / 100
-    }
+    const kd = Math.floor(knockouts.length / (deaths.length || 1) * 100) / 100
     const knockoutEachMatch = frontlineLog.length ? Math.floor(knockouts.length / frontlineLog.length * 100) / 100 : 0
     const deathEachMatch = frontlineLog.length ? Math.floor(deaths.length / frontlineLog.length * 100) / 100 : 0
 
