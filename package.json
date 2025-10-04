@@ -1,6 +1,6 @@
 {
   "name": "frontline-overlay",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
