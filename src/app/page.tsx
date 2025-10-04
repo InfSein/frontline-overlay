@@ -93,7 +93,7 @@ interface SelfActionLog {
 
 /** 玩家表 | `key:charID` | `val:charName` */
 let playerMap : Record<string, string> = {
-  'E0000000': '(场地)',
+  'E0000000': '(场地/dot)',
 }
 /** 召唤物表 | `key:召唤物ID` | `val:召唤者ID` */
 let summonMap : Record<string, string> = {}
@@ -105,6 +105,17 @@ const badboys : SelfActionLog[] = []
 const reactive = {
   currFrontlineResult: undefined as FrontlineResult | undefined,
   currFrontlineStartTime: 0,
+}
+
+const addSelfActionLog = (list: SelfActionLog[], log: SelfActionLog) => {
+  const lastLog = list[list.length - 1]
+
+  if (lastLog && lastLog.perpetratorName === log.perpetratorName && lastLog.actionName === log.actionName
+    && Math.abs(lastLog.happenTime - log.happenTime) <= 3000) {
+    list.pop()
+  }
+
+  list.push(log)
 }
 
 const parseGc = (gc_name: string) => {
@@ -393,6 +404,9 @@ export default function Home() {
       setDummy(0)
       if (process.env.NODE_ENV === 'development') {
         console.log('[Zone] ', data.zoneID, ' / ', data.zoneName)
+        if (data.zoneID === 250) { // 狼狱
+          setOnConflict(true)
+        }
       }
     }
   }, [
@@ -435,7 +449,10 @@ export default function Home() {
         if (isValidAction && perpetratorId && victimId) {
           const { hit, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
 
-          if (process.env.NODE_ENV === 'development') {
+          if (
+            process.env.NODE_ENV === 'development'
+            && (perpetratorId === playerId || victimId === playerId)
+          ) {
             console.log(
               `[Action] ${perpetratorName}(${perpetratorId}) -> ${victimName}(${victimId}): ${hitActionName}(${hitActionId})`,
               '\nhit:', hit,
@@ -465,26 +482,13 @@ export default function Home() {
               'A8F2'/*勇气*/, '72D8'/*光阴神的礼赞凯歌*/, '72F7'/*闭式舞姿*/,
               '73E6'/*守护之光*/, '7344'/*命水*/,
             ]
-            const mustHeal = [
-              '723B'/*吉星相位*/, '723F'/*吉星相位2*/,
-            ]
             if (goodActions.includes(hitActionId) || goodActions.includes(hitActionName)) {
-              if (!goodActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
-              let record = true
-              if (mustHeal.includes(hitActionId) && !hit) {
-                record = false
-              }
-              if (hitActionName === '光阴神的礼赞凯歌' && data.line[10] === '0') {
-                record = false
-              }
-              if (record) {
-                goodboys.push({
-                  happenTime: Date.now(),
-                  perpetratorName: perpetratorName,
-                  actionName: hitActionName,
-                  actionDamage: heal,
-                })
-              }
+              addSelfActionLog(goodboys, {
+                happenTime: Date.now(),
+                perpetratorName: perpetratorName,
+                actionName: hitActionName,
+                actionDamage: heal,
+              })
             }
             // 记录坏人
             const badActions = [
@@ -493,30 +497,13 @@ export default function Home() {
               '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '72D2'/*爆破箭*/,
               'A226'/*昏沉*/,
             ]
-            const mustUnhit = [
-              '732D'/*陨石冲击*/, 
-            ]
-            const mustHit = [
-              '72E7'/*魔弹射手*/,
-              '72DF'/*空气锚*/, '72D2'/*爆破箭*/,
-            ]
             if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
-              if (!badActions.includes(hitActionId)) console.log('[Action]\t' + hitActionId + '\t' + hitActionName + '\t' + damage)
-              let record = true
-              if (
-                (mustUnhit.includes(hitActionId) && hit)
-                || (mustHit.includes(hitActionId) && !hit)
-              ) {
-                record = false
-              }
-              if (record) {
-                badboys.push({
-                  happenTime: Date.now(),
-                  perpetratorName: perpetratorName,
-                  actionName: hitActionName,
-                  actionDamage: damage,
-                })
-              }
+              addSelfActionLog(badboys, {
+                happenTime: Date.now(),
+                perpetratorName: perpetratorName,
+                actionName: hitActionName,
+                actionDamage: damage,
+              })
             }
           }
         }
@@ -881,10 +868,7 @@ export default function Home() {
   const resolveLog = useCallback(() => {
     const knockouts = frontlineLog.map(log => log.knockouts).flat()
     const deaths = frontlineLog.map(log => log.deaths).flat()
-    let kd = 0
-    if (deaths.length) {
-      kd = Math.floor(knockouts.length / deaths.length * 100) / 100
-    }
+    const kd = Math.floor(knockouts.length / (deaths.length || 1) * 100) / 100
     const knockoutEachMatch = frontlineLog.length ? Math.floor(knockouts.length / frontlineLog.length * 100) / 100 : 0
     const deathEachMatch = frontlineLog.length ? Math.floor(deaths.length / frontlineLog.length * 100) / 100 : 0
 
