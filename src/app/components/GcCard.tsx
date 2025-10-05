@@ -1,3 +1,4 @@
+import { Divider } from 'tdesign-react'
 import { GrandCompany } from '@/app/types'
 import {
   getGrandCompanyName,
@@ -11,45 +12,44 @@ type GcCardProps = {
   /** 是否为己方 */
   me: boolean
   /** 点分 */
-  floatPoints: number
+  floatPoints: number | string
+  /** 增长速度 */
+  increaseSpeed: number
 }
 
 export default function GcCard({
-  gc, me, floatPoints
+  gc, me, floatPoints, increaseSpeed
 }: GcCardProps) {
   const color = getGrandCompanyColor(gc)
   const flag = getGrandCompanyFlag(gc)
 
-  const containerStyle: React.CSSProperties = {
-    //width: '100%',
-    padding: '0.5rem',
-    gap: '0.25rem',
-    borderRadius: '4px',
-    boxShadow: '0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: color,
-    backgroundImage: `url(${flag})`,
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: 'contain',
-  }
-
   return (
-    <div style={containerStyle}>
-      <div>
-        <div
-          className="text-[1.75rem] leading-[1.5] font-medium text-white"
-          style={{ textShadow: '1px 1px 2px black' }}
-        >
-          {getGrandCompanyName(gc)}
+    <div
+      className="flex flex-col rounded-lg shadow-lg overflow-hidden bg-center bg-no-repeat bg-contain"
+      style={{
+        backgroundColor: color,
+        backgroundImage: `url(${flag})`,
+      }}
+    >
+      <div
+        className="flex items-center p-2 pb-0"
+      >
+        <div>
+          <div className="text-[1.75rem] leading-[1.2] font-medium text-white drop-shadow-[1px_1px_2px_black]">
+            {getGrandCompanyName(gc)}
+          </div>
+          <p className="text-[#cad5e2] m-0 leading-1">{me ? '⭐我方' : '　敌方'}</p>
         </div>
-        <p className="text-[#cad5e2] m-0">
-          {me ? '⭐我方' : '　敌方'}
-        </p>
+        <div className="ml-auto mr-1 text-[2.625rem] leading-[1.3] font-bold text-white">
+          {floatPoints}
+        </div>
       </div>
-      <div className="ml-auto mr-1 text-[2.625rem] font-bold text-white">
-        {floatPoints}
+      <Divider style={{ margin: 0 }} />
+      <div
+        className="text-right text-white font-medium leading-1 p-1 pt-0 mr-2"
+        style={{ fontFamily: '"Eurostar Regular"' }}
+      >
+        +<span className="font-bold">{increaseSpeed}</span>/t
       </div>
     </div>
   )

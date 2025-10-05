@@ -29,6 +29,7 @@ import {
   checkAppUpdates,
   deepCopy,
   copyToClipboard,
+  getSecurePointIncrease,
 } from '@/app/tools'
 import { AppConfig, fixAppConfig } from './types/config';
 import { loadConfig } from './tools/config';
@@ -36,6 +37,7 @@ import { loadConfig } from './tools/config';
 /** 标准点结构，包括被其他方占领而暂停跳分的点 */
 interface PointInfo {
   type?: undefined;
+  dropSpeed: number;
   remain: number;
   total: number;
   owner: GrandCompany;
@@ -44,6 +46,11 @@ interface PointInfo {
   pause: () => void;
   resume: () => void;
   cancel: () => void;
+}
+/** 静态点结构，如阵地这种不会自然消失只会一直跳分的 */
+interface StaticPointInfo {
+  type: 'static';
+  owner?: GrandCompany;
 }
 /** 初始点结构，仅限刚刚刷新出来，未被占领过的点 */
 interface InitialPointInfo {
@@ -75,7 +82,7 @@ const gcFp : Record<GrandCompany, number> = {
   [GrandCompany.twinadder]: 0,
   [GrandCompany.immoflame]: 0,
 }
-const pointMap : Record<string, PointInfo | InitialPointInfo> = {}
+const pointMap : Record<string, PointInfo | StaticPointInfo | InitialPointInfo> = {}
 const prePoints : PrePointInfo[] = []
 
 interface LasthitInfo {
@@ -207,13 +214,13 @@ export default function Home() {
     return prePoints.length + Object.keys(pointMap).length
   }
   const activatePoint = (key: string, owner: GrandCompany, ptLv: string, total: number, drop: number) => {
-    if (pointMap[key] && pointMap[key].type !== 'initial') {
+    if (pointMap[key] && pointMap[key].type !== 'static' && pointMap[key].type !== 'initial') {
       pointMap[key].owner = owner
       pointMap[key].resume()
       setDummy(d => d + 1)
       return
     }
-    if (pointMap[key]) {
+    if (pointMap[key] && pointMap[key].type !== 'static') {
       pointMap[key].cancel()
     }
 
@@ -241,6 +248,7 @@ export default function Home() {
     }
 
     pointMap[key] = {
+      dropSpeed: drop,
       get remain() {
         return remain
       },
@@ -265,7 +273,7 @@ export default function Home() {
     startTimer()
   }
   const createInitialPoint = (key: string, ptLv: string, total: number, countdown?: number) => {
-    if (pointMap[key]) {
+    if (pointMap[key] && pointMap[key].type !== 'static') {
       pointMap[key].cancel()
     }
 
@@ -347,12 +355,29 @@ export default function Home() {
   const getGcPoint = (gc: GrandCompany) => {
     if (zone === Frontline.seize || zone === Frontline.naadam) {
       const arr = Object.values(pointMap)
-        .filter(val => val.type !== 'initial' && val.owner === gc)
+        .filter(val => val.type !== 'static' && val.type !== 'initial' && !val.paused && val.owner === gc)
         .map(val => (val as PointInfo).remain)
       if (!arr.length) return 0
       return arr.reduce((prev, cur) => prev + cur)
+    } else if (zone === Frontline.secure) {
+      return '-'
     } else {
       return gcFp[gc]
+    }
+  }
+  const getGcIncreaseSpeed = (gc: GrandCompany) => {
+    if (zone === Frontline.seize || zone === Frontline.naadam) {
+      const arr = Object.values(pointMap)
+        .filter(val => val.type !== 'static' && val.type !== 'initial' && val.owner === gc)
+        .map(val => (val as PointInfo).dropSpeed)
+      if (!arr.length) return 0
+      return arr.reduce((prev, cur) => prev + cur)
+    } else if (zone === Frontline.secure) {
+      const arr = Object.values(pointMap)
+        .filter(val => val.type === 'static' && val.owner === gc)
+      return getSecurePointIncrease(arr.length)
+    } else {
+      return 0
     }
   }
   const getKnockouts = useCallback(() => {
@@ -394,7 +419,7 @@ export default function Home() {
       setOnConflict(false); setZone(''); setGc('')
       gcFp.maelstrom = 0; gcFp.twinadder = 0; gcFp.immoflame = 0
       Object.entries(pointMap).forEach(([key, val]) => {
-        if (val.type === 'initial') delete pointMap[key]
+        if (val.type === 'initial' || val.type === 'static') delete pointMap[key]
         else val.cancel()
       })
       prePoints.length = 0
@@ -616,7 +641,7 @@ export default function Home() {
       const matchPause = msg.match(/(S|A|B)级的亚拉戈石文(.*?)变为中立状态！/)
       if (matchPause) {
         const pt = matchPause[2]
-        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
+        if (pointMap[pt] && pointMap[pt].type !== 'static' && pointMap[pt].type !== 'initial') {
           pointMap[pt].pause()
         }
         setDummy(d => d + 1)
@@ -626,7 +651,7 @@ export default function Home() {
       const matchClean = msg.match(/(S|A|B)级的亚拉戈石文(.*?)的情报已枯竭！/)
       if (matchClean) {
         const pt = matchClean[2]
-        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
+        if (pointMap[pt] && pointMap[pt].type !== 'static' && pointMap[pt].type !== 'initial') {
           pointMap[pt].cancel()
         }
         while (prePoints.length && getCurrPointCount() > ptMax) prePoints.pop()
@@ -723,7 +748,7 @@ export default function Home() {
       const matchClean = msg.match(/无垢的大地(.*?)已失效。/)
       if (matchClean) {
         const pt = matchClean[1]
-        if (pointMap[pt] && pointMap[pt].type !== 'initial') {
+        if (pointMap[pt] && pointMap[pt].type !== 'static' && pointMap[pt].type !== 'initial') {
           pointMap[pt].cancel()
         }
         setDummy(d => d + 1)
@@ -741,6 +766,29 @@ export default function Home() {
       if (msg === '距离战斗开始已经过15分钟，无垢的大地的同时出现数量减少了！') {
         setPtMax(2)
         setDummy(d => d + 1)
+      }
+    }
+    else if (zone === Frontline.secure) {
+      const matchConquer = msg.match(/(黑涡团|双蛇党|恒辉队)占领了(.*?)！/)
+      if (matchConquer) {
+        const pt = matchConquer[2]
+        const owner = parseGc(matchConquer[1])
+        pointMap[pt] = {
+          type: 'static',
+          owner,
+        }
+        setDummy(d => d + 1)
+        return
+      }
+
+      const matchPause = msg.match(/(.*?)恢复成了中立状态！/)
+      if (matchPause) {
+        const pt = matchPause[1]
+        pointMap[pt] = {
+          type: 'static',
+        }
+        setDummy(d => d + 1)
+        return
       }
     }
 
@@ -797,6 +845,14 @@ export default function Home() {
           ptLv: val.ptLv,
           ptName: ptName,
           ptDescription: '中立' + (val.time ? ('／还需 ' + val.time.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString())),
+        }
+      } else if (val.type === 'static') {
+        return {
+          key: `pointMap-${key}`,
+          type: !val.owner ? 'neutrality' : 'active',
+          specifyColor: val.owner ? getGrandCompanyColor(val.owner) : '',
+          ptName: ptName,
+          ptDescription: val.owner ? getGrandCompanyName(val.owner) : '中立',
         }
       } else {
         return {
@@ -1065,7 +1121,7 @@ export default function Home() {
       return '还未进入对战'
     } else if (!onConflict) {
       return '正在等待战斗开始'
-    } else if (zone === Frontline.shatter || zone === Frontline.secure) {
+    } else if (zone === Frontline.shatter) {
       return '暂不支持解析 ' + getFrontlineNames(zone)[1] + ' 的战况数据'
     } else if (zone === RivalWings.hiddengorge) {
       return '暂不支持解析 烈羽争锋 的战况数据'
@@ -1147,13 +1203,13 @@ export default function Home() {
               <div className="w-full grid grid-cols-3 gap-2">
                 {
                   Object.values(GrandCompany).map(company => (
-                    <GcCard key={company} gc={company} me={gc === company} floatPoints={getGcPoint(company)} />
+                    <GcCard key={company} gc={company} me={gc === company} floatPoints={getGcPoint(company)} increaseSpeed={getGcIncreaseSpeed(company)} />
                   ))
                 }
               </div>
               <div className={PageStyle.title}>当前据点</div>
               {
-                (zone === Frontline.shatter || zone === Frontline.secure) && (
+                (zone === Frontline.shatter) && (
                   <div className="w-full text-[1.25rem] self-baseline text-white px-1 py-0.5 rounded bg-gray-400/90 border border-black/50">
                     暂不支持解析{ getFrontlineNames(zone)[1] }的当前据点数据。
                   </div>
