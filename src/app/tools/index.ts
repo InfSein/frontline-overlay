@@ -123,6 +123,13 @@ export const getGrandCompanyColor = (gc: GrandCompany) => {
     case GrandCompany.immoflame: return '#285FB7'
   }
 }
+export const getGrandCompanySubColor = (gc: GrandCompany) => {
+  switch (gc) {
+    case GrandCompany.maelstrom: return 'rgba(148,33,16,0.4)'
+    case GrandCompany.twinadder: return 'rgba(159,158,68,0.4)'
+    case GrandCompany.immoflame: return 'rgba(40,95,183,0.4)'
+  }
+}
 
 export const getGrandCompanyFlag = (gc: GrandCompany) => {
   return `./image/${gc}.png`
@@ -184,6 +191,8 @@ export const getFrontlineResultBackgroundColor = (result: FrontlineResult) => {
 export const getFrontlineBackground = (fl: PvPBattle) => {
   return `./image/${fl}.webp`
 }
+
+export const getSecurePointIncrease = (ptAmount: number) => [0, 2, 4, 6, 10, 12, 14, 18, 20, 22][ptAmount] ?? 0
 
 /**
  * 从 ACT 网络日志行中获取技能伤害量

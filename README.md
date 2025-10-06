@@ -19,14 +19,14 @@
 这里的进度指的是「战况」面板解析的开发进度。<br>
 「击倒」「阵亡」「好人」「坏人」「统计」面板已经支持解析全部的纷争前线／烈羽争锋／水晶冲突。
 
-|          ＼          |          开发         |          测试         |
-| :------------------: | :-------------------: | :-------------------: |
-|    尘封秘岩（争夺战）   |  :white_check_mark:   |  :white_check_mark:   |
-|   昂萨哈凯尔（竞争战）   |  :white_check_mark:   | :white_check_mark: |
-|     荣誉野（碎冰战）     | :black_square_button: | :black_square_button: |
-|   周边遗迹群（阵地战）   | :black_square_button: | :black_square_button: |
-|        烈羽争锋        | :black_square_button: | :black_square_button: |
-|        水晶冲突        | :black_square_button: | :black_square_button: |
+|          ＼          |          开发         |
+| :------------------: | :-------------------: |
+|    尘封秘岩（争夺战）   |   :white_check_mark:    |
+|   昂萨哈凯尔（竞争战）   |  :white_check_mark:   |
+|     荣誉野（碎冰战）     | :black_square_button: |
+|   周边遗迹群（阵地战）   |   :white_check_mark:   |
+|        烈羽争锋        | :black_square_button: |
+|        水晶冲突        | :black_square_button: |
 
 ## 主要功能
 
