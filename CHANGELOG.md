@@ -1,6 +1,6 @@
 # 更新日志
 
-## v1.7.0 (2025-10-05)
+## v1.7.0 (2025-10-06)
 * “战况”选项卡的剩余点分下方现在还会显示各势力分数的增长速度。 <br>
   ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/1.7.0.png)
 * “战况”选项卡现已支持解析「周边遗迹群（阵地战）」。 <br>
