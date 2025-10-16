@@ -68,7 +68,25 @@ const groups: ConfigGroup[] = [
         type: 'switch',
       },
     ]
-  }
+  },
+  {
+    key: 'monitor',
+    name: '监控',
+    icon: 'precise-monitor',
+    items: [
+      {
+        key: 'badboy_threshold',
+        name: '坏人阈值',
+        desc: [
+          '设置一个10000～99999之间的数字作为阈值。',
+          '当你受到超过阈值的伤害时，即使此技能不在坏人监控之列，也仍然会进入坏人统计。',
+        ],
+        type: 'number',
+        min: 10000, max: 99999,
+        step: 1000, decimalPlaces: 0,
+      },
+    ]
+  },
 ]
 
 export default function ConfigPage() {
@@ -129,7 +147,10 @@ export default function ConfigPage() {
           <InputNumber
             value={(formConfig as any)[item.key]}
             onChange={(v) => handleChange(item.key, v)}
-            min={0}
+            min={item.min} max={item.max}
+            step={item.step}
+            decimalPlaces={item.decimalPlaces}
+            allowInputOverLimit={false}
             className="w-40"
           />
         )
