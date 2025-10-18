@@ -16,6 +16,10 @@ export interface AppConfig {
   /** 隐藏复制点分按钮 */
   hide_situation_copy_btn: boolean
   // #endregion
+  // #region 监控
+  /** 坏人阈值 */
+  badboy_threshold: number
+  // #endregion
 }
 
 const defaultAppConfig : AppConfig = {
@@ -24,6 +28,7 @@ const defaultAppConfig : AppConfig = {
   auto_expand_when_enter_battlefield: false,
   auto_collapse_when_leave_battlefield: false,
   hide_situation_copy_btn: false,
+  badboy_threshold: 20000,
 }
 
 export const fixAppConfig = (appConfig?: AppConfig) => {
@@ -47,6 +52,7 @@ interface ConfigItemBase {
   key: keyof AppConfig
   name: string
   desc?: (AppTextUi | string)[]
+  beta?: boolean
 }
 interface ConfigItemSwitch extends ConfigItemBase {
   type: "switch"
@@ -56,6 +62,10 @@ interface ConfigItemString extends ConfigItemBase {
 }
 interface ConfigItemNumber extends ConfigItemBase {
   type: "number"
+  min?: number
+  max?: number
+  step?: number
+  decimalPlaces?: number
 }
 interface ConfigItemSliderNumber extends ConfigItemBase {
   type: "slider-number"

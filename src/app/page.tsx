@@ -522,7 +522,10 @@ export default function Home() {
               '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '72D2'/*爆破箭*/,
               'A226'/*昏沉*/,
             ]
-            if (badActions.includes(hitActionId) || badActions.includes(hitActionName)) {
+            if (
+              badActions.includes(hitActionId) || badActions.includes(hitActionName)
+              || damage >= appConfig.badboy_threshold
+            ) {
               addSelfActionLog(badboys, {
                 happenTime: Date.now(),
                 perpetratorName: perpetratorName,
@@ -821,6 +824,7 @@ export default function Home() {
   }, [
     onConflict, zone, ptMax, dummy, playerId, playerName,
     appConfig.auto_expand_when_enter_battlefield,
+    appConfig.badboy_threshold,
   ])
 
   const getCards = () => {
