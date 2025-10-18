@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider } from 'tdesign-react'
+import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider, Tooltip, Tag } from 'tdesign-react'
 import {
   IconFont,
   SaveIcon,
@@ -226,7 +226,14 @@ export default function ConfigPage() {
                   className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex flex-col">
-                    <span className="text-base font-medium">{item.name}</span>
+                    <div className="text-base font-medium">
+                      {item.name}
+                      {
+                        item.beta && <Tooltip content="此设置项仅作测试之用，随时可能被更改或删除。" showArrow={false}>
+                          <span className="text-[12px] leading-[1] font-normal p-1 text-white bg-[#E37318] ml-1 rounded">BETA</span>
+                        </Tooltip>
+                      }
+                    </div>
                     {!!item.desc && item.desc.map((d, i) =>
                       typeof d === "string" ? (
                         <span key={i} className="text-xs text-gray-500">

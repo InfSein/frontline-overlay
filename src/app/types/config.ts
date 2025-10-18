@@ -52,6 +52,7 @@ interface ConfigItemBase {
   key: keyof AppConfig
   name: string
   desc?: (AppTextUi | string)[]
+  beta?: boolean
 }
 interface ConfigItemSwitch extends ConfigItemBase {
   type: "switch"
