@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider, Tooltip, Tag } from 'tdesign-react'
+import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider, Tooltip } from 'tdesign-react'
 import {
   IconFont,
   SaveIcon,
