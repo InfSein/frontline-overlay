@@ -1,14 +1,25 @@
 1:"$Sreact.fragment"
 2:I[4970,[],"ClientSegmentRoot"]
-3:I[1056,["778","static/chunks/778-161293d0b1a602a8.js","177","static/chunks/app/layout-e186c3a56f5b4e07.js"],"default"]
+3:I[1056,["778","static/chunks/778-161293d0b1a602a8.js","177","static/chunks/app/layout-105ab79fa8cffaa8.js"],"default"]
 4:I[7555,[],""]
 5:I[1295,[],""]
 a:I[8393,[],""]
 :HL["/frontline-overlay/_next/static/media/4cf2300e9c8272f7-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/frontline-overlay/_next/static/media/93f479601ee12b01-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/frontline-overlay/_next/static/css/3772aaca828afc04.css","style"]
-:HL["/frontline-overlay/_next/static/css/c5529ea6260131cb.css","style"]
-7:Tffb,<h1>更新日志</h1>
+:HL["/frontline-overlay/_next/static/css/4709ecda9a2813e8.css","style"]
+7:T12b2,<h1>更新日志</h1>
+<h2>v1.8.0 (2025-10-29)</h2>
+<ul>
+<li>增加设置项“坏人阈值”。 <br>
+当你受到超过阈值的伤害时，即使此技能不在坏人监控之列，也仍然会进入坏人统计。 <br>
+默认为20000，可以设置为10000～99999之间的任意数。</li>
+<li>坏人统计中增加对 舞者“行列舞” 的监控，不再监控 黑魔“昏沉” </li>
+<li>“击倒”／“死亡”选项卡现在默认显示技能伤害 <br>
+※ 仍可通过右下角按钮切换是否显示最后一击造成的伤害。</li>
+<li>尝试修复部分技能统计的伤害量不正确的问题</li>
+<li>进一步修复好人、坏人统计会重复地记录部分技能的问题</li>
+</ul>
 <h2>v1.7.0 (2025-10-06)</h2>
 <ul>
 <li>“战况”选项卡的剩余点分下方现在还会显示各势力分数的增长速度。 <br>
@@ -98,7 +109,7 @@ a:I[8393,[],""]
 <ul>
 <li>悬浮窗发布。</li>
 </ul>
-0:{"P":null,"b":"nxjeinQXE_2uvv7dBMk9u","p":"/frontline-overlay","c":["","changelog"],"i":false,"f":[[["",{"children":["changelog",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/frontline-overlay/_next/static/css/3772aaca828afc04.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","link","1",{"rel":"stylesheet","href":"/frontline-overlay/_next/static/css/c5529ea6260131cb.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","$L2",null,{"Component":"$3","slots":{"children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]},"params":{},"promise":"$@6"}]]}],{"children":["changelog",["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","div",null,{"className":"prose px-6 py-10 max-w-4xl mx-auto space-y-4 select-text","children":["$","div",null,{"dangerouslySetInnerHTML":{"__html":"$7"}}]}],null,"$L8"]}],{},null,false]},null,false]},null,false],"$L9",false]],"m":"$undefined","G":["$a",[]],"s":false,"S":true}
+0:{"P":null,"b":"dTUZygfOLIsn0xIJ421EC","p":"/frontline-overlay","c":["","changelog"],"i":false,"f":[[["",{"children":["changelog",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/frontline-overlay/_next/static/css/3772aaca828afc04.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","link","1",{"rel":"stylesheet","href":"/frontline-overlay/_next/static/css/4709ecda9a2813e8.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","$L2",null,{"Component":"$3","slots":{"children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]},"params":{},"promise":"$@6"}]]}],{"children":["changelog",["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","div",null,{"className":"prose px-6 py-10 max-w-4xl mx-auto space-y-4 select-text","children":["$","div",null,{"dangerouslySetInnerHTML":{"__html":"$7"}}]}],null,"$L8"]}],{},null,false]},null,false]},null,false],"$L9",false]],"m":"$undefined","G":["$a",[]],"s":false,"S":true}
 b:I[9665,[],"OutletBoundary"]
 d:I[4911,[],"AsyncMetadataOutlet"]
 f:I[9665,[],"ViewportBoundary"]
