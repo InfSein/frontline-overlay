@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider } from 'tdesign-react'
+import { Button, Switch, Slider, Input, InputNumber, Select, Card, Divider, Tooltip } from 'tdesign-react'
 import {
   IconFont,
   SaveIcon,
@@ -68,7 +68,25 @@ const groups: ConfigGroup[] = [
         type: 'switch',
       },
     ]
-  }
+  },
+  {
+    key: 'monitor',
+    name: '监控',
+    icon: 'precise-monitor',
+    items: [
+      {
+        key: 'badboy_threshold',
+        name: '坏人阈值',
+        desc: [
+          '设置一个10000～99999之间的数字作为阈值。',
+          '当你受到超过阈值的伤害时，即使此技能不在坏人监控之列，也仍然会进入坏人统计。',
+        ],
+        type: 'number',
+        min: 10000, max: 99999,
+        step: 1000, decimalPlaces: 0,
+      },
+    ]
+  },
 ]
 
 export default function ConfigPage() {
@@ -129,7 +147,10 @@ export default function ConfigPage() {
           <InputNumber
             value={(formConfig as any)[item.key]}
             onChange={(v) => handleChange(item.key, v)}
-            min={0}
+            min={item.min} max={item.max}
+            step={item.step}
+            decimalPlaces={item.decimalPlaces}
+            allowInputOverLimit={false}
             className="w-40"
           />
         )
@@ -205,7 +226,14 @@ export default function ConfigPage() {
                   className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex flex-col">
-                    <span className="text-base font-medium">{item.name}</span>
+                    <div className="text-base font-medium">
+                      {item.name}
+                      {
+                        item.beta && <Tooltip content="此设置项仅作测试之用，随时可能被更改或删除。" showArrow={false}>
+                          <span className="text-[12px] leading-[1] font-normal p-1 text-white bg-[#E37318] ml-1 rounded">BETA</span>
+                        </Tooltip>
+                      }
+                    </div>
                     {!!item.desc && item.desc.map((d, i) =>
                       typeof d === "string" ? (
                         <span key={i} className="text-xs text-gray-500">

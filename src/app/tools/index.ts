@@ -213,14 +213,13 @@ export const getActionDamageFromLogLine = (logline: string[]) => {
       if (damaged) {
         if (!damageType) damageType = 'damage'
         else if (damageType === 'heal') damageType = 'both'
-        damage = parseDamage(logVal)
+        damage += parseDamage(logVal)
       }
       if (healed) {
         if (!damageType) damageType = 'heal'
         else if (damageType === 'damage') damageType = 'both'
-        heal = parseDamage(logVal)
+        heal += parseDamage(logVal)
       }
-      return
     }
   })
   damageType ??= 'damage' as "damage" | "heal" | "both"
