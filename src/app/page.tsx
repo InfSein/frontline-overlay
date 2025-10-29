@@ -115,11 +115,17 @@ const reactive = {
 }
 
 const addSelfActionLog = (list: SelfActionLog[], log: SelfActionLog) => {
-  const lastLog = list[list.length - 1]
+  const recentLogs = list.slice(-5)
 
-  if (lastLog && lastLog.perpetratorName === log.perpetratorName && lastLog.actionName === log.actionName
-    && Math.abs(lastLog.happenTime - log.happenTime) <= 3000) {
-    list.pop()
+  const duplicateIndex = recentLogs.findIndex(lastLog =>
+    lastLog.perpetratorName === log.perpetratorName &&
+    lastLog.actionName === log.actionName &&
+    Math.abs(lastLog.happenTime - log.happenTime) <= 4000
+  )
+
+  if (duplicateIndex !== -1) {
+    const actualIndex = list.length - recentLogs.length + duplicateIndex
+    list.splice(actualIndex, 1)
   }
 
   list.push(log)
@@ -184,7 +190,7 @@ export default function Home() {
 
   const [appConfig, setAppConfig] = useState<AppConfig>(fixAppConfig())
 
-  const [showDamageInKD, setShowDamageInKD] = useState(false)
+  const [showDamageInKD, setShowDamageInKD] = useState(true)
 
   const [playerId, setPlayerId] = useState<string>('')
   const [playerName, setPlayerName] = useState<string>('')
@@ -424,7 +430,7 @@ export default function Home() {
       })
       prePoints.length = 0
       playerMap = {
-        'E0000000': '(场地)',
+        'E0000000': '(场地/dot)',
       }; summonMap = {}; playerLasthitMap = {}
       setDummy(0)
       if (process.env.NODE_ENV === 'development') {
@@ -520,7 +526,8 @@ export default function Home() {
               'A8ED'/*全力挥打*/, '7199'/*献身*/, '732D'/*陨石冲击*/,
               '72E7'/*魔弹射手*/, '72DF'/*空气锚*/,
               '72D3'/*默者的夜曲*/, 'A1FB'/*英雄的返场余音*/, '72D2'/*爆破箭*/,
-              'A226'/*昏沉*/,
+              '72F8'/*行列舞*/
+              // 'A226'/*昏沉*/,
             ]
             if (
               badActions.includes(hitActionId) || badActions.includes(hitActionName)
