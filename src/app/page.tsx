@@ -110,6 +110,7 @@ const deaths : DeathInfo[] = []
 const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
 const reactive = {
+  pidIndex: 1,
   currFrontlineResult: undefined as FrontlineResult | undefined,
   currFrontlineStartTime: 0,
 }
@@ -834,7 +835,7 @@ export default function Home() {
     appConfig.badboy_threshold,
   ])
 
-  const getCards = () => {
+  const getPointCards = () => {
     const result : {
       key: string,
       type: "active" | "neutrality" | "preparing"
@@ -887,7 +888,21 @@ export default function Home() {
         ptDescription: '还需 ' + val.remain.toString() + 's',
       })
     })
-    return result
+    return result.map(val => {
+      const cardFlow = reactive.pidIndex++
+      const cardKey = val.key + '-' + cardFlow
+      return (
+        <PointCard
+          key={cardKey}
+          type={val.type}
+          ptLv={val.ptLv}
+          ptName={val.ptName}
+          ptProgress={val.ptProgress}
+          ptDescription={val.ptDescription}
+          specifyColor={val.specifyColor}
+        />
+      )
+    })
   }
   const getShowDamageInKdButton = () => {
     return <Button
@@ -1227,21 +1242,7 @@ export default function Home() {
                 )
               }
               <div className="w-full flex flex-col gap-0.5">
-                {
-                  getCards().map(val => {
-                    return (
-                      <PointCard
-                        key={val.key}
-                        type={val.type}
-                        ptLv={val.ptLv}
-                        ptName={val.ptName}
-                        ptProgress={val.ptProgress}
-                        ptDescription={val.ptDescription}
-                        specifyColor={val.specifyColor}
-                      />
-                    )
-                  })
-                }
+                { getPointCards() }
               </div>
               <div className="fixed bottom-4 right-8 z-10">
                 {
