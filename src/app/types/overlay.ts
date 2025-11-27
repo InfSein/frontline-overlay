@@ -30,7 +30,7 @@ export type LoglineData = {
 }
 
 export interface OverlayCombatant {
-    OwnerID: number;
+  OwnerID: number;
   Type: number;
   MonsterType: number;
   Status: number;
