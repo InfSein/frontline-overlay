@@ -1,4 +1,4 @@
-import { OverlayEvent } from "@/app/types/overlay"
+import { OverlayEvent, OverlayCombatant } from "@/app/types/overlay"
 
 const useOverlay = () => {
   let ws : WebSocket | undefined
@@ -143,6 +143,18 @@ const useOverlay = () => {
       events: Object.keys(subscribers),
     })
   }
+  
+  const getCombatants = () : Promise<OverlayCombatant[]> => {
+    return new Promise((resolve) => {
+      window.OverlayPluginApi!.callHandler(
+        JSON.stringify({ call: 'getCombatants' }),
+        (str: string) => {
+          const playerData = JSON.parse(str) as { combatants: OverlayCombatant[] }
+          resolve(playerData.combatants)
+        }
+      )
+    })
+  }
 
   return {
     eventsStarted,
@@ -151,6 +163,7 @@ const useOverlay = () => {
     removeOverlayListener,
     callOverlayHandler,
     startOverlayEvents,
+    getCombatants,
   }
 }
 

@@ -135,6 +135,57 @@ export const getGrandCompanyFlag = (gc: GrandCompany) => {
   return `./image/${gc}.png`
 }
 
+export const getJobInfo = (job: number | undefined) => {
+  let job_name = '', job_icon = ''
+  switch (job) {
+    case 19:
+      job_name = '骑士'; job_icon = 'paladin'; break
+    case 20:
+      job_name = '武僧'; job_icon = 'monk'; break
+    case 21:
+      job_name = '战士'; job_icon = 'warrior'; break
+    case 22:
+      job_name = '龙骑士'; job_icon = 'dragoon'; break
+    case 23:
+      job_name = '吟游诗人'; job_icon = 'bard'; break
+    case 24:
+      job_name = '白魔法师'; job_icon = 'whitemage'; break
+    case 25:
+      job_name = '黑魔法师'; job_icon = 'blackmage'; break
+    case 27:
+      job_name = '召唤师'; job_icon = 'summoner'; break
+    case 28:
+      job_name = '学者'; job_icon = 'scholar'; break
+    case 30:
+      job_name = '忍者'; job_icon = 'ninja'; break
+    case 31:
+      job_name = '机工士'; job_icon = 'machinist'; break
+    case 32:
+      job_name = '暗黑骑士'; job_icon = 'darkknight'; break
+    case 33:
+      job_name = '占星术士'; job_icon = 'astrologian'; break
+    case 34:
+      job_name = '武士'; job_icon = 'samurai'; break
+    case 35:
+      job_name = '赤魔法师'; job_icon = 'redmage'; break
+    case 37:
+      job_name = '绝枪战士'; job_icon = 'gunbreaker'; break
+    case 38:
+      job_name = '舞者'; job_icon = 'dancer'; break
+    case 39:
+      job_name = '钐镰客'; job_icon = 'reaper'; break
+    case 40:
+      job_name = '贤者'; job_icon = 'sage'; break
+    case 41:
+      job_name = '蝰蛇剑士'; job_icon = 'viper'; break
+    case 42:
+      job_name = '绘灵法师'; job_icon = 'pictomancer'; break
+    default:
+      job_name = '未知'; job_icon = 'none'; break
+  }
+  return { job_name, job_icon }
+}
+
 /**
  * 获取纷争前线的名称信息
  * @returns [简称, 全称, 类型]
@@ -200,7 +251,7 @@ export const getSecurePointIncrease = (ptAmount: number) => [0, 2, 4, 6, 10, 12,
  */
 export const getActionDamageFromLogLine = (logline: string[]) => {
   let hit = false
-  let damageType : "damage" | "heal" | "both" | undefined = undefined
+  let damageType: "damage" | "heal" | "both" | undefined = undefined
   let damage = 0, heal = 0
   const mightIndex = [8, 10, 12, 14, 16, 18, 20, 22] as const
   mightIndex.forEach(index => {

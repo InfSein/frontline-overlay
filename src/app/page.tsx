@@ -154,7 +154,7 @@ export default function Home() {
       className: 'text text-[1.375rem]',
     })
   }
-  const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
+  const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents, getCombatants } = useOverlay()
 
   const [appNewVersion, setAppNewVersion] = useState<string>('')
   const [checkingAppUpdate, setCheckingAppUpdate] = useState(false)
@@ -394,6 +394,26 @@ export default function Home() {
     return deaths.filter(death => death.victimName === playerName)
   }, [playerName])
 
+  const getPlayerJob = useCallback(async () => {
+    const combatants = await getCombatants()
+    const player = combatants.find(combatant => combatant.ID.toString(16).toUpperCase() === playerId)
+    if (!player) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(
+          'No player was found in given combatants.',
+          '\ncombatants:', combatants,
+          '\nplayer:', JSON.stringify({ id: playerId, name: playerName })
+        )
+      }
+      return
+    }
+    return player.Job
+  }, [
+    getCombatants,
+    playerId,
+    playerName
+  ])
+
   const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
     const conflictZone = GameZonesMap.get(data.zoneID)
     if (conflictZone) {
@@ -411,14 +431,17 @@ export default function Home() {
           result = reactive.currFrontlineResult
           reactive.currFrontlineResult = undefined
         }
-        const log = deepCopy<FrontlineLog>({
-          zone: zone,
-          result,
-          start_time: reactive.currFrontlineStartTime,
-          knockouts: getKnockouts(),
-          deaths: getDeaths()
+        getPlayerJob().then(job => {
+          const log = deepCopy<FrontlineLog>({
+            zone: zone,
+            job,
+            result,
+            start_time: reactive.currFrontlineStartTime,
+            knockouts: getKnockouts(),
+            deaths: getDeaths()
+          })
+          setFrontlineLog(prev => [...prev, log])
         })
-        setFrontlineLog(prev => [...prev, log])
         if (appConfig.auto_collapse_when_leave_battlefield) {
           setCollapsed(true)
         }
@@ -442,7 +465,7 @@ export default function Home() {
       }
     }
   }, [
-    zone, getKnockouts, getDeaths,
+    zone, getKnockouts, getDeaths, getPlayerJob,
     appConfig.auto_collapse_when_leave_battlefield,
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {

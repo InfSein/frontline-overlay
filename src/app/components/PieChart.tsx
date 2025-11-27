@@ -16,6 +16,12 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
     percent: ((item.amount / totalAmount) * 100).toFixed(2),
   }))
 
+  const legend = chartData.length <= 12 ? {
+    orient: 'vertical',
+    left: 'left',
+    data: chartData.map(item => item.name),
+  } : undefined
+
   const option = {
     tooltip: {
       trigger: 'item',
@@ -23,16 +29,12 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
         return `${params.name}: ${params.value} (${params.percent}%)`
       },
     },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      data: chartData.map(item => item.name),
-    },
+    legend: legend,
     series: [
       {
         name: 'Amount Distribution',
         type: 'pie',
-        radius: '50%',
+        radius: '70%',
         data: chartData,
         emphasis: {
           itemStyle: {
