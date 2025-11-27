@@ -102,6 +102,7 @@ export const GameZonesMap = new Map<number, PvPBattle>([
 export type FrontlineResult = "1st" | "2nd" | "3rd" | "win" | "lose"
 export interface FrontlineLog {
   zone: PvPBattle
+  job?: number
   result?: FrontlineResult
   start_time: number
   knockouts: DeathInfo[]

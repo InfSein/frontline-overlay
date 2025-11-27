@@ -110,6 +110,7 @@ const deaths : DeathInfo[] = []
 const goodboys : SelfActionLog[] = []
 const badboys : SelfActionLog[] = []
 const reactive = {
+  pidIndex: 1,
   currFrontlineResult: undefined as FrontlineResult | undefined,
   currFrontlineStartTime: 0,
 }
@@ -153,7 +154,7 @@ export default function Home() {
       className: 'text text-[1.375rem]',
     })
   }
-  const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents } = useOverlay()
+  const { initialize, addOverlayListener, removeOverlayListener, startOverlayEvents, getCombatants } = useOverlay()
 
   const [appNewVersion, setAppNewVersion] = useState<string>('')
   const [checkingAppUpdate, setCheckingAppUpdate] = useState(false)
@@ -393,6 +394,26 @@ export default function Home() {
     return deaths.filter(death => death.victimName === playerName)
   }, [playerName])
 
+  const getPlayerJob = useCallback(async () => {
+    const combatants = await getCombatants()
+    const player = combatants.find(combatant => combatant.ID.toString(16).toUpperCase() === playerId)
+    if (!player) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(
+          'No player was found in given combatants.',
+          '\ncombatants:', combatants,
+          '\nplayer:', JSON.stringify({ id: playerId, name: playerName })
+        )
+      }
+      return
+    }
+    return player.Job
+  }, [
+    getCombatants,
+    playerId,
+    playerName
+  ])
+
   const zoneChangeCallback = useCallback((data: ChangeZoneData) => {
     const conflictZone = GameZonesMap.get(data.zoneID)
     if (conflictZone) {
@@ -410,14 +431,17 @@ export default function Home() {
           result = reactive.currFrontlineResult
           reactive.currFrontlineResult = undefined
         }
-        const log = deepCopy<FrontlineLog>({
-          zone: zone,
-          result,
-          start_time: reactive.currFrontlineStartTime,
-          knockouts: getKnockouts(),
-          deaths: getDeaths()
+        getPlayerJob().then(job => {
+          const log = deepCopy<FrontlineLog>({
+            zone: zone,
+            job,
+            result,
+            start_time: reactive.currFrontlineStartTime,
+            knockouts: getKnockouts(),
+            deaths: getDeaths()
+          })
+          setFrontlineLog(prev => [...prev, log])
         })
-        setFrontlineLog(prev => [...prev, log])
         if (appConfig.auto_collapse_when_leave_battlefield) {
           setCollapsed(true)
         }
@@ -441,7 +465,7 @@ export default function Home() {
       }
     }
   }, [
-    zone, getKnockouts, getDeaths,
+    zone, getKnockouts, getDeaths, getPlayerJob,
     appConfig.auto_collapse_when_leave_battlefield,
   ])
   const primaryPlayerChangeCallback = useCallback((data: ChangePrimaryPlayerData) => {
@@ -834,7 +858,7 @@ export default function Home() {
     appConfig.badboy_threshold,
   ])
 
-  const getCards = () => {
+  const getPointCards = () => {
     const result : {
       key: string,
       type: "active" | "neutrality" | "preparing"
@@ -887,7 +911,21 @@ export default function Home() {
         ptDescription: '还需 ' + val.remain.toString() + 's',
       })
     })
-    return result
+    return result.map(val => {
+      const cardFlow = reactive.pidIndex++
+      const cardKey = val.key + '-' + cardFlow
+      return (
+        <PointCard
+          key={cardKey}
+          type={val.type}
+          ptLv={val.ptLv}
+          ptName={val.ptName}
+          ptProgress={val.ptProgress}
+          ptDescription={val.ptDescription}
+          specifyColor={val.specifyColor}
+        />
+      )
+    })
   }
   const getShowDamageInKdButton = () => {
     return <Button
@@ -1227,21 +1265,7 @@ export default function Home() {
                 )
               }
               <div className="w-full flex flex-col gap-0.5">
-                {
-                  getCards().map(val => {
-                    return (
-                      <PointCard
-                        key={val.key}
-                        type={val.type}
-                        ptLv={val.ptLv}
-                        ptName={val.ptName}
-                        ptProgress={val.ptProgress}
-                        ptDescription={val.ptDescription}
-                        specifyColor={val.specifyColor}
-                      />
-                    )
-                  })
-                }
+                { getPointCards() }
               </div>
               <div className="fixed bottom-4 right-8 z-10">
                 {
