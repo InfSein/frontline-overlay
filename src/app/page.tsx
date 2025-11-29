@@ -520,12 +520,19 @@ export default function Home() {
 
           // 记录上次伤害表
           if (hit && (damageType === 'damage' || damageType === 'both')) {
-            const key = `${perpetratorId}-${victimId}`
-            playerLasthitMap[key] = {
-              perpetratorName: perpetratorName,
-              victimName: victimName,
-              hitActionName: hitActionName,
-              hitActionDamage: damage,
+            const specialActions = [
+              '星遁天诛', '完人',
+              '献身', '全力挥打', '绝空拳', '爆破箭', '胖胖之墙'
+            ] // 可能不造成伤害就击杀的技能
+
+            if (specialActions.includes(hitActionName) || damage > 0) {
+              const key = `${perpetratorId}-${victimId}`
+              playerLasthitMap[key] = {
+                perpetratorName: perpetratorName,
+                victimName: victimName,
+                hitActionName: hitActionName,
+                hitActionDamage: damage,
+              }
             }
           }
           if (hitActionId && victimId === playerId && perpetratorId !== playerId) {
