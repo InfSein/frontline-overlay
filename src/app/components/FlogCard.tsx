@@ -59,7 +59,7 @@ const FlogCard : React.FC<FlogCardProps> = ({
         <div className="flex items-center gap-1 text-[1.1rem] text-gray-200 leading-[1] m-0 text-shadow">
           { formatTimestamp(frontlineLog.start_time) }
           <Divider layout="vertical" style={{ margin: '0 0.25rem'}} />
-          <img src={`/icon/game-job/${jobIcon}.png`} className="inline-block w-[1.1em] h-[1.1em] vertical-align:middle" />
+          <img src={`./icon/game-job/${jobIcon}.png`} className="inline-block w-[1.1em] h-[1.1em] vertical-align:middle" />
           { jobName }
         </div>
       </div>
