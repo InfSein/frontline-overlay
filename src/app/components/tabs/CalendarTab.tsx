@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import PageStyle from '../page.module.css'
-import { getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames } from '../tools';
-import { Frontline } from '../types';
+import PageStyle from '@/app/page.module.css';
+import { getFrontlineBackground, getFrontlineBackgroundColor, getFrontlineForeColor, getFrontlineNames } from '../../tools';
+import { Frontline } from '../../types';
 
 /* 
  * 轮换算法参考了 https://github.com/NekoWoods/what-zc-today/blob/main/sketch.js
