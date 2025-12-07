@@ -113,6 +113,8 @@ export interface DeathInfo {
   happenTime: number;
   victimName: string;
   perpetratorName: string;
+  victimJob?: number;
+  perpetratorJob?: number;
   summonedBy?: string;
   lasthitActionName: string;
   lasthitActionDamage: number;
