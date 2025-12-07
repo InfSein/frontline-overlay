@@ -29,7 +29,7 @@ const StatisticsTab: React.FC = () => {
   return (
     <div id="statistics-tab" className={PageStyle.panel}>
       {!frontlineLog.length && (
-        <AlertCard msg="暂无记录。请完成至少一场纷争前线后再来查看。" />
+        <AlertCard msg="暂无记录。请完成至少一场对战后再来查看。" />
       )}
       <div className={PageStyle.title}>
         参战统计

@@ -3,6 +3,7 @@ import { BrowseIcon, BrowseOffIcon } from 'tdesign-icons-react';
 import AlertCard from '../AlertCard';
 import PageStyle from '@/app/page.module.css';
 import { useOverlayData } from '../OverlayDataProvider';
+import JobSpan from '../JobSpan';
 
 const KnockoutTab: React.FC = () => {
   const {
@@ -57,7 +58,12 @@ const KnockoutTab: React.FC = () => {
               </>
             )}
             <span>击倒了</span>
-            <span className="text-orange-700">{death.victimName}</span>
+            <div className="flex items-center">
+              {!!death.victimJob && (
+                <JobSpan job={death.victimJob} />
+              )}
+              <span className="text-orange-700">{death.victimName}</span>
+            </div>
           </div>
         </div>
       ))}

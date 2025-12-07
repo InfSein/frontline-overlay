@@ -37,7 +37,7 @@ const TopToolbar: React.FC = () => {
             className="text-[1.25rem] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
             hover:bg-gray-700 data-[active=true]:bg-white/30 transition-colors duration-200"
           >
-            {tabPages[tab as keyof typeof tabPages]}
+            {tabPages[tab]}
           </div>
         ))}
       </div>

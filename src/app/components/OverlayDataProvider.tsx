@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, JSX } from
 import { MessagePlugin } from 'tdesign-react/lib/';
 import useOverlay from '../tools/overlay';
 import { GrandCompany, Frontline, FrontlineLog, DeathInfo, CrystalConflict, FrontlineResult, GameZonesMap, PvPBattle, RivalWings } from '../types';
-import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData } from '../types/overlay';
+import { ChangePrimaryPlayerData, ChangeZoneData, LoglineData, OverlayCombatant } from '../types/overlay';
 import {
   getGrandCompanyName,
   getGrandCompanyColor,
@@ -62,6 +62,7 @@ interface LasthitInfo {
 interface SelfActionLog {
   happenTime: number;
   perpetratorName: string;
+  perpetratorJob?: number;
   actionName: string;
   actionDamage: number;
 }
@@ -77,9 +78,11 @@ const pointMap: Record<string, PointInfo | StaticPointInfo | InitialPointInfo> =
 const prePoints: PrePointInfo[] = [];
 
 // 玩家表 | `key:charID` | `val:charName`
-let playerMap: Record<string, string> = {
+let playerMapName: Record<string, string> = {
   'E0000000': '(场地/dot)',
 };
+let playerMapJob : Record<string, number> = {};
+let playerMapFull: Record<string, OverlayCombatant> = {};
 
 // 召唤物表 | `key:召唤物ID` | `val:召唤者ID`
 let summonMap: Record<string, string> = {};
@@ -381,6 +384,9 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
   }, [playerName]);
 
   const getPlayerJob = useCallback(async () => {
+    if (playerMapJob[playerId]) {
+      return playerMapJob[playerId];
+    }
     const combatants = await getCombatants();
     const player = combatants.find(combatant => combatant.ID.toString(16).toUpperCase() === playerId);
     if (!player) {
@@ -428,6 +434,9 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
           });
           setFrontlineLog(prev => [...prev, log]);
         });
+        if (process.env.NODE_ENV === 'development') {
+          console.log(JSON.stringify(playerMapFull))
+        }
         if (appConfig.auto_collapse_when_leave_battlefield) {
           setCollapsed(true);
         }
@@ -439,9 +448,12 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
         else val.cancel();
       });
       prePoints.length = 0;
-      playerMap = {
+      playerMapName = {
         'E0000000': '(场地/dot)',
-      }; summonMap = {}; playerLasthitMap = {};
+      };
+      playerMapJob = {};
+      playerMapFull = {};
+      summonMap = {}; playerLasthitMap = {};
       setDummy(0);
       if (process.env.NODE_ENV === 'development') {
         console.log('[Zone] ', data.zoneID, ' / ', data.zoneName);
@@ -473,7 +485,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
         // 03|2025-07-21T19:50:15.3580000+08:00|100F9FCA|西风|18|64|0000|415|MoDuNa|0|0|54000|55500|10000|10000|||241.34|135.04|-7.08|-2.09|af51ebeec28c5c27
         const charId = data.line[2];
         const charName = data.line[3];
-        playerMap[charId] = charName;
+        playerMapName[charId] = charName;
       } else if ((msgType === '21' || msgType === '22')) { // 发动技能
         // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
         // 22|2025-07-21T20:15:49.3900000+08:00|1058F1D5|浮|72DC|霰弹枪|40000002|木人|720003|17700000|0|0|0|0|0|0|0|0|0|0|0|0|0|0|75000|75000|10000|10000|||104.12|-4.71|2.31|3.14|57000|57000|10000|10000|||94.94|-13.42|2.31|-2.71|0007B835|1|2|00||01|72DC|72DC|0.100|0000|69f2e27a0f10b758
@@ -483,6 +495,8 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
         const hitActionName = data.line[5] || '???';
         const victimId = data.line[6];
         const victimName = data.line[7] || '???';
+
+        const perpetratorJob = playerMapJob[perpetratorId];
 
         let isValidAction = data.line[8] !== '0';
         if (hitActionId === '72D3'/*默者的夜曲*/) {
@@ -536,6 +550,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
               addSelfActionLog(goodboys, {
                 happenTime: Date.now(),
                 perpetratorName: perpetratorName,
+                perpetratorJob: perpetratorJob,
                 actionName: hitActionName,
                 actionDamage: heal,
               });
@@ -555,6 +570,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
               addSelfActionLog(badboys, {
                 happenTime: Date.now(),
                 perpetratorName: perpetratorName,
+                perpetratorJob: perpetratorJob,
                 actionName: hitActionName,
                 actionDamage: damage,
               });
@@ -572,19 +588,21 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
             let summoner: string | undefined;
             if (summonMap[perpetratorId]) {
               const summonerId = summonMap[perpetratorId];
-              if (playerMap[summonerId]) {
-                summoner = playerMap[summonerId];
+              if (playerMapName[summonerId]) {
+                summoner = playerMapName[summonerId];
               } else if (summonerId === playerId) {
                 summoner = playerName;
               }
             }
             if (!perpetratorName) {
-              perpetratorName = playerMap[perpetratorId] || '???';
+              perpetratorName = playerMapName[perpetratorId] || '???';
             }
             deaths.push({
               happenTime: Date.now(),
               victimName: victimName,
               perpetratorName: perpetratorName,
+              victimJob: playerMapJob[victimId],
+              perpetratorJob: playerMapJob[summoner || perpetratorId],
               summonedBy: summoner,
               lasthitActionName: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
               lasthitActionDamage: playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
@@ -980,6 +998,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
     };
   },[frontlineLog]);
 
+  // 读取和监听应用设置变更
   useEffect(() => {
     const config = loadConfig();
     setAppConfig(config);
@@ -1001,6 +1020,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
     };
   }, []);
 
+  // 注册 overlay 事件监听器
   useEffect(() => {
     if (typeof window === 'undefined') return;
     initialize(window);
@@ -1011,103 +1031,6 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
 
     startOverlayEvents();
 
-    if (process.env.NODE_ENV === 'development') {
-      (window as any).test_zone = (zone: number) => {
-        console.log('zone:', GameZonesMap.get(zone));
-      };
-      (window as any).gen_demo_data = () => {
-        const min = 60 * 1000;
-        setFrontlineLog([
-          {
-            zone: Frontline.seize,
-            result: 'win',
-            start_time: Date.now(),
-            knockouts: [
-              genDeath('其他玩家01', '星遁天诛'),
-              genDeath('其他玩家02', '星遁天诛'),
-              genDeath('其他玩家03', '星遁天诛'),
-              genDeath('其他玩家04', '星遁天诛'),
-              genDeath('其他玩家05', '冰晶乱流之术'),
-            ],
-            deaths: [
-              genDeath('其他玩家01', '魔弹射手'),
-              genDeath('其他玩家02', '百万核爆'),
-              genDeath('其他玩家03', '天穹破碎'),
-            ],
-          },
-          {
-            zone: Frontline.shatter,
-            result: 'lose',
-            start_time: Date.now() + min*15,
-            knockouts: [
-              genDeath('其他玩家01', '星遁天诛'),
-              genDeath('其他玩家02', '星遁天诛'),
-            ],
-            deaths: [
-              genDeath('其他玩家03', '天穹破碎'),
-            ],
-          },
-          {
-            zone: CrystalConflict.palaistra,
-            result: 'win',
-            start_time: Date.now() + min*31,
-            knockouts: [
-              genDeath('其他玩家01', '星遁天诛'),
-            ],
-            deaths: [
-              genDeath('其他玩家03', '天穹破碎'),
-              genDeath('其他玩家05', '天穹破碎'),
-            ],
-          },
-          {
-            zone: CrystalConflict.volcanic,
-            result: 'lose',
-            start_time: Date.now() + min*48,
-            knockouts: [
-              genDeath('其他玩家01', '猛击'),
-              genDeath('其他玩家02', '冰晶乱流之术'),
-              genDeath('其他玩家03', '冰晶乱流之术'),
-              genDeath('其他玩家04', '猛击'),
-              genDeath('其他玩家05', '是生灭法'),
-              genDeath('其他玩家06', '是生灭法'),
-              genDeath('其他玩家05', '是生灭法'),
-              genDeath('其他玩家06', '是生灭法'),
-              genDeath('其他玩家05', '是生灭法'),
-              genDeath('其他玩家06', '是生灭法'),
-            ],
-            deaths: [
-              genDeath('其他玩家03', '夜昏'),
-              genDeath('其他玩家03', '夜昏'),
-              genDeath('其他玩家03', '夜昏'),
-              genDeath('其他玩家03', '夜昏'),
-              genDeath('其他玩家03', '夜昏'),
-            ],
-          },
-          {
-            zone: CrystalConflict.castletown,
-            result: 'win',
-            start_time: Date.now() + min*31,
-            knockouts: [
-              genDeath('其他玩家01', '星遁天诛'),
-            ],
-            deaths: [
-              genDeath('其他玩家03', '天穹破碎'),
-              genDeath('其他玩家05', '天穹破碎'),
-            ],
-          },
-        ]);
-
-        function genDeath(p: string, action: string, damage?: number) {
-          return {
-            happenTime: 0,
-            victimName: p,
-            perpetratorName: p,
-            lasthitActionName: action,
-            lasthitActionDamage: damage ?? 0,
-          };
-        }
-      };
-    }
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback);
@@ -1118,6 +1041,27 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
     zoneChangeCallback, loglineCallback, primaryPlayerChangeCallback,
     initialize, addOverlayListener, removeOverlayListener, startOverlayEvents,
   ]);
+
+  // 注册战斗成员监听器
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const watchCombatants = setInterval(async () => {
+      if (!onConflict && !zone) return;
+      const combatants = await getCombatants();
+      combatants?.forEach(combatant => {
+        const playerId = combatant.ID.toString(16).toUpperCase()
+        playerMapJob[playerId] = combatant.Job
+        playerMapFull[playerId] = combatant
+      })
+    }, 1500);
+
+    return () => {
+      clearInterval(watchCombatants);
+    }
+  }, [
+    getCombatants, onConflict, zone,
+  ])
 
   const value = {
     appConfig,

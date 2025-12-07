@@ -3,6 +3,7 @@ import { BrowseIcon, BrowseOffIcon } from 'tdesign-icons-react';
 import AlertCard from '../AlertCard';
 import PageStyle from '@/app/page.module.css';
 import { useOverlayData } from '../OverlayDataProvider';
+import JobSpan from '../JobSpan';
 
 const DeathTab: React.FC = () => {
   const {
@@ -42,7 +43,12 @@ const DeathTab: React.FC = () => {
           <div>{formatTime(death.happenTime)}　</div>
           <div className="flex flex-wrap flex-1">
             <span>被</span>
-            <span className="text-orange-700">{death.summonedBy || death.perpetratorName}</span>
+            <div className="flex items-center">
+              {!!death.perpetratorJob && (
+                <JobSpan job={death.perpetratorJob} />
+              )}
+              <span className="text-orange-700">{death.summonedBy || death.perpetratorName}</span>
+            </div>
             {death.summonedBy && (
               <>
                 <span>召唤的</span>

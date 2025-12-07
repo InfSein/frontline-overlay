@@ -1,6 +1,7 @@
 import AlertCard from '../AlertCard';
 import PageStyle from '@/app/page.module.css';
 import { useOverlayData } from '../OverlayDataProvider';
+import JobSpan from '../JobSpan';
 
 const BadBoyTab: React.FC = () => {
   const {
@@ -20,7 +21,12 @@ const BadBoyTab: React.FC = () => {
         <div key={'badboy' + logIndex} className={PageStyle.title}>
           <div>{formatTime(log.happenTime)}　</div>
           <div className="flex flex-wrap flex-1">
-            <span className="text-orange-700">{log.perpetratorName}</span>
+            <div className="flex items-center">
+              {!!log.perpetratorJob && (
+                <JobSpan job={log.perpetratorJob} />
+              )}
+              <span className="text-orange-700">{log.perpetratorName}</span>
+            </div>
             <span>对你发动了</span>
             <span className="text-orange-700">{log.actionName}</span>
             {!!log.actionDamage && (
