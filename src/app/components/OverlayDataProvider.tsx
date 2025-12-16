@@ -346,7 +346,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
   };
 
   const getGcPoint = (gc: GrandCompany) => {
-    if (zone === Frontline.seize || zone === Frontline.naadam) {
+    if (zone === Frontline.seize || zone === Frontline.naadam || zone === Frontline.triumph) {
       const arr = Object.values(pointMap)
         .filter(val => val.type !== 'static' && val.type !== 'initial' && !val.paused && val.owner === gc)
         .map(val => (val as PointInfo).remain);
@@ -360,7 +360,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
   };
 
   const getGcIncreaseSpeed = (gc: GrandCompany) => {
-    if (zone === Frontline.seize || zone === Frontline.naadam) {
+    if (zone === Frontline.seize || zone === Frontline.naadam || zone === Frontline.triumph) {
       const arr = Object.values(pointMap)
         .filter(val => val.type !== 'static' && val.type !== 'initial' && val.owner === gc)
         .map(val => (val as PointInfo).dropSpeed);
@@ -815,6 +815,68 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
         setDummy(d => d + 1);
       }
     }
+    else if (zone === Frontline.triumph) {
+      const getFp = (ptLv: string) => {
+        if (ptLv === 'S') return [200, 20];
+        else if (ptLv === 'A') return [100, 10];
+        else if (ptLv === 'B') return [50, 5];
+        throw new Error('[gcFp] wtf point is? ' + ptLv);
+      };
+
+      const matchInitial = msg.match(/30秒后(S|A|B)级的战略目标点(.*?)将变为可控制状态……/);
+      if (matchInitial && matchInitial[2]) {
+        const ptLv = matchInitial[1];
+        const pt = matchInitial[2];
+        const [total] = getFp(ptLv);
+        createInitialPoint(pt, ptLv, total, 30);
+        setDummy(d => d + 1);
+        return;
+      }
+
+      const matchNeutral = msg.match(/(S|A|B)级的战略目标点(.*?)已变为可控制状态！/);
+      if (matchNeutral && matchNeutral[2]) {
+        const ptLv = matchNeutral[1];
+        const pt = matchNeutral[2];
+        const [total] = getFp(ptLv);
+        createInitialPoint(pt, ptLv, total);
+        setDummy(d => d + 1);
+        return;
+      }
+
+      const matchConquer = msg.match(/(黑涡团|双蛇党|恒辉队)控制了(S|A|B)级的战略目标点(.*?)！/);
+      if (matchConquer) {
+        const pt = matchConquer[3];
+        const ptLv = matchConquer[2];
+        const owner = parseGc(matchConquer[1]);
+        const [total, drop] = getFp(ptLv);
+        activatePoint(pt, owner, ptLv, total, drop);
+        setDummy(d => d + 1);
+        return;
+      }
+
+      const matchClean = msg.match(/战略目标点(.*?)已失效。/);
+      if (matchClean) {
+        const pt = matchClean[1];
+        if (pointMap[pt] && pointMap[pt].type !== 'static' && pointMap[pt].type !== 'initial') {
+          pointMap[pt].cancel();
+        }
+        setDummy(d => d + 1);
+        return;
+      }
+
+      if (msg === '战斗已经过去了5分钟，战略目标点同时出现的数量减少了！') {
+        setPtMax(4);
+        setDummy(d => d + 1);
+      }
+      if (msg === '战斗已经过去了10分钟，战略目标点同时出现的数量减少了！') {
+        setPtMax(3);
+        setDummy(d => d + 1);
+      }
+      if (msg === '战斗已经过去了15分钟，战略目标点同时出现的数量减少了！') {
+        setPtMax(2);
+        setDummy(d => d + 1);
+      }
+    }
     else if (zone === Frontline.secure) {
       const matchConquer = msg.match(/(黑涡团|双蛇党|恒辉队)占领了(.*?)！/);
       if (matchConquer) {
@@ -885,6 +947,7 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
       if (zone === Frontline.seize) ptName = '亚拉戈石文';
       else if (zone === Frontline.shatter) ptName = '冰封的石文';
       else if (zone === Frontline.naadam) ptName = '无垢的大地';
+      else if (zone === Frontline.triumph) ptName = '战略目标点';
       ptName += key;
       if (val.type === 'initial') {
         return {
@@ -968,11 +1031,15 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
   };
 
   const resolveLog = useCallback(() => {
+    const dealDouble = (a: number, b: number) => {
+      return Math.round((a / (b || 1)) * 100) / 100;
+    }
+
     const knockouts = frontlineLog.map(log => log.knockouts).flat();
     const deaths = frontlineLog.map(log => log.deaths).flat();
-    const kd = Math.floor(knockouts.length / (deaths.length || 1) * 100) / 100;
-    const knockoutEachMatch = frontlineLog.length ? Math.floor(knockouts.length / frontlineLog.length * 100) / 100 : 0;
-    const deathEachMatch = frontlineLog.length ? Math.floor(deaths.length / frontlineLog.length * 100) / 100 : 0;
+    const kd = dealDouble(knockouts.length, deaths.length);
+    const knockoutEachMatch = dealDouble(knockouts.length, frontlineLog.length);
+    const deathEachMatch = dealDouble(deaths.length, frontlineLog.length);
 
     const knockoutSkillMap : Record<string, number> = {};
     knockouts.forEach(knockout => {
@@ -1030,7 +1097,6 @@ const OverlayDataProvider: React.FC<OverlayDataProviderProps> = ({ children }) =
     addOverlayListener('LogLine', loglineCallback);
 
     startOverlayEvents();
-
 
     return () => {
       removeOverlayListener('ChangeZone', zoneChangeCallback);

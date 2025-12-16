@@ -134,6 +134,26 @@ export default function CalendarTab() {
           </p>
         </div>
       </div>
+      <div
+        className="relative p-2 gap-1 rounded shadow-xl flex items-center"
+        style={{
+          color: getFrontlineForeColor(Frontline.triumph),
+          backgroundColor: getFrontlineBackgroundColor(Frontline.triumph),
+          backgroundImage: `url(${getFrontlineBackground(Frontline.triumph)})`,
+          backgroundSize: '70%',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: '1% center',
+        }}
+      >
+        <div className="ml-auto">
+          <div className="text-[1.75rem] leading-[1.5] font-medium text-white text-shadow">
+            { getFrontlineNames(Frontline.triumph)[1] }
+          </div>
+          <p className="text-[#cad5e2] m-0 mr-1 text-right">
+            { getFrontlineNames(Frontline.triumph)[2] }
+          </p>
+        </div>
+      </div>
       <div className={PageStyle.title}>未来战场</div>
       <div className="flex flex-col gap-0.5 text-[1.125rem]">
         {
@@ -159,6 +179,21 @@ export default function CalendarTab() {
             )
           })
         }
+        <div
+          className="flex items-center border border-black/50 rounded px-1 py-0.5"
+          style={{
+            color: getFrontlineForeColor(Frontline.triumph),
+            backgroundColor: getFrontlineBackgroundColor(Frontline.triumph),
+          }}
+        >
+          <div>
+            <span className="mx-[0.3em] ml-[0.5em]"> · </span>
+            <span>{ getFrontlineNames(Frontline.triumph)[1] }</span>
+          </div>
+          <div className="ml-auto">
+            {`　(长期开放)`}
+          </div>
+        </div>
       </div>
     </div>
   )

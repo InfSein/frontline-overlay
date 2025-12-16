@@ -196,6 +196,7 @@ export const getFrontlineNames = (fl: PvPBattle) => {
     case Frontline.seize: return ['尘封', '尘封秘岩', '争夺战'] as const
     case Frontline.shatter: return ['碎冰', '荣誉野', '碎冰战'] as const
     case Frontline.naadam: return ['草原', '昂萨哈凯尔', '竞争战'] as const
+    case Frontline.triumph: return ['高原', '沃刻其特', '演习战'] as const
     case RivalWings.hiddengorge: return ['隐塞', '隐塞', '机动战'] as const
     case CrystalConflict.palaistra: return ['学校', '角力学校', '水晶冲突'] as const
     case CrystalConflict.cloudnine: return ['九霄', '九霄云上', '水晶冲突'] as const
@@ -219,6 +220,7 @@ export const getFrontlineBackgroundColor = (fl: PvPBattle) => {
     case Frontline.seize: return '#44756A' as const
     case Frontline.shatter: return '#F6F9F6' as const
     case Frontline.naadam: return '#616D22' as const
+    case Frontline.triumph: return '#418CBF' as const
     case RivalWings.hiddengorge: return '#946141' as const
     case CrystalConflict.palaistra: return '#1E3743' as const
     case CrystalConflict.cloudnine: return '#56849B' as const
