@@ -35,6 +35,8 @@ export enum Frontline {
   shatter = "shatter",
   /** 昂萨哈凯尔（竞争战） */
   naadam = "naadam",
+  /** 沃刻其特（演习战） */
+  triumph = "triumph",
 }
 export enum RivalWings {
   /** 隐塞（机动战） */
@@ -63,6 +65,8 @@ const GameZones = {
     shatter: 554,
     /** 昂萨哈凯尔（竞争战） */
     naadam: 888,
+    /** 沃刻其特（演习战） */
+    triumph: 1313,
   },
   rivalWings: {
     /** 隐塞（机动战） */
@@ -87,6 +91,7 @@ export const GameZonesMap = new Map<number, PvPBattle>([
   [GameZones.frontline.seize, Frontline.seize],
   [GameZones.frontline.shatter, Frontline.shatter],
   [GameZones.frontline.naadam, Frontline.naadam],
+  [GameZones.frontline.triumph, Frontline.triumph],
 
   // rivalWings
   [GameZones.rivalWings.hiddengorge, RivalWings.hiddengorge],
