@@ -1,0 +1,15 @@
+.page-panel {
+  @apply w-full relative flex-1 bg-black/30 p-2 rounded text-white flex flex-col gap-1;
+}
+
+.page-title {
+  @apply w-full flex flex-wrap items-center text-[1.25rem] self-baseline text-white px-1 py-0.5 rounded bg-gray-900/90 border border-black/50;
+}
+.page-title_info {
+  @apply w-full flex items-center text-[1.25rem] self-baseline text-white px-1 py-0.5 rounded border;
+  background-color: rgba(56, 137, 197, 0.25);
+  border-color: rgba(56, 137, 197, 0.35);
+}
+.page-content {
+  @apply w-full items-center text-[1.25rem] self-baseline text-black px-3 py-1 rounded bg-white/60 border border-white;
+}

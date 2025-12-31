@@ -1,0 +1,15 @@
+@import './base.css';
+@import './page.css';
+@import './scrollbar.css';
+
+#app {
+  height: 100%;
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 2px black;
+}
+
+.n-message__content {
+  font-size: 1.25rem !important;
+}

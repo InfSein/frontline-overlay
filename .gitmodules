@@ -1,0 +1,3 @@
+[submodule "external/cactbot"]
+	path = external/cactbot
+	url = https://github.com/OverlayPlugin/cactbot.git

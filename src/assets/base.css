@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background: transparent;
+  user-select: none;
+  font-family: Cambria, "思源宋体 CN", Arial, Helvetica, sans-serif;
+}
