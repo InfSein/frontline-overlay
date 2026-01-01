@@ -266,7 +266,7 @@ export const getSecurePointIncrease = (ptAmount: number) => [0, 2, 4, 6, 10, 12,
  * @returns hit: 是否命中, damage: 伤害量
  */
 export const getActionDamageFromLogLine = (logline: string[]) => {
-  let hit = false
+  let hit = false, instantDeath = false
   let damageType: "damage" | "heal" | "both" | undefined = undefined
   let damage = 0, heal = 0
   const mightIndex = [8, 10, 12, 14, 16, 18, 20, 22] as const
@@ -275,7 +275,7 @@ export const getActionDamageFromLogLine = (logline: string[]) => {
     if (!logType || !logVal) return
     if (logType === '0') return
 
-    const { dodgeOrMiss, damaged, healed } = parseLog(logType)
+    const { dodgeOrMiss, instantDead, damaged, healed } = parseLog(logType)
     if (!dodgeOrMiss) {
       hit = true
       if (damaged) {
@@ -289,9 +289,12 @@ export const getActionDamageFromLogLine = (logline: string[]) => {
         heal += parseDamage(logVal)
       }
     }
+    if (instantDead) {
+      instantDeath = true
+    }
   })
   damageType ??= 'damage' as "damage" | "heal" | "both"
-  return { hit, damageType, damage, heal }
+  return { hit, instantDeath, damageType, damage, heal }
 
   function parseLog(logType: string) {
     const effectType = parseInt((logType || '0'), 16)

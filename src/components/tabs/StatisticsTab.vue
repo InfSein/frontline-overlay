@@ -11,7 +11,8 @@ const {
 
 const knockoutChartTabs = computed(() => [
   [ 'skill', '按技能', statistics.value.pieData.knockoutBySkill ],
-  [ 'job', '按职业', statistics.value.pieData.knockoutByJob ],
+  [ 'selfJob', '按自身职业', statistics.value.pieData.knockoutBySelfJob ],
+  [ 'enemyJob', '按敌方职业', statistics.value.pieData.knockoutByEnemyJob ],
 ] as [string, string, { label: string; amount: number }[]][])
 const activeKnockoutChartTab = ref(knockoutChartTabs.value![0]![0])
 const currKnockoutChartData = computed(() =>
@@ -20,7 +21,8 @@ const currKnockoutChartData = computed(() =>
 
 const deathChartTabs = computed(() => [
   [ 'skill', '按技能', statistics.value.pieData.deathBySkill ],
-  [ 'job', '按职业', statistics.value.pieData.deathByJob ],
+  [ 'selfJob', '按自身职业', statistics.value.pieData.deathBySelfJob ],
+  [ 'enemyJob', '按敌方职业', statistics.value.pieData.deathByEnemyJob ],
 ] as [string, string, { label: string; amount: number }[]][])
 const activeDeathChartTab = ref(deathChartTabs.value![0]![0])
 const currDeathChartData = computed(() =>
@@ -78,7 +80,7 @@ const currDeathChartData = computed(() =>
       <n-divider class="!my-1" />
       <div class="h-60">
         <PieChart v-if="currKnockoutChartData.length" :data="currKnockoutChartData" />
-        <div v-else class="flex items-center justify-center">暂无数据</div>
+        <div v-else class="h-full flex items-center justify-center">暂无数据</div>
       </div>
     </div>
 
@@ -100,7 +102,7 @@ const currDeathChartData = computed(() =>
       <n-divider class="!my-1" />
       <div class="h-60">
         <PieChart v-if="currDeathChartData.length" :data="currDeathChartData" />
-        <div v-else class="h-60 flex items-center justify-center">暂无数据</div>
+        <div v-else class="h-full flex items-center justify-center">暂无数据</div>
       </div>
     </div>
 

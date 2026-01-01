@@ -26,6 +26,7 @@ import {
 } from '@/tools/combat-log'
 import { deepCopy, getActionDamageFromLogLine, getFrontlineNames, getGrandCompanyColor, getGrandCompanyName, getJobInfo, getSecurePointIncrease } from '@/tools'
 import type { PointConfigNaadam, PointConfigSecure, PointConfigSeize } from '@/types/point'
+import { ImportantActions } from '@/constants'
 
 // Global variables
 const appVar = reactive({
@@ -122,7 +123,7 @@ const useCombatParser = () => {
 
     list.push(log)
   }
-  const addIarLog = (list: IarLog[], log: IarLog, maxGapTime = 3000) => {
+  const addIarLog = (list: IarLog[], log: IarLog, maxGapTime = 2000) => {
     const recentLogs = list.slice(-5)
 
     const duplicateIndex = recentLogs.findIndex(lastLog =>
@@ -405,6 +406,7 @@ const useCombatParser = () => {
       combatData.badboys.length = 0
       combatData.mygoods.length = 0
       combatData.mybads.length = 0
+      combatData.iarLog.length = 0
 
       if (combatData.zone === Frontline.seize) combatData.ptMax = 4
       else if (combatData.zone === Frontline.naadam) combatData.ptMax = 6
@@ -565,7 +567,7 @@ const useCombatParser = () => {
         }
 
         if (isValidAction && perpetratorId && victimId) {
-          const { hit, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
+          const { hit, instantDeath, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
 
           if (
             isDev
@@ -595,6 +597,7 @@ const useCombatParser = () => {
                 victimName: victimName,
                 hitActionName: hitActionName,
                 hitActionDamage: damage,
+                hitActionInstantDeath: instantDeath,
               }
             }
           }
@@ -645,6 +648,7 @@ const useCombatParser = () => {
                   targetJob: perpetratorJob,
                   actionName: hitActionName,
                   actionDamage: damage,
+                  actionInstantDeath: instantDeath,
                 })
               } else if (perpetratorId === combatData.playerId) {
                 addSelfActionLog(combatData.mybads, {
@@ -653,36 +657,26 @@ const useCombatParser = () => {
                   targetJob: victimJob,
                   actionName: hitActionName,
                   actionDamage: damage,
+                  actionInstantDeath: instantDeath,
                 })
               }
             }
             // 记录行迹
-            const importantActions = [
-              '蛮荒崩裂', '尽毁', '混沌旋风', '原初的怒震', '原初的怒号',
-              '腐秽大地', '腐秽黑暗', '夜昏',
-              '命运之环', '命运之印', '终结击',
-              '涤罪之心', '神谕', '发炎III',
-              '天穹破碎', '劫火灭却之术', '斩铁剑',
-              '暗夜游魂',
-              '蛇鳞击', '血气蛇鳞击', '吞天巨蛇',
-              '英雄的返场余音',
-              '行列舞', '刃舞·终',
-              '耀星', '霜星',
-              '百万核爆',
-              '荆棘环绕', '南天十字',
-            ]
+            const importantActions = Object.keys(ImportantActions)
             if (
               importantActions.includes(hitActionName)
               && perpetratorId === combatData.playerId
-              && victimId !== combatData.playerId
             ) {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const [m, maxGapTime] = ImportantActions[hitActionName]!
+              const actionTargets = victimId !== combatData.playerId ? [victimName] : []
               addIarLog(combatData.iarLog, {
                 happenTime: Date.now(),
                 actionName: hitActionName,
-                actionTargets: [victimName],
+                actionTargets,
                 totalDamage: damage,
                 totalHeal: heal,
-              })
+              }, maxGapTime)
             }
           }
         }
@@ -715,6 +709,7 @@ const useCombatParser = () => {
               summonedBy: summoner,
               lasthitActionName: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
               lasthitActionDamage: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
+              lasthitActionInstantDeath: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionInstantDeath || false,
             })
           }
         }
@@ -974,9 +969,11 @@ const useCombatParser = () => {
 
     const pieData = {
       knockoutBySkill: countBy(knockouts, k => k.lasthitActionName),
-      knockoutByJob: countBy(knockouts, k => getJobInfo(k.victimJob).job_name || '???'),
+      knockoutBySelfJob: countBy(knockouts, k => getJobInfo(k.perpetratorJob).job_name || '???'),
+      knockoutByEnemyJob: countBy(knockouts, k => getJobInfo(k.victimJob).job_name || '???'),
       deathBySkill: countBy(deaths, d => d.lasthitActionName),
-      deathByJob: countBy(deaths, d => getJobInfo(d.perpetratorJob).job_name || '???'),
+      deathBySelfJob: countBy(deaths, d => getJobInfo(d.victimJob).job_name || '???'),
+      deathByEnemyJob: countBy(deaths, d => getJobInfo(d.perpetratorJob).job_name || '???'),
     }
 
     return {

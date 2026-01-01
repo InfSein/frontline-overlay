@@ -1,8 +1,8 @@
 # FFXIV PvP悬浮窗
 
-![Next.js](https://img.shields.io/badge/Next.js-15.4.1-000?logo=next.js)
-![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4.3-06b6d4?logo=tailwindcss)
+![Vite](https://img.shields.io/badge/Vite-7.1.12-646CFF?style=flat&logo=vite)
+![Vue3](https://img.shields.io/badge/Vue-3.5.22-4FC08D?style=flat&logo=vue.js)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4.19-06b6d4?logo=tailwindcss)
 
 专为 最终幻想XIV PvP 玩法制作的 ACT OverlayPlugin 悬浮窗插件。
 
@@ -12,7 +12,7 @@
 
 > [!TIP]\
 > 仅为国服简体中文客户端设计。<br>
-> 其他服务器／语言的客户端可能无法正常使用部分功能。
+> 其他服务器／语言的客户端可能无法正常使用。
 
 ## 工作进度
 
@@ -25,6 +25,7 @@
 |   昂萨哈凯尔（竞争战）   |  :white_check_mark:   |
 |     荣誉野（碎冰战）     | :black_square_button: |
 |   周边遗迹群（阵地战）   |   :white_check_mark:   |
+|    沃刻其特（演习战）   |   :white_check_mark:   |
 |        烈羽争锋        | :black_square_button: |
 |        水晶冲突        | :black_square_button: |
 

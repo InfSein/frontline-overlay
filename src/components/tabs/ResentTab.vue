@@ -25,6 +25,13 @@ const activeTab = ref(insideTabs.value![0]![0])
 const currTabDescription = computed(() => insideTabs.value!.find(tab => tab[0] === activeTab.value)![2])
 const currSelfActionLogs = computed(() => insideTabs.value!.find(tab => tab[0] === activeTab.value)![3])
 
+const getSelfActionLogDamage = (log: SelfActionLog) => {
+  if (log.actionInstantDeath) {
+    return '即死'
+  }
+  return log.actionDamage.toLocaleString()
+}
+
 const switchShowPlayerNameButtonActionText = computed(() => hidePlayerName.value ? '显示' : '隐藏')
 const handleSwitchShowPlayerName = () => {
   const act = switchShowPlayerNameButtonActionText.value
@@ -96,7 +103,7 @@ const handleSwitchShowPlayerName = () => {
             <span class="text-orange-700">{{ log.actionName }}</span>
             <template v-if="log.actionDamage">
               <span>，造成了</span>
-              <span class="text-orange-700">{{ log.actionDamage.toLocaleString() }}</span>
+              <span class="text-orange-700">{{ getSelfActionLogDamage(log) }}</span>
               <span>伤害</span>
             </template>
           </template>
@@ -110,7 +117,7 @@ const handleSwitchShowPlayerName = () => {
             <span class="text-orange-700">{{ log.actionName }}</span>
             <template v-if="log.actionDamage">
               <span>，造成了</span>
-              <span class="text-orange-700">{{ log.actionDamage.toLocaleString() }}</span>
+              <span class="text-orange-700">{{ getSelfActionLogDamage(log) }}</span>
               <span>伤害</span>
             </template>
           </template>

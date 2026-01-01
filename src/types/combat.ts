@@ -40,6 +40,7 @@ export interface LasthitInfo {
   victimName: string;
   hitActionName: string;
   hitActionDamage: number;
+  hitActionInstantDeath?: boolean;
 }
 
 export interface SelfActionLog {
@@ -48,6 +49,7 @@ export interface SelfActionLog {
   targetJob?: number;
   actionName: string;
   actionDamage: number;
+  actionInstantDeath?: boolean;
 }
 
 export interface IarLog {
@@ -77,4 +79,5 @@ export interface DeathInfo {
   summonedBy?: string;
   lasthitActionName: string;
   lasthitActionDamage: number;
+  lasthitActionInstantDeath?: boolean;
 }

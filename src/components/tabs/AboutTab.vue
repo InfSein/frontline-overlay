@@ -96,7 +96,7 @@ const handleUpdateApp = async () => {
         >
           点此更新
         </n-button>
-        <div class="text-red-600">※当前数据和已记录的场次统计将会丢失。</div>
+        <div class="text-red-600">※当前对战的数据将会丢失。</div>
       </template>
       <template v-else>
         <div>已是最新版本</div>

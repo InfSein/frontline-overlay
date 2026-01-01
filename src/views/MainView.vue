@@ -67,7 +67,7 @@ const handleOpenConfigWindow = () => {
       <div class="flex gap-2">
         <div
           v-if="!appVar.collapsed"
-          class="flex items-center justify-center p-2 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer
+          class="flex items-center justify-center p-2 border border-transparent rounded text-white hover:bg-white/30 cursor-pointer
             text-shadow transition-colors duration-200"
           title="打开设置窗口"
           @click="handleOpenConfigWindow"
@@ -77,9 +77,9 @@ const handleOpenConfigWindow = () => {
           </n-icon>
         </div>
         <div
-          class="flex items-center justify-center p-2 border border-transparent rounded text-white hover:bg-gray-700 cursor-pointer
+          class="flex items-center justify-center p-2 border border-transparent rounded text-white cursor-pointer
             text-shadow transition-colors duration-200"
-          :class="appVar.collapsed ? 'bg-white/30' : ''"
+          :class="appVar.collapsed ? 'bg-white/30' : 'hover:bg-white/30'"
           :title="appVar.collapsed ? '展开' : '折叠'"
           @click="appVar.collapsed = !appVar.collapsed"
         >

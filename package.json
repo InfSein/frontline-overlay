@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "update:submodule": "git submodule update --remote --merge",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "update:submodule": "git submodule update --remote",
+    "build": "npm run update:submodule && vite build",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
