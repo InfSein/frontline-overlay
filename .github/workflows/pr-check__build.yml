@@ -12,6 +12,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update Submodules
+        run: git submodule update --remote --recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -22,5 +28,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build static site
+      - name: Run build as check
         run: GITHUB_PAGES=1 npm run build
