@@ -6,7 +6,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
     ".gitignore": ".editorconfig, .gitattributes, .gitmodules",
-    "tsconfig.json": "tsconfig.*.json, env.d.ts, env.*.ts",
+    "tsconfig.json": "tsconfig.*.json, env.d.ts, env.*.d.ts",
     "vite.config.*": "eslint*, tailwind*, postcss*",
     "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*",
     "folder-alias.json": "private-folder-alias.json",

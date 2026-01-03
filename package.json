@@ -10,6 +10,7 @@
     "dev": "vite",
     "update:submodule": "git submodule update --remote",
     "build": "npm run update:submodule && vite build",
+    "postinstall": "node scripts/update-version.cjs",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
@@ -17,6 +18,8 @@
   },
   "dependencies": {
     "echarts": "^6.0.0",
+    "github-markdown-css": "^5.8.1",
+    "markdown-it": "^14.1.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.25",
     "vue-echarts": "^8.0.1",
@@ -25,6 +28,7 @@
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.3",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^24.10.1",
     "@vicons/material": "^0.13.0",
     "@vitejs/plugin-vue": "^6.0.2",

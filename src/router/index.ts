@@ -14,6 +14,11 @@ const router = createRouter({
       name: 'config',
       component: () => import('../views/ConfigView.vue'),
     },
+    {
+      path: '/changelog',
+      name: 'changelog',
+      component: () => import('../views/ChangelogView.vue'),
+    },
   ],
 })
 
