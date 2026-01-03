@@ -22,7 +22,8 @@ import {
   getCombatants
 } from '@/tools/overlay'
 import {
-  loadCombatLogs, addCombatLog,
+  loadCombatLogs,
+  saveCombatLogs,
 } from '@/tools/combat-log'
 import { deepCopy, getActionDamageFromLogLine, getFrontlineNames, getGrandCompanyColor, getGrandCompanyName, getJobInfo, getSecurePointIncrease } from '@/tools'
 import type { PointConfigNaadam, PointConfigSecure, PointConfigSeize } from '@/types/point'
@@ -30,6 +31,7 @@ import { ImportantActions } from '@/constants'
 
 // Global variables
 const appVar = reactive({
+  inited: false,
   collapsed: false,
 })
 const combatData = reactive({
@@ -313,7 +315,7 @@ const useCombatParser = () => {
     combatData.playerId = data.charID.toString(16).toUpperCase()
     combatData.playerName = data.charName
   }
-  const handleZoneChange: EventMap['ChangeZone'] = (data) => {
+  const handleZoneChange: EventMap['ChangeZone'] = async (data) => {
     const conflictZone = GameZonesMap.get(data.zoneID)
     if (conflictZone) {
       combatData.zone = conflictZone
@@ -331,18 +333,16 @@ const useCombatParser = () => {
           insiderData.currFrontlineResult = undefined
         }
         const { zone } = combatData
-        getPlayerJob().then(job => {
-          const log = deepCopy<FrontlineLog>({
-            zone: zone,
-            job,
-            result,
-            start_time: insiderData.currFrontlineStartTime,
-            knockouts: deepCopy(knockouts.value),
-            deaths: deepCopy(deaths.value),
-          })
-          combatData.frontlineLog.push(log)
-          addCombatLog(log)
+        const job = await getPlayerJob()
+        const log = deepCopy<FrontlineLog>({
+          zone: zone,
+          job,
+          result,
+          start_time: insiderData.currFrontlineStartTime,
+          knockouts: deepCopy(knockouts.value),
+          deaths: deepCopy(deaths.value),
         })
+        combatData.frontlineLog.push(log)
         if (isDev) {
           console.log(JSON.stringify(combatData.playerMapFull))
         }
@@ -870,6 +870,12 @@ const useCombatParser = () => {
     }
   }
 
+  // 持久化保存对战记录
+  watch(combatData.frontlineLog, (newVal) => {
+    if (!appVar.inited) return
+    saveCombatLogs(newVal)
+  })
+
   const situationLockMsg = computed(() => {
     if (!combatData.onConflict && !combatData.zone){
       return '还未进入对战'
@@ -1018,6 +1024,7 @@ const useCombatParser = () => {
       appVar.collapsed = true
     }
 
+    appVar.inited = true
     console.log('combat parser initialized')
   }
   const dispose = () => {
@@ -1027,6 +1034,7 @@ const useCombatParser = () => {
 
     if (insiderData.combatantWatcher) clearInterval(insiderData.combatantWatcher)
 
+    appVar.inited = false
     console.log('combat parser disposed')
   }
 

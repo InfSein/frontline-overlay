@@ -21,7 +21,8 @@ export const loadCombatLogs = () => {
 }
 
 export const saveCombatLogs = (logs: FrontlineLog[]) => {
-  const date = formatDate(Date.now())
+  const currStoraged = getItem<StoragedCombatLog>(key)
+  const date = currStoraged?.date ?? formatDate(Date.now())
   setItem(key, {
     date: date, logs: deepCopy(logs)
   })
@@ -35,4 +36,8 @@ export const addCombatLog = (log: FrontlineLog) => {
   }
   currStoraged.logs.push(deepCopy(log))
   setItem(key, currStoraged)
+}
+
+export const addCombatLogAsync = async (log: FrontlineLog) => {
+  addCombatLog(log)
 }
