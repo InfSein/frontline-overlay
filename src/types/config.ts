@@ -14,8 +14,6 @@ export interface AppConfig {
   auto_collapse_when_leave_battlefield: boolean
   // #endregion
   // #region 战况
-  /** 隐藏复制点分按钮 */
-  hide_situation_copy_btn: boolean
   // #endregion
   // #region 监控
   /** 坏人阈值 */
@@ -35,7 +33,6 @@ const defaultAppConfig : AppConfig = {
   auto_collapse_when_launch: false,
   auto_expand_when_enter_battlefield: false,
   auto_collapse_when_leave_battlefield: false,
-  hide_situation_copy_btn: false,
   badboy_threshold: 20000,
   ui_fold_cache: {},
 }

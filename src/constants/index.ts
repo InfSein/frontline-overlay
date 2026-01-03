@@ -8,16 +8,17 @@ export type ImportantActionConfig = [
 ]
 
 export const ImportantActions = {
+  '圣盾阵': [ 'hit,damage' ],
   '蛮荒崩裂': [ 'hit,damage' ],
   // '尽毁': [ 'hit,damage' ],
   // '混沌旋风': [ 'hit,damage' ],
-  '原初的怒震': [ 'hit' ],
+  '原初的怒震': [ 'hit,damage' ],
   '原初的怒号': [ 'hit' ],
   '腐秽大地': [ 'hit' ],
   // '腐秽黑暗': [ 'hit' ],
   '夜昏': [ 'hit,damage' ],
   // '命运之环': [ 'hit,damage' ],
-  '命运之印': [ 'hit,damage' ],
+  '命运之印': [ 'hit' ],
   '终结击': [ 'hit,damage' ],
   '涤罪之心': [ 'hit,damage' ],
   '神谕': [ 'hit,damage' ],
@@ -32,7 +33,7 @@ export const ImportantActions = {
   '英雄的返场余音': [ 'hit,damage' ],
   '行列舞': [ 'hit' ],
   // '刃舞·终': [ 'hit,damage' ],
-  // '耀星': [ 'hit,damage' ],
+  '耀星': [ 'hit,damage' ],
   '霜星': [ 'hit,damage' ],
   '百万核爆': [ 'hit,damage' ],
   '荆棘环绕': [ 'hit,damage' ],

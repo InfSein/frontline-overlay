@@ -53,7 +53,7 @@ const chartData = computed(() =>
  * legend：只有 <= 12 个时才显示
  */
 const legend = computed(() => {
-  return chartData.value.length <= 12
+  return chartData.value.length <= 10
     ? {
         orient: 'vertical',
         top: 'top',

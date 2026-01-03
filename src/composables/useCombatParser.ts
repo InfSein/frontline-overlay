@@ -372,9 +372,9 @@ const useCombatParser = () => {
     }
   }
   const handleLogLine: EventMap['LogLine'] = (data) => {
-    const msgType = data.line[0]; // "00"
-    const msgChannel = data.line[2]; // "0839"
-    const msg = data.line[4]; // "冰封的石文A1启动了，冰块变得脆弱了！"
+    const msgType = data.line[0] // "00"
+    const msgChannel = data.line[2] // "0839"
+    const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
 
     // 处理战斗日志
     if (combatData.onConflict || combatData.zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
@@ -390,7 +390,7 @@ const useCombatParser = () => {
     if (!msg) return
 
     // 处理战斗开始信息
-    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/);
+    const matchGc = msg.match(/以(黑涡团|双蛇党|恒辉队)的身份参加了纷争前线！/)
     if (
       matchGc
       || msg === '战斗即将开始！'
@@ -439,10 +439,10 @@ const useCombatParser = () => {
           match: /(S|A|B)级的亚拉戈石文(.*?)的情报已枯竭！/, indexes: [2, 1],
         },
         getFp: (ptLv: string) => {
-          if (ptLv === 'S') return [160, 4];
-          else if (ptLv === 'A') return [120, 3];
-          else if (ptLv === 'B') return [80, 2];
-          throw new Error('[gcFp] wtf point is? ' + ptLv);
+          if (ptLv === 'S') return [160, 4]
+          else if (ptLv === 'A') return [120, 3]
+          else if (ptLv === 'B') return [80, 2]
+          throw new Error('[gcFp] wtf point is? ' + ptLv)
         },
         ptMax: {
           initial: 4,
@@ -588,7 +588,7 @@ const useCombatParser = () => {
             const specialActions = [
               '星遁天诛', '完人',
               '献身', '全力挥打', '绝空拳', '爆破箭', '胖胖之墙'
-            ]; // 可能不造成伤害就击杀的技能
+            ] // 可能不造成伤害就击杀的技能
 
             if (specialActions.includes(hitActionName) || damage > 0) {
               const key = `${perpetratorId}-${victimId}`
@@ -619,7 +619,7 @@ const useCombatParser = () => {
                   actionName: hitActionName,
                   actionDamage: heal,
                 })
-              } else if (perpetratorId === combatData.playerId) {
+              } else if (victimId !== combatData.playerId && perpetratorId === combatData.playerId) {
                 addSelfActionLog(combatData.mygoods, {
                   happenTime: Date.now(),
                   targetName: victimName,
@@ -650,7 +650,7 @@ const useCombatParser = () => {
                   actionDamage: damage,
                   actionInstantDeath: instantDeath,
                 })
-              } else if (perpetratorId === combatData.playerId) {
+              } else if (victimId !== combatData.playerId && perpetratorId === combatData.playerId) {
                 addSelfActionLog(combatData.mybads, {
                   happenTime: Date.now(),
                   targetName: victimName,
@@ -688,13 +688,13 @@ const useCombatParser = () => {
         let perpetratorName = data.line[5]
         if (victimId && !victimId.startsWith('40')) { // 忽略场景物体被打倒的信息
           if (perpetratorId) {
-            let summoner: string | undefined
+            let summonerId: string | undefined, summonerName: string | undefined
             if (combatData.summonMap[perpetratorId]) {
-              const summonerId = combatData.summonMap[perpetratorId]
+              summonerId = combatData.summonMap[perpetratorId]
               if (combatData.playerMapName[summonerId]) {
-                summoner = combatData.playerMapName[summonerId]
-              } else if (summonerId === combatData.playerId) {
-                summoner = combatData.playerName
+                summonerName = combatData.playerMapName[summonerId]
+              } else {
+                summonerName = '???'
               }
             }
             if (!perpetratorName) {
@@ -705,8 +705,8 @@ const useCombatParser = () => {
               victimName: victimName,
               perpetratorName: perpetratorName,
               victimJob: combatData.playerMapJob[victimId],
-              perpetratorJob: combatData.playerMapJob[summoner || perpetratorId],
-              summonedBy: summoner,
+              perpetratorJob: combatData.playerMapJob[summonerId || perpetratorId],
+              summonedBy: summonerName,
               lasthitActionName: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
               lasthitActionDamage: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
               lasthitActionInstantDeath: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionInstantDeath || false,
@@ -727,7 +727,7 @@ const useCombatParser = () => {
       if (conf.mode === 'seize') {
         let matcher = conf.neutralMatch
 
-        const matchNeutral = msg.match(matcher.match);
+        const matchNeutral = msg.match(matcher.match)
         if (matchNeutral) {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchNeutral[ptLvIndex!]
@@ -739,7 +739,7 @@ const useCombatParser = () => {
         }
 
         matcher = conf.conquerMatch
-        const matchConquer = msg.match(matcher.match);
+        const matchConquer = msg.match(matcher.match)
         if (matchConquer) {
           const [ptIndex, ptLvIndex, ownerIndex] = matcher.indexes
           const pt = matchConquer[ptIndex!]
@@ -753,7 +753,7 @@ const useCombatParser = () => {
         }
 
         matcher = conf.pauseMatch
-        const matchPause = msg.match(matcher.match);
+        const matchPause = msg.match(matcher.match)
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
@@ -765,7 +765,7 @@ const useCombatParser = () => {
         }
 
         matcher = conf.cleanMatch
-        const matchClean = msg.match(matcher.match);
+        const matchClean = msg.match(matcher.match)
         if (matchClean) {
           const [ptIndex] = matcher.indexes
           const pt = matchClean[ptIndex!]
@@ -773,12 +773,12 @@ const useCombatParser = () => {
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].cancel()
           }
-          while (combatData.prePoints.length && getCurrPointCount() > combatData.ptMax) combatData.prePoints.pop();
+          while (combatData.prePoints.length && getCurrPointCount() > combatData.ptMax) combatData.prePoints.pop()
           if (combatData.prePoints.length < combatData.ptMax) {
-            const key = `seize-${Date.now()}-${insiderData.pidIndex++}`;
+            const key = `seize-${Date.now()}-${insiderData.pidIndex++}`
             combatData.prePoints.push(createPrePoint(key, 15))
           }
-          return;
+          return
         }
 
         conf.ptMax.changeEvents?.forEach(eventConf => {
@@ -789,7 +789,7 @@ const useCombatParser = () => {
       } else if (conf.mode === 'naadam') {
         let matcher = conf.initialMatch
 
-        const matchInitial = msg.match(matcher.match);
+        const matchInitial = msg.match(matcher.match)
         if (matchInitial) {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchInitial[ptLvIndex!]
@@ -840,11 +840,11 @@ const useCombatParser = () => {
       } else if (conf.mode === 'secure') {
         let matcher = conf.conquerMatch
 
-        const matchConquer = msg.match(matcher.match);
+        const matchConquer = msg.match(matcher.match)
         if (matchConquer) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const [ptIndex, ptLvIndex, ownerIndex] = matcher.indexes
-          const pt = matchConquer[ptIndex!];
+          const pt = matchConquer[ptIndex!]
           const owner = matchConquer[ownerIndex!]
           if (!pt || !owner) return
           const gc = parseGc(owner)
@@ -856,7 +856,7 @@ const useCombatParser = () => {
         }
 
         matcher = conf.pauseMatch
-        const matchPause = msg.match(matcher.match);
+        const matchPause = msg.match(matcher.match)
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
@@ -872,17 +872,17 @@ const useCombatParser = () => {
 
   const situationLockMsg = computed(() => {
     if (!combatData.onConflict && !combatData.zone){
-      return '还未进入对战';
+      return '还未进入对战'
     } else if (!combatData.onConflict) {
-      return '正在等待战斗开始';
+      return '正在等待战斗开始'
     } else if (combatData.zone === Frontline.shatter) {
-      return '暂不支持解析 ' + getFrontlineNames(combatData.zone)[1] + ' 的战况数据';
+      return '暂不支持解析 ' + getFrontlineNames(combatData.zone)[1] + ' 的战况数据'
     } else if (combatData.zone === RivalWings.hiddengorge) {
-      return '暂不支持解析 烈羽争锋 的战况数据';
+      return '暂不支持解析 烈羽争锋 的战况数据'
     } else if (Object.values(CrystalConflict).includes(combatData.zone as CrystalConflict)) {
-      return '暂不支持解析 水晶冲突 的战况数据';
+      return '暂不支持解析 水晶冲突 的战况数据'
     }
-    return false;
+    return false
   })
   const pointData = computed(() => {
     const result: {
@@ -894,12 +894,12 @@ const useCombatParser = () => {
       ptProgress?: number
       ptDescription: string
     }[] = Object.entries(combatData.pointMap).map(([key, val]) => {
-      let ptName = '';
-      if (combatData.zone === Frontline.seize) ptName = '亚拉戈石文';
-      else if (combatData.zone === Frontline.shatter) ptName = '冰封的石文';
-      else if (combatData.zone === Frontline.naadam) ptName = '无垢的大地';
-      else if (combatData.zone === Frontline.triumph) ptName = '战略目标点';
-      ptName += key;
+      let ptName = ''
+      if (combatData.zone === Frontline.seize) ptName = '亚拉戈石文'
+      else if (combatData.zone === Frontline.shatter) ptName = '冰封的石文'
+      else if (combatData.zone === Frontline.naadam) ptName = '无垢的大地'
+      else if (combatData.zone === Frontline.triumph) ptName = '战略目标点'
+      ptName += key
       if (val.type === 'initial') {
         return {
           key: `pointMap-${key}`,
@@ -907,7 +907,7 @@ const useCombatParser = () => {
           ptLv: val.ptLv,
           ptName: ptName,
           ptDescription: '中立' + (val.time ? ('／还需 ' + val.time.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString())),
-        };
+        }
       } else if (val.type === 'static') {
         return {
           key: `pointMap-${key}`,
@@ -915,7 +915,7 @@ const useCombatParser = () => {
           specifyColor: val.owner ? getGrandCompanyColor(val.owner) : '',
           ptName: ptName,
           ptDescription: val.owner ? getGrandCompanyName(val.owner) : '中立',
-        };
+        }
       } else {
         return {
           key: `pointMap-${key}`,
@@ -925,9 +925,9 @@ const useCombatParser = () => {
           ptName: ptName,
           ptProgress: val.remain / val.total * 100,
           ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.remain.toString(),
-        };
+        }
       }
-    });
+    })
     combatData.prePoints.forEach(val => {
       result.push({
         key: `prePoints-${val.key}`,
@@ -936,8 +936,8 @@ const useCombatParser = () => {
         ptName: '即将刷新',
         ptProgress: val.remain / val.total * 100,
         ptDescription: '还需 ' + val.remain.toString() + 's',
-      });
-    });
+      })
+    })
     return result.map(val => {
       const cardFlow = insiderData.pidIndex++
       return {
@@ -1006,6 +1006,7 @@ const useCombatParser = () => {
       const combatants = await getCombatants()
       combatants?.forEach(combatant => {
         const playerId = combatant.ID.toString(16).toUpperCase()
+        combatData.playerMapName[playerId] = combatant.Name
         combatData.playerMapJob[playerId] = combatant.Job
         combatData.playerMapFull[playerId] = combatant
       })

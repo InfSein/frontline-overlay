@@ -4,7 +4,6 @@ import {
   SaveFilled,
   WarningRound,
   SettingsApplicationsSharp,
-  NetworkWifi3BarSharp,
   MonitorHeartFilled,
 } from '@vicons/material'
 import { type AppConfig, type ConfigGroup } from '@/types/config'
@@ -52,21 +51,6 @@ const groups: ConfigGroup[] = [
         desc: [
           '在离开对战区域时自动折叠悬浮窗。',
           '初次加载或是在PvE区域内切换地图时不会触发。',
-        ],
-        type: 'switch',
-      },
-    ]
-  },
-  {
-    key: 'situation',
-    name: '战况',
-    icon: NetworkWifi3BarSharp,
-    items: [
-      {
-        key: 'hide_situation_copy_btn',
-        name: '隐藏复制点分按钮',
-        desc: [
-          '如果你不需要战况选项卡中的复制点分按钮，可以打开此选项将其隐藏。',
         ],
         type: 'switch',
       },
