@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update Submodules
+        run: git submodule update --remote --recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,7 +36,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          publish_dir: ./dist
 
       - name: Get version from package.json
         id: get_version

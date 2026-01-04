@@ -1,5 +1,28 @@
 # 更新日志
 
+## v3.0.0 (2026-01-03)
+* 进行项目技术重构，详见 [Github PR#41](https://github.com/InfSein/frontline-overlay/pull/41)
+* 删除“战况”选项卡中的复制点分功能。<br>
+  ※ 对应的设置项也将删除。
+* 合并旧选项卡。合并后可以在选项卡子项中查看原内容。
+  - “击倒”与“死亡”选项卡合并为“战绩”选项卡
+  - “好人”与“坏人”选项卡合并为“恩怨”选项卡<br>
+    ※ “好人”将改名为“受恩”；“坏人”将改名为“蒙怨”<br>
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/1.png)
+* 追加统计项目。
+  - “恩怨”选项卡中追加“施恩”，统计自己对他人发动的关键援护技能
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/5.png)
+  - “恩怨”选项卡中追加“结怨”，统计自己对他人发动的关键阻碍技能
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/6.png)
+* 各个统计项目中右下角的按钮功能从“切换是否显示伤害”变为“切换是否显示玩家名称”<br>
+  ※ 切换是否显示伤害的功能删除。现在各个统计项目将常驻显示技能伤害。
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/3.png)
+* 追加“行迹”统计，记录对战中自身发动的部分关键技能的效果。<br>
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/2.png)
+* “统计”选项卡的今日战绩将被缓存，当天之内，关闭ACT／更新悬浮窗不再会导致记录被清空。
+* “统计”选项卡的“击倒统计”／“死亡统计”将可以按照自身／敌方的职业归类统计。
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.0.0/7.png)
+
 ## v2.0.0 (2025-12-16)
 * 适配 7.4 版本
 * 增加对「沃刻其特（演习战）」的解析

@@ -1,1 +1,26 @@
-{}
+{
+    "src/components/tabs": {
+        "description": "标签页"
+    },
+    "src/components/tabs/ExploitTab.vue": {
+        "description": "战绩"
+    },
+    "src/components/tabs/SituationTab.vue": {
+        "description": "战况"
+    },
+    "src/components/tabs/ResentTab.vue": {
+        "description": "恩怨"
+    },
+    "src/components/tabs/CalendarTab.vue": {
+        "description": "日历"
+    },
+    "src/components/tabs/StatisticsTab.vue": {
+        "description": "统计"
+    },
+    "src/components/tabs/AboutTab.vue": {
+        "description": "关于"
+    },
+    "src/components/tabs/IarTab.vue": {
+        "description": "行迹"
+    }
+}

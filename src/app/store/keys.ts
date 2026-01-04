@@ -1,1 +1,0 @@
-export const _APP_CONFIG_STORAGE_KEY = 'APP_CONFIG'

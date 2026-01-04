@@ -1,9 +1,13 @@
 {
   "css.lint.unknownAtRules": "ignore",
+  "npm.exclude": [
+    "**/external/**"
+  ],
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
+    ".gitignore": ".editorconfig, .gitattributes, .gitmodules",
     "tsconfig.json": "tsconfig.*.json, env.d.ts, env.*.d.ts",
-    "next.config.*": "next-env.d.ts, tailwind.config.*, postcss.config.*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig",
+    "vite.config.*": "eslint*, tailwind*, postcss*",
     "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*",
     "folder-alias.json": "private-folder-alias.json",
     "README.md": "CHANGELOG.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md",
