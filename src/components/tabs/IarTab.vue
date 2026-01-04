@@ -13,6 +13,7 @@ const parsedIarLog = computed(() => {
     return {
       ...log,
       formatedHappenTime: formatTime(log.happenTime),
+      showExecs: measures.includes('exec'),
       showHits: measures.includes('hit'),
       showDamage: measures.includes('damage'),
       showHeal: measures.includes('heal'),
@@ -30,6 +31,10 @@ const parsedIarLog = computed(() => {
         <div>{{ log.formatedHappenTime }}　</div>
         <div class="flex-1">
           <span>发动</span>
+          <template v-if="log.showExecs">
+            <span class="text-orange-700">{{ log.actionTargets.length }}</span>
+            <span>次</span>
+          </template>
           <span class="text-orange-700">{{ log.actionName }}</span>
           <template v-if="log.showHits">
             <span>命中</span>

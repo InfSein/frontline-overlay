@@ -362,6 +362,9 @@ const useCombatParser = () => {
       }
       combatData.playerMapJob = {}
       combatData.playerMapFull = {}
+      if (isDev && Object.values(combatData.summonMap).length) {
+        console.log('summon map:', deepCopy(combatData.summonMap))
+      }
       combatData.summonMap = {}; combatData.playerLasthitMap = {}
       if (isDev) {
         console.log('[Zone] ', data.zoneID, ' / ', data.zoneName)
@@ -567,6 +570,7 @@ const useCombatParser = () => {
         }
 
         if (isValidAction && perpetratorId && victimId) {
+          const summonerId = combatData.summonMap[perpetratorId]
           const { hit, instantDeath, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
 
           if (
@@ -665,7 +669,7 @@ const useCombatParser = () => {
             const importantActions = Object.keys(ImportantActions)
             if (
               importantActions.includes(hitActionName)
-              && perpetratorId === combatData.playerId
+              && (perpetratorId === combatData.playerId || summonerId === combatData.playerId)
             ) {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const [m, maxGapTime] = ImportantActions[hitActionName]!
@@ -693,8 +697,8 @@ const useCombatParser = () => {
               summonerId = combatData.summonMap[perpetratorId]
               if (combatData.playerMapName[summonerId]) {
                 summonerName = combatData.playerMapName[summonerId]
-              } else {
-                summonerName = '???'
+              } else if (summonerId === combatData.playerId) {
+                summonerName = combatData.playerName
               }
             }
             if (!perpetratorName) {
@@ -717,7 +721,10 @@ const useCombatParser = () => {
         // 261|2025-07-21T20:19:36.6860000+08:00|Add|40007109|BNpcID|3951|BNpcNameID|E53|CastTargetID|E0000000|CurrentMP|10000|CurrentWorldID|65535|Heading|1.6445|Level|100|MaxHP|57000|MaxMP|10000|ModelStatus|3072|Name|象式浮空炮塔|NPCTargetID|E0000000|OwnerID|1058F1D5|PosX|95.1405|PosY|-7.4485|PosZ|2.3552|Radius|1.0000|Type|2|WorldID|65535|0ed50912a51e73d8
         const summonedId = data.line[3]
         const ownerId = data.line[29]
-        if (summonedId && ownerId) {
+        if (
+          summonedId && ownerId
+          && (!ownerId.includes('.') && !ownerId.includes('-') && ownerId.length > 4)
+        ) {
           combatData.summonMap[summonedId] = ownerId
         }
       }
