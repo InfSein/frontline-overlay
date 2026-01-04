@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <script>
+      var repo = '/frontline-overlay'
+      var path = location.pathname.replace(repo, '')
+      location.replace(
+        repo +
+          '/' +
+          '?' +
+          'redirect=' +
+          encodeURIComponent(path + location.search + location.hash)
+      )
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>

@@ -12,11 +12,17 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
-app.mount('#app')
+try {
+  configure({
+    tagId: 'G-MFVR2W1LKB',
+    pageTracker: {
+      router,
+    }
+  })
+} catch (e) {
+  console.warn('gtag init failed:\n', e)
+}
 
-configure({
-  tagId: 'G-MFVR2W1LKB',
-  pageTracker: {
-    router,
-  }
+router.isReady().then(() => {
+  app.mount('#app')
 })
