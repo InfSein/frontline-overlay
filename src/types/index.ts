@@ -53,6 +53,8 @@ export enum CrystalConflict {
   castletown = "castletown",
   /** 赤土红沙 */
   redsands = "redsands",
+  /** 海岸斗场 */
+  bayside = "bayside",
 }
 
 const GameZones = {
@@ -83,6 +85,8 @@ const GameZones = {
     castletown: [1116, 1117],
     /** 赤土红沙 */
     redsands: [1138, 1139],
+    /** 海岸斗场 */
+    bayside: [1293, 1294],
   }
 }
 export const GameZonesMap = new Map<number, PvPBattle>([
