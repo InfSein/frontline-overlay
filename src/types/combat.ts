@@ -31,8 +31,8 @@ export interface InitialPointInfo {
 
 export interface PrePointInfo {
   key: string;
-  remain: number;
-  ptTotal: number;
+  tRemain: number;
+  tTotal: number;
 }
 
 export interface LasthitInfo {

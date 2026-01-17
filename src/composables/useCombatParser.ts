@@ -255,18 +255,18 @@ const useCombatParser = () => {
 
     const point: PrePointInfo = reactive({
       key,
-      remain: total,
-      ptTotal: total,
+      tRemain: total,
+      tTotal: total,
       cancel() {
         cleanup(point)
       }
     })
 
     timer = setInterval(() => {
-      point.remain -= 1
+      point.tRemain -= 1
 
-      if (point.remain <= 0) {
-        point.remain = 0
+      if (point.tRemain <= 0) {
+        point.tRemain = 0
         cleanup(point)
       }
     }, 1000)
@@ -906,6 +906,7 @@ const useCombatParser = () => {
       ptName: string
       ptProgress?: number
       ptDescription: string
+      sortValue?: number
     }[] = Object.entries(combatData.pointMap).map(([key, val]) => {
       let ptName = ''
       if (combatData.zone === Frontline.seize) ptName = '亚拉戈石文'
@@ -913,6 +914,12 @@ const useCombatParser = () => {
       else if (combatData.zone === Frontline.naadam) ptName = '无垢的大地'
       else if (combatData.zone === Frontline.triumph) ptName = '战略目标点'
       ptName += key
+
+      // 计算排序权重
+      let sortValue: number | undefined = undefined
+      if ('ptRemain' in val) sortValue = val.ptRemain
+      else if ('ptTotal' in val) sortValue = val.ptTotal
+
       if (val.type === 'initial') {
         return {
           key: `pointMap-${key}`,
@@ -920,6 +927,7 @@ const useCombatParser = () => {
           ptLv: val.ptLv,
           ptName: ptName,
           ptDescription: '中立' + (val.time ? ('／还需 ' + val.time.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString())),
+          sortValue
         }
       } else if (val.type === 'static') {
         return {
@@ -928,6 +936,7 @@ const useCombatParser = () => {
           specifyColor: val.owner ? getGrandCompanyColor(val.owner) : '',
           ptName: ptName,
           ptDescription: val.owner ? getGrandCompanyName(val.owner) : '中立',
+          sortValue
         }
       } else {
         return {
@@ -938,6 +947,7 @@ const useCombatParser = () => {
           ptName: ptName,
           ptProgress: val.ptRemain / val.ptTotal * 100,
           ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.ptRemain.toString(),
+          sortValue
         }
       }
     })
@@ -947,10 +957,25 @@ const useCombatParser = () => {
         type: 'preparing',
         ptLv: '?',
         ptName: '即将刷新',
-        ptProgress: val.remain / val.ptTotal * 100,
-        ptDescription: '还需 ' + val.remain.toString() + 's',
+        ptProgress: val.tRemain / val.tTotal * 100,
+        ptDescription: '还需 ' + val.tRemain.toString() + 's',
+        sortValue: 120 // 使用战场点分平均值作为期望
       })
     })
+
+    // 排序
+    result.sort((a, b) => {
+      // undefined (无价值) 置顶
+      if (a.sortValue === undefined && b.sortValue !== undefined) return -1
+      if (a.sortValue !== undefined && b.sortValue === undefined) return 1
+      if (a.sortValue === undefined && b.sortValue === undefined) {
+        return a.key.localeCompare(b.key)
+      }
+
+      // 有价值的从高到低
+      return (b.sortValue as number) - (a.sortValue as number)
+    })
+
     return result.map(val => {
       const cardFlow = insiderData.pidIndex++
       return {
