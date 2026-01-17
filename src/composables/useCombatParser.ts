@@ -1045,6 +1045,42 @@ const useCombatParser = () => {
     console.log('combat parser disposed')
   }
 
+  const buildDebugData = () => {
+    if (!isDev) return
+
+    combatData.zone = Frontline.seize
+    combatData.onConflict = true
+
+    // cleanup
+    Object.entries(combatData.pointMap).forEach(([key, val]) => {
+      if (val.type === 'initial' || val.type === 'static') delete combatData.pointMap[key]
+      else val.cancel()
+    })
+    combatData.prePoints.length = 0
+
+    // 1. Initial Point (S, counting down)
+    createInitialPoint('debug-initial-s', 'S', 160, 30)
+
+    // 2. Active Point (A, Maelstrom)
+    activatePoint('debug-active-a-mael', GrandCompany.maelstrom, 'A', 120, 3)
+
+    // 3. Paused Point (B, TwinAdder, paused)
+    activatePoint('debug-paused-b-adder', GrandCompany.twinadder, 'B', 80, 2)
+    const pausedKey = 'debug-paused-b-adder'
+    if (combatData.pointMap[pausedKey] && 'pause' in combatData.pointMap[pausedKey]) {
+      combatData.pointMap[pausedKey].pause()
+    }
+
+    // 4. Static Point (Immortal Flames)
+    combatData.pointMap['debug-static-flames'] = {
+      type: 'static',
+      owner: GrandCompany.immoflame
+    }
+
+    // 5. PrePoint (Preparing)
+    combatData.prePoints.push(createPrePoint('debug-prepoint', 15))
+  }
+
   return {
     appVar, combatData, insiderData,
     getGcPoint, getGcIncreaseSpeed,
@@ -1055,6 +1091,7 @@ const useCombatParser = () => {
     statistics,
     init,
     dispose,
+    buildDebugData,
   }
 }
 
