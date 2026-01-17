@@ -170,8 +170,8 @@ const useCombatParser = () => {
 
     const point: PointInfo = reactive({
       dropSpeed: drop,
-      remain: total,
-      total: total,
+      ptRemain: total,
+      ptTotal: total,
       owner: owner,
       ptLv: ptLv,
       paused: false as boolean,
@@ -188,9 +188,9 @@ const useCombatParser = () => {
 
     const tick = () => {
       if (point.paused) return
-      point.remain -= drop
-      if (point.remain <= 0) {
-        point.remain = 0
+      point.ptRemain -= drop
+      if (point.ptRemain <= 0) {
+        point.ptRemain = 0
         cleanup()
       }
     }
@@ -256,7 +256,7 @@ const useCombatParser = () => {
     const point: PrePointInfo = reactive({
       key,
       remain: total,
-      total,
+      ptTotal: total,
       cancel() {
         cleanup(point)
       }
@@ -282,7 +282,7 @@ const useCombatParser = () => {
     ) {
       const arr = Object.values(combatData.pointMap)
         .filter(val => val.type !== 'static' && val.type !== 'initial' && !val.paused && val.owner === gc)
-        .map(val => (val as PointInfo).remain)
+        .map(val => (val as PointInfo).ptRemain)
       if (!arr.length) return 0
       return arr.reduce((prev, cur) => prev + cur)
     } else if (combatData.zone === Frontline.secure) {
@@ -936,8 +936,8 @@ const useCombatParser = () => {
           specifyColor: val.paused ? '' : getGrandCompanyColor(val.owner),
           ptLv: val.ptLv,
           ptName: ptName,
-          ptProgress: val.remain / val.total * 100,
-          ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.remain.toString(),
+          ptProgress: val.ptRemain / val.ptTotal * 100,
+          ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.ptRemain.toString(),
         }
       }
     })
@@ -947,7 +947,7 @@ const useCombatParser = () => {
         type: 'preparing',
         ptLv: '?',
         ptName: '即将刷新',
-        ptProgress: val.remain / val.total * 100,
+        ptProgress: val.remain / val.ptTotal * 100,
         ptDescription: '还需 ' + val.remain.toString() + 's',
       })
     })
