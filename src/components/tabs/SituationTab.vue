@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import GcCard from '../GcCard.vue'
+import PointCards from '../PointCards.vue'
 import useCombatParser from '@/composables/useCombatParser'
 import { Frontline, GrandCompany } from '@/types'
 import { getFrontlineNames } from '@/tools'
+import { useStore } from '@/stores'
 
+const store = useStore()
 const {
   combatData,
   getGcPoint, getGcIncreaseSpeed,
@@ -43,18 +46,10 @@ const {
     >
       暂不支持解析{{ getFrontlineNames(combatData.zone)[1] }}的当前据点数据。
     </div>
-    <div class="w-full flex flex-col gap-0.5">
-      <PointCard
-        v-for="point in pointData"
-        :key="point.cardKey"
-        :type="point.type"
-        :pt-lv="point.ptLv"
-        :pt-name="point.ptName"
-        :pt-progress="point.ptProgress"
-        :pt-description="point.ptDescription"
-        :specify-color="point.specifyColor"
-      />
-    </div>
+    <PointCards
+      :points="pointData"
+      :card-style="store.appConfig.situation_pointcard_style"
+    />
   </div>
 </template>
 

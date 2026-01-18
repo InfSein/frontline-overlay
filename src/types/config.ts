@@ -14,6 +14,8 @@ export interface AppConfig {
   auto_collapse_when_leave_battlefield: boolean
   // #endregion
   // #region 战况
+  /** PointCard 样式 */
+  situation_pointcard_style: "modern" | "classic"
   // #endregion
   // #region 监控
   /** 坏人阈值 */
@@ -33,6 +35,7 @@ const defaultAppConfig : AppConfig = {
   auto_collapse_when_launch: false,
   auto_expand_when_enter_battlefield: false,
   auto_collapse_when_leave_battlefield: false,
+  situation_pointcard_style: 'modern',
   badboy_threshold: 20000,
   ui_fold_cache: {},
 }

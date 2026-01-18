@@ -170,8 +170,8 @@ const useCombatParser = () => {
 
     const point: PointInfo = reactive({
       dropSpeed: drop,
-      remain: total,
-      total: total,
+      ptRemain: total,
+      ptTotal: total,
       owner: owner,
       ptLv: ptLv,
       paused: false as boolean,
@@ -188,9 +188,9 @@ const useCombatParser = () => {
 
     const tick = () => {
       if (point.paused) return
-      point.remain -= drop
-      if (point.remain <= 0) {
-        point.remain = 0
+      point.ptRemain -= drop
+      if (point.ptRemain <= 0) {
+        point.ptRemain = 0
         cleanup()
       }
     }
@@ -255,18 +255,18 @@ const useCombatParser = () => {
 
     const point: PrePointInfo = reactive({
       key,
-      remain: total,
-      total,
+      tRemain: total,
+      tTotal: total,
       cancel() {
         cleanup(point)
       }
     })
 
     timer = setInterval(() => {
-      point.remain -= 1
+      point.tRemain -= 1
 
-      if (point.remain <= 0) {
-        point.remain = 0
+      if (point.tRemain <= 0) {
+        point.tRemain = 0
         cleanup(point)
       }
     }, 1000)
@@ -282,7 +282,7 @@ const useCombatParser = () => {
     ) {
       const arr = Object.values(combatData.pointMap)
         .filter(val => val.type !== 'static' && val.type !== 'initial' && !val.paused && val.owner === gc)
-        .map(val => (val as PointInfo).remain)
+        .map(val => (val as PointInfo).ptRemain)
       if (!arr.length) return 0
       return arr.reduce((prev, cur) => prev + cur)
     } else if (combatData.zone === Frontline.secure) {
@@ -906,6 +906,7 @@ const useCombatParser = () => {
       ptName: string
       ptProgress?: number
       ptDescription: string
+      sortValue?: number
     }[] = Object.entries(combatData.pointMap).map(([key, val]) => {
       let ptName = ''
       if (combatData.zone === Frontline.seize) ptName = '亚拉戈石文'
@@ -913,6 +914,12 @@ const useCombatParser = () => {
       else if (combatData.zone === Frontline.naadam) ptName = '无垢的大地'
       else if (combatData.zone === Frontline.triumph) ptName = '战略目标点'
       ptName += key
+
+      // 计算排序权重
+      let sortValue: number | undefined = undefined
+      if ('ptRemain' in val) sortValue = val.ptRemain
+      else if ('ptTotal' in val) sortValue = val.ptTotal
+
       if (val.type === 'initial') {
         return {
           key: `pointMap-${key}`,
@@ -920,6 +927,7 @@ const useCombatParser = () => {
           ptLv: val.ptLv,
           ptName: ptName,
           ptDescription: '中立' + (val.time ? ('／还需 ' + val.time.remain.toString() + 's') : ('／剩余 ' + val.ptTotal.toString())),
+          sortValue
         }
       } else if (val.type === 'static') {
         return {
@@ -928,6 +936,7 @@ const useCombatParser = () => {
           specifyColor: val.owner ? getGrandCompanyColor(val.owner) : '',
           ptName: ptName,
           ptDescription: val.owner ? getGrandCompanyName(val.owner) : '中立',
+          sortValue
         }
       } else {
         return {
@@ -936,8 +945,9 @@ const useCombatParser = () => {
           specifyColor: val.paused ? '' : getGrandCompanyColor(val.owner),
           ptLv: val.ptLv,
           ptName: ptName,
-          ptProgress: val.remain / val.total * 100,
-          ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.remain.toString(),
+          ptProgress: val.ptRemain / val.ptTotal * 100,
+          ptDescription: (val.paused ? '中立': getGrandCompanyName(val.owner)) + '／剩余 ' + val.ptRemain.toString(),
+          sortValue
         }
       }
     })
@@ -947,10 +957,25 @@ const useCombatParser = () => {
         type: 'preparing',
         ptLv: '?',
         ptName: '即将刷新',
-        ptProgress: val.remain / val.total * 100,
-        ptDescription: '还需 ' + val.remain.toString() + 's',
+        ptProgress: val.tRemain / val.tTotal * 100,
+        ptDescription: '还需 ' + val.tRemain.toString() + 's',
+        sortValue: 120 - val.tRemain // 使用战场点分平均值作为期望
       })
     })
+
+    // 排序
+    result.sort((a, b) => {
+      // undefined (无价值) 置顶
+      if (a.sortValue === undefined && b.sortValue !== undefined) return -1
+      if (a.sortValue !== undefined && b.sortValue === undefined) return 1
+      if (a.sortValue === undefined && b.sortValue === undefined) {
+        return a.key.localeCompare(b.key)
+      }
+
+      // 有价值的从高到低
+      return (b.sortValue as number) - (a.sortValue as number)
+    })
+
     return result.map(val => {
       const cardFlow = insiderData.pidIndex++
       return {
@@ -1045,6 +1070,33 @@ const useCombatParser = () => {
     console.log('combat parser disposed')
   }
 
+  const buildDebugData = () => {
+    if (!isDev) return
+
+    // 处理基本战斗数据
+    combatData.zone = Frontline.seize
+    combatData.onConflict = true
+
+    // 生成“战况”调试数据
+    Object.entries(combatData.pointMap).forEach(([key, val]) => {
+      if (val.type === 'initial' || val.type === 'static') delete combatData.pointMap[key]
+      else val.cancel()
+    })
+    combatData.prePoints.length = 0
+    createInitialPoint('A1', 'S', 160, 30)
+    activatePoint('B2', GrandCompany.maelstrom, 'A', 120, 3)
+    activatePoint('C3', GrandCompany.twinadder, 'B', 80, 2)
+    const pausedKey = 'C3'
+    if (combatData.pointMap[pausedKey] && 'pause' in combatData.pointMap[pausedKey]) {
+      combatData.pointMap[pausedKey].pause()
+    }
+    combatData.pointMap['D4'] = {
+      type: 'static',
+      owner: GrandCompany.immoflame
+    }
+    combatData.prePoints.push(createPrePoint('A4', 15))
+  }
+
   return {
     appVar, combatData, insiderData,
     getGcPoint, getGcIncreaseSpeed,
@@ -1055,6 +1107,7 @@ const useCombatParser = () => {
     statistics,
     init,
     dispose,
+    buildDebugData,
   }
 }
 

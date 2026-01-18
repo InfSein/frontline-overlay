@@ -3,6 +3,7 @@ import {
   SettingsRound,
   KeyboardArrowUpRound,
   KeyboardArrowDownRound,
+  BugReportRound,
 } from '@vicons/material'
 import SituationTab from '@/components/tabs/SituationTab.vue'
 import ExploitTab from '@/components/tabs/ExploitTab.vue'
@@ -18,8 +19,11 @@ const {
   appVar,
   init,
   dispose,
+  buildDebugData,
 } = useCombatParser()
 useConfigUpdateHandler()
+
+const isDev = import.meta.env.DEV
 
 onMounted(() => {
   init()
@@ -65,6 +69,17 @@ const handleOpenConfigWindow = () => {
         </div>
       </div>
       <div class="flex gap-2">
+        <div
+          v-if="isDev && !appVar.collapsed"
+          class="flex items-center justify-center p-2 border border-transparent rounded text-white hover:bg-white/30 cursor-pointer
+            text-shadow transition-colors duration-200"
+          title="生成调试数据"
+          @click="buildDebugData"
+        >
+          <n-icon size="1.25rem">
+            <BugReportRound />
+          </n-icon>
+        </div>
         <div
           v-if="!appVar.collapsed"
           class="flex items-center justify-center p-2 border border-transparent rounded text-white hover:bg-white/30 cursor-pointer

@@ -217,6 +217,7 @@ export const getFrontlineNames = (fl: PvPBattle) => {
     case CrystalConflict.volcanic: return ['火山', '火山之心', '水晶冲突'] as const
     case CrystalConflict.castletown: return ['大殿', '机关大殿', '水晶冲突'] as const
     case CrystalConflict.redsands: return ['沙漠', '赤土红沙', '水晶冲突'] as const
+    case CrystalConflict.bayside: return ['海岸', '海岸斗场', '水晶冲突'] as const
   }
 }
 
@@ -241,6 +242,7 @@ export const getFrontlineBackgroundColor = (fl: PvPBattle) => {
     case CrystalConflict.volcanic: return '#976E5A' as const
     case CrystalConflict.castletown: return '#211B19' as const
     case CrystalConflict.redsands: return '#EAC38C' as const
+    case CrystalConflict.bayside: return '#63A2BC' as const
   }
 }
 

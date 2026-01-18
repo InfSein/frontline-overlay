@@ -5,6 +5,7 @@ import {
   WarningRound,
   SettingsApplicationsSharp,
   MonitorHeartFilled,
+  FlagFilled,
 } from '@vicons/material'
 import { type AppConfig, type ConfigGroup } from '@/types/config'
 import { deepCopy } from '@/tools'
@@ -53,6 +54,27 @@ const groups: ConfigGroup[] = [
           '初次加载或是在PvE区域内切换地图时不会触发。',
         ],
         type: 'switch',
+      },
+    ]
+  },
+  {
+    key: 'situation',
+    name: '战况',
+    icon: FlagFilled,
+    items: [
+      {
+        key: 'situation_pointcard_style',
+        name: '“当前据点”布局',
+        desc: [
+          '设置“当前据点”中各个据点卡片的布局样式。',
+          '　> 现代：每行展示多个卡片，提高信息密度；',
+          '　> 经典：每行展示一个卡片，维持旧版本风格。',
+        ],
+        type: 'select',
+        options: [
+          { label: '现代', value: 'modern' },
+          { label: '经典', value: 'classic' },
+        ]
       },
     ]
   },
@@ -180,7 +202,7 @@ const handleSave = () => {
               v-else-if="item.type === 'select'"
               v-model:value="(formConfig as any)[item.key]"
               :options="item.options"
-              class="w-48"
+              class="w-36"
             />
           </div>
         </div>

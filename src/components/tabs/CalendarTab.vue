@@ -170,7 +170,7 @@ const formatDate = (date: Date) => {
       <div
         v-for="future in futureData"
         :key="future.val"
-        class="flex items-center border border-black/50 rounded px-1 py-0.5"
+        class="flex items-center border border-black/50 rounded px-1 py-0.5 pr-2"
         :style="{
           color: getCardForeColor(future.rm),
           backgroundColor: getCardBackgroundColor(future.rm),
@@ -181,11 +181,11 @@ const formatDate = (date: Date) => {
           <span>{{ getFrontline(future.rm)[1] }}</span>
         </div>
         <div class="ml-auto">
-          {{ `(${formatDate(getNext23(now, future.val))}／${timeUntilNext23(now, future.val)}后)` }}
+          {{ `${formatDate(getNext23(now, future.val))}／${timeUntilNext23(now, future.val)}后` }}
         </div>
       </div>
       <div
-        class="flex items-center border border-black/50 rounded px-1 py-0.5"
+        class="flex items-center border border-black/50 rounded px-1 py-0.5 pr-2"
         :style="{
           color: getFrontlineForeColor(Frontline.triumph),
           backgroundColor: getFrontlineBackgroundColor(Frontline.triumph),
@@ -196,7 +196,7 @@ const formatDate = (date: Date) => {
           <span>{{ getFrontlineNames(Frontline.triumph)[1] }}</span>
         </div>
         <div class="ml-auto">
-          {{`　(当前版本长期开放)`}}
+          {{`　当前版本长期开放`}}
         </div>
       </div>
     </div>

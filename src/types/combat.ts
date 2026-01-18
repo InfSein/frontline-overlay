@@ -3,8 +3,8 @@ import type { GrandCompany, PvPBattle } from ".";
 export interface PointInfo {
   type?: undefined;
   dropSpeed: number;
-  remain: number;
-  total: number;
+  ptRemain: number;
+  ptTotal: number;
   owner: GrandCompany;
   ptLv: string;
   paused: boolean;
@@ -31,8 +31,8 @@ export interface InitialPointInfo {
 
 export interface PrePointInfo {
   key: string;
-  remain: number;
-  total: number;
+  tRemain: number;
+  tTotal: number;
 }
 
 export interface LasthitInfo {
