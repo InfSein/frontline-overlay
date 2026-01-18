@@ -22,5 +22,14 @@
     },
     "src/components/tabs/IarTab.vue": {
         "description": "行迹"
+    },
+    "src/views/MainView.vue": {
+        "description": "主界面"
+    },
+    "src/views/ConfigView.vue": {
+        "description": "设置界面"
+    },
+    "src/views/ChangelogView.vue": {
+        "description": "更新笔记界面"
     }
 }

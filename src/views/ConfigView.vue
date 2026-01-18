@@ -64,9 +64,9 @@ const groups: ConfigGroup[] = [
     items: [
       {
         key: 'situation_pointcard_style',
-        name: '据点卡片样式',
+        name: '“当前据点”布局',
         desc: [
-          '设置“当前据点”卡片的显示样式。',
+          '设置“当前据点”中各个据点卡片的布局样式。',
           '　> 现代：每行展示多个卡片，提高信息密度；',
           '　> 经典：每行展示一个卡片，维持旧版本风格。',
         ],

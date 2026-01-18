@@ -44,4 +44,10 @@ export const ImportantActions = {
   '百万核爆': [ 'hit,damage' ],
   '荆棘环绕': [ 'hit,damage' ],
   '南天十字': [ 'hit,damage' ],
+
+  // * SPECIAL
+  '交叉光剑': [ 'hit,damage' ],
+  '超大型导弹': [ 'hit,damage' ],
+  '大火炎放射': [ 'hit,damage' ],
+  '巨型光束炮': [ 'hit,damage' ],
 } as Record<string, ImportantActionConfig>

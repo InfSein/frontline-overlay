@@ -959,7 +959,7 @@ const useCombatParser = () => {
         ptName: '即将刷新',
         ptProgress: val.tRemain / val.tTotal * 100,
         ptDescription: '还需 ' + val.tRemain.toString() + 's',
-        sortValue: 120 // 使用战场点分平均值作为期望
+        sortValue: 120 - val.tRemain // 使用战场点分平均值作为期望
       })
     })
 
