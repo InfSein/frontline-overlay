@@ -25,6 +25,7 @@ const groups: ConfigGroup[] = [
         desc: [
           '调整悬浮窗的显示大小倍数。',
           '当你使用了infsein.github.io提供的其他悬浮窗时，请使用此处而非ACT的设置来调整缩放。',
+          '调整此项目后，需要刷新一次悬浮窗才能生效。',
         ],
         type: 'slider-number',
         min: 0.5, max: 2, step: 0.1,
@@ -34,7 +35,7 @@ const groups: ConfigGroup[] = [
         name: '启动时自动折叠',
         desc: [
           '在悬浮窗初次加载时自动折叠悬浮窗。',
-          '这也包括刷新悬浮窗的场合。'
+          '“初次加载”也包括刷新悬浮窗的场合。'
         ],
         type: 'switch',
       },
@@ -50,8 +51,8 @@ const groups: ConfigGroup[] = [
         key: 'auto_collapse_when_leave_battlefield',
         name: '离开对战时自动折叠',
         desc: [
-          '在离开对战区域时自动折叠悬浮窗。',
-          '初次加载或是在PvE区域内切换地图时不会触发。',
+          '在离开对战区域(从PvP区域进入PvE区域)时自动折叠悬浮窗。',
+          '「初次加载」 和 「PvE区域进入PvE区域」 的场合不会触发折叠。',
         ],
         type: 'switch',
       },
@@ -68,7 +69,7 @@ const groups: ConfigGroup[] = [
         desc: [
           '设置“当前据点”中各个据点卡片的布局样式。',
           '　> 现代：每行展示多个卡片，提高信息密度；',
-          '　> 经典：每行展示一个卡片，维持旧版本风格。',
+          '　> 经典：每行展示一个卡片，维持旧版本习惯。',
         ],
         type: 'select',
         options: [
@@ -85,10 +86,10 @@ const groups: ConfigGroup[] = [
     items: [
       {
         key: 'badboy_threshold',
-        name: '坏人阈值',
+        name: '仇怨阈值',
         desc: [
           '设置一个10000～99999之间的数字作为阈值。',
-          '当你受到超过阈值的伤害时，即使此技能不在坏人监控之列，也仍然会进入坏人统计。',
+          '当你受到超过阈值的伤害时，即使此技能不在“蒙怨”／“结怨”所监控的阻碍技能之列，也仍然会进入统计。',
         ],
         type: 'number',
         min: 10000, max: 99999,
