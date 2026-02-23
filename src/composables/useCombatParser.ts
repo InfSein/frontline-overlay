@@ -704,6 +704,18 @@ const useCombatParser = () => {
             if (!perpetratorName) {
               perpetratorName = combatData.playerMapName[perpetratorId] || '???'
             }
+            const lastHitAction = {
+              name: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
+              damage: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
+              instantDeath: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionInstantDeath || false,
+            }
+            const lasthitActionName = combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???'
+            const instantDeathActions = [
+              '星遁天诛', '完人',
+            ]
+            if (instantDeathActions.includes(lasthitActionName) && lastHitAction.damage <= 0) {
+              lastHitAction.instantDeath = true
+            }
             combatData.allPlayersDeaths.push({
               happenTime: Date.now(),
               victimName: victimName,
@@ -711,9 +723,9 @@ const useCombatParser = () => {
               victimJob: combatData.playerMapJob[victimId],
               perpetratorJob: combatData.playerMapJob[summonerId || perpetratorId],
               summonedBy: summonerName,
-              lasthitActionName: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionName || '???',
-              lasthitActionDamage: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionDamage || 0,
-              lasthitActionInstantDeath: combatData.playerLasthitMap[`${perpetratorId}-${victimId}`]?.hitActionInstantDeath || false,
+              lasthitActionName: lastHitAction.name,
+              lasthitActionDamage: lastHitAction.damage,
+              lasthitActionInstantDeath: lastHitAction.instantDeath,
             })
           }
         }

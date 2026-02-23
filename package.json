@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "update:submodule": "git submodule update --remote",
-    "build": "npm run update:submodule && vite build",
+    "build": "vite build",
     "postinstall": "node scripts/update-version.cjs",
     "preview": "vite preview",
     "build-only": "vite build",
