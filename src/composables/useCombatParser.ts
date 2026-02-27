@@ -1107,6 +1107,17 @@ const useCombatParser = () => {
       owner: GrandCompany.immoflame
     }
     combatData.prePoints.push(createPrePoint('A4', 15))
+
+    // 生成“统计”调试数据
+    if (!combatData.frontlineLog.length) {
+      combatData.frontlineLog.push({
+        zone: Frontline.seize,
+        job: 42,
+        start_time: Date.now(),
+        knockouts: [],
+        deaths: [],
+      })
+    }
   }
 
   return {
