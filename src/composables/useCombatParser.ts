@@ -1088,6 +1088,8 @@ const useCombatParser = () => {
     // 处理基本战斗数据
     combatData.zone = Frontline.seize
     combatData.onConflict = true
+    combatData.playerId ||= 'SELF'
+    combatData.playerName ||= 'SELF'
 
     // 生成“战况”调试数据
     Object.entries(combatData.pointMap).forEach(([key, val]) => {
@@ -1107,6 +1109,162 @@ const useCombatParser = () => {
       owner: GrandCompany.immoflame
     }
     combatData.prePoints.push(createPrePoint('A4', 15))
+
+    // 生成“战绩”调试数据
+    const timeGap = 1000 * 35
+    combatData.allPlayersDeaths = [
+      {
+        happenTime: Date.now(),
+        victimName: '无辜路人01',
+        victimJob: 24,
+        summonedBy: combatData.playerName,
+        perpetratorName: '亚灵神巴哈姆特',
+        perpetratorJob: 42,
+        lasthitActionName: '百万核爆',
+        lasthitActionDamage: 11627,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap,
+        victimName: '无辜路人02',
+        victimJob: 19,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '山崩',
+        lasthitActionDamage: 6742,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        perpetratorName: '某个忍者',
+        perpetratorJob: 30,
+        lasthitActionName: '星遁天诛',
+        lasthitActionDamage: 0,
+        lasthitActionInstantDeath: true,
+      },
+      {
+        happenTime: Date.now() + timeGap * 3,
+        victimName: '无辜路人03',
+        victimJob: 20,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '死星核爆',
+        lasthitActionDamage: 9144,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 4,
+        victimName: '无辜路人04',
+        victimJob: 21,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '毁绝',
+        lasthitActionDamage: 2415,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 5,
+        victimName: '无辜路人05',
+        victimJob: 22,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '彗星',
+        lasthitActionDamage: 8921,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        perpetratorName: '某个机工',
+        perpetratorJob: 31,
+        lasthitActionName: '魔弹射手',
+        lasthitActionDamage: 22174,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        summonedBy: '某个召唤',
+        perpetratorName: '亚灵神巴哈姆特',
+        perpetratorJob: 27,
+        lasthitActionName: '百万核爆',
+        lasthitActionDamage: 11946,
+        lasthitActionInstantDeath: false,
+      },
+    ]
+
+    // 生成“恩怨”调试数据
+    combatData.goodboys = [
+      {
+        happenTime: Date.now(),
+        targetName: '好心白魔',
+        targetJob: 24,
+        actionName: '水流幕',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 1,
+        targetName: '好心召唤',
+        targetJob: 27,
+        actionName: '守护之光',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        targetName: '骑士',
+        targetJob: 19,
+        actionName: '卫护',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 3,
+        targetName: '好心白魔',
+        targetJob: 24,
+        actionName: '救疗',
+        actionDamage: 12000,
+      },
+    ]
+    combatData.badboys = [
+      {
+        happenTime: Date.now() + timeGap * 4,
+        targetName: '狗战士',
+        targetJob: 21,
+        actionName: '献身',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 5,
+        targetName: '狗骑士',
+        targetJob: 19,
+        actionName: '全力挥打',
+        actionDamage: 1260,
+      },
+      {
+        happenTime: Date.now() + timeGap * 6,
+        targetName: '狗武僧',
+        targetJob: 20,
+        actionName: '陨石冲击',
+        actionDamage: 11842,
+      },
+      {
+        happenTime: Date.now() + timeGap * 7,
+        targetName: '组排机工1',
+        targetJob: 31,
+        actionName: '魔弹射手',
+        actionDamage: 16742,
+      },
+      {
+        happenTime: Date.now() + timeGap * 7,
+        targetName: '组排机工2',
+        targetJob: 31,
+        actionName: '魔弹射手',
+        actionDamage: 24716,
+      },
+    ]
 
     // 生成“统计”调试数据
     if (!combatData.frontlineLog.length) {
