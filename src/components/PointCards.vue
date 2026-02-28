@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface PointData {
   cardKey: string
   type: "active" | "neutrality" | "preparing"
@@ -14,7 +16,7 @@ interface PointCardsProps {
   cardStyle?: "modern" | "classic"
 }
 
-withDefaults(defineProps<PointCardsProps>(), {
+const props = withDefaults(defineProps<PointCardsProps>(), {
   cardStyle: 'classic'
 })
 
@@ -27,6 +29,18 @@ const getPointColor = (point: PointData) => {
 }
 
 const getPointProgress = (point: PointData) => point.ptProgress ?? 100
+
+const modernGridClass = computed(() => {
+  switch (props.points.length) {
+    case 1:
+      return 'grid grid-cols-1 gap-2'
+    case 2:
+    case 4:
+      return 'grid grid-cols-2 gap-2'
+    default:
+      return 'grid grid-cols-3 gap-2'
+  }
+})
 </script>
 
 <template>
@@ -34,7 +48,7 @@ const getPointProgress = (point: PointData) => point.ptProgress ?? 100
     class="w-full"
     :class="{
       'flex flex-col gap-0.5': cardStyle === 'classic',
-      'grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2': cardStyle === 'modern'
+      [modernGridClass]: cardStyle === 'modern'
     }"
   >
     <div
