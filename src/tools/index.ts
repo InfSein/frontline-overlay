@@ -117,6 +117,7 @@ export const formatDate = (ts: number) => {
 }
 export const formatTime = (ts: number) => new Date(ts).toTimeString().slice(0, 8)
 export const formatTimestamp = (ts: number) => {
+  if (!ts) return '????-??-?? ??:??:??'
   const date = formatDate(ts)
   const time = formatTime(ts)
   return `${date} ${time}`

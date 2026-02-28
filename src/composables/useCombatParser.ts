@@ -426,8 +426,9 @@ const useCombatParser = () => {
     if (!combatData.onConflict && !combatData.zone) return
 
     // 处理各种刷点文本日志
+    let pointLogMatched = false
     if (combatData.zone === Frontline.seize) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'seize',
         neutralMatch: {
           match: /(S|A|B)级的亚拉戈石文(.*?)开始活动了！/, indexes: [2, 1],
@@ -455,7 +456,7 @@ const useCombatParser = () => {
         }
       })
     } else if (combatData.zone === Frontline.naadam) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'naadam',
         initialMatch: {
           match: /30秒后(S|A|B)级无垢的大地(.*?)即将进入可契约状态。/, indexes: [2, 1],
@@ -477,7 +478,7 @@ const useCombatParser = () => {
         },
       })
     } else if (combatData.zone === Frontline.triumph) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'naadam',
         initialMatch: {
           match: /30秒后(S|A|B)级的战略目标点(.*?)将变为可控制状态……/, indexes: [2, 1],
@@ -499,7 +500,7 @@ const useCombatParser = () => {
         },
       })
     } else if (combatData.zone === Frontline.secure) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'secure',
         conquerMatch: {
           match: /(黑涡团|双蛇党|恒辉队)占领了(.*?)！/, indexes: [2, NaN, 1],
@@ -508,6 +509,10 @@ const useCombatParser = () => {
           match: /(.*?)恢复成了中立状态！/, indexes: [1],
         },
       })
+    }
+    if (pointLogMatched) {
+      combatData.onConflict = true
+      return
     }
 
     // 处理结算信息，尝试获取比赛结果
@@ -742,7 +747,7 @@ const useCombatParser = () => {
       }
     }
     function parsePointLog(conf: PointConfigSeize | PointConfigNaadam | PointConfigSecure) {
-      if (!msg) return
+      if (!msg) return false
       if (conf.mode === 'seize') {
         let matcher = conf.neutralMatch
 
@@ -751,10 +756,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchNeutral[ptLvIndex!]
           const pt = matchNeutral[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total)
-          return
+          return true
         }
 
         matcher = conf.conquerMatch
@@ -764,11 +769,11 @@ const useCombatParser = () => {
           const pt = matchConquer[ptIndex!]
           const ptLv = matchConquer[ptLvIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !ptLv || !owner) return
+          if (!pt || !ptLv || !owner) return false
           const gc = parseGc(owner)
           const [total, drop] = conf.getFp(ptLv)
           activatePoint(pt, gc, ptLv, total, drop)
-          return
+          return true
         }
 
         matcher = conf.pauseMatch
@@ -776,11 +781,11 @@ const useCombatParser = () => {
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].pause()
           }
-          return
+          return true
         }
 
         matcher = conf.cleanMatch
@@ -788,7 +793,7 @@ const useCombatParser = () => {
         if (matchClean) {
           const [ptIndex] = matcher.indexes
           const pt = matchClean[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].cancel()
           }
@@ -797,7 +802,7 @@ const useCombatParser = () => {
             const key = `seize-${Date.now()}-${insiderData.pidIndex++}`
             combatData.prePoints.push(createPrePoint(key, 15))
           }
-          return
+          return true
         }
 
         conf.ptMax.changeEvents?.forEach(eventConf => {
@@ -813,10 +818,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchInitial[ptLvIndex!]
           const pt = matchInitial[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total, 30)
-          return
+          return true
         }
 
         matcher = conf.neutralMatch
@@ -825,10 +830,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchNeutral[ptLvIndex!]
           const pt = matchNeutral[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total)
-          return
+          return true
         }
 
         matcher = conf.conquerMatch
@@ -838,11 +843,11 @@ const useCombatParser = () => {
           const pt = matchConquer[ptIndex!]
           const ptLv = matchConquer[ptLvIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !ptLv || !owner) return
+          if (!pt || !ptLv || !owner) return false
           const gc = parseGc(owner)
           const [total, drop] = conf.getFp(ptLv)
           activatePoint(pt, gc, ptLv, total, drop)
-          return
+          return true
         }
 
         matcher = conf.cleanMatch
@@ -850,11 +855,11 @@ const useCombatParser = () => {
         if (matchClean) {
           const [ptIndex] = matcher.indexes
           const pt = matchClean[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].cancel()
           }
-          return
+          return true
         }
       } else if (conf.mode === 'secure') {
         let matcher = conf.conquerMatch
@@ -865,13 +870,13 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex, ownerIndex] = matcher.indexes
           const pt = matchConquer[ptIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !owner) return
+          if (!pt || !owner) return false
           const gc = parseGc(owner)
           combatData.pointMap[pt] = {
             type: 'static',
             owner: gc,
           }
-          return
+          return true
         }
 
         matcher = conf.pauseMatch
@@ -879,13 +884,14 @@ const useCombatParser = () => {
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           combatData.pointMap[pt] = {
             type: 'static'
           }
-          return
+          return true
         }
       }
+      return false
     }
   }
 
