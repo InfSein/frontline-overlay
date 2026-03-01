@@ -426,8 +426,9 @@ const useCombatParser = () => {
     if (!combatData.onConflict && !combatData.zone) return
 
     // 处理各种刷点文本日志
+    let pointLogMatched = false
     if (combatData.zone === Frontline.seize) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'seize',
         neutralMatch: {
           match: /(S|A|B)级的亚拉戈石文(.*?)开始活动了！/, indexes: [2, 1],
@@ -455,7 +456,7 @@ const useCombatParser = () => {
         }
       })
     } else if (combatData.zone === Frontline.naadam) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'naadam',
         initialMatch: {
           match: /30秒后(S|A|B)级无垢的大地(.*?)即将进入可契约状态。/, indexes: [2, 1],
@@ -477,7 +478,7 @@ const useCombatParser = () => {
         },
       })
     } else if (combatData.zone === Frontline.triumph) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'naadam',
         initialMatch: {
           match: /30秒后(S|A|B)级的战略目标点(.*?)将变为可控制状态……/, indexes: [2, 1],
@@ -499,7 +500,7 @@ const useCombatParser = () => {
         },
       })
     } else if (combatData.zone === Frontline.secure) {
-      parsePointLog({
+      pointLogMatched = parsePointLog({
         mode: 'secure',
         conquerMatch: {
           match: /(黑涡团|双蛇党|恒辉队)占领了(.*?)！/, indexes: [2, NaN, 1],
@@ -508,6 +509,10 @@ const useCombatParser = () => {
           match: /(.*?)恢复成了中立状态！/, indexes: [1],
         },
       })
+    }
+    if (pointLogMatched) {
+      combatData.onConflict = true
+      return
     }
 
     // 处理结算信息，尝试获取比赛结果
@@ -742,7 +747,7 @@ const useCombatParser = () => {
       }
     }
     function parsePointLog(conf: PointConfigSeize | PointConfigNaadam | PointConfigSecure) {
-      if (!msg) return
+      if (!msg) return false
       if (conf.mode === 'seize') {
         let matcher = conf.neutralMatch
 
@@ -751,10 +756,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchNeutral[ptLvIndex!]
           const pt = matchNeutral[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total)
-          return
+          return true
         }
 
         matcher = conf.conquerMatch
@@ -764,11 +769,11 @@ const useCombatParser = () => {
           const pt = matchConquer[ptIndex!]
           const ptLv = matchConquer[ptLvIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !ptLv || !owner) return
+          if (!pt || !ptLv || !owner) return false
           const gc = parseGc(owner)
           const [total, drop] = conf.getFp(ptLv)
           activatePoint(pt, gc, ptLv, total, drop)
-          return
+          return true
         }
 
         matcher = conf.pauseMatch
@@ -776,11 +781,11 @@ const useCombatParser = () => {
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].pause()
           }
-          return
+          return true
         }
 
         matcher = conf.cleanMatch
@@ -788,7 +793,7 @@ const useCombatParser = () => {
         if (matchClean) {
           const [ptIndex] = matcher.indexes
           const pt = matchClean[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].cancel()
           }
@@ -797,7 +802,7 @@ const useCombatParser = () => {
             const key = `seize-${Date.now()}-${insiderData.pidIndex++}`
             combatData.prePoints.push(createPrePoint(key, 15))
           }
-          return
+          return true
         }
 
         conf.ptMax.changeEvents?.forEach(eventConf => {
@@ -813,10 +818,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchInitial[ptLvIndex!]
           const pt = matchInitial[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total, 30)
-          return
+          return true
         }
 
         matcher = conf.neutralMatch
@@ -825,10 +830,10 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex] = matcher.indexes
           const ptLv = matchNeutral[ptLvIndex!]
           const pt = matchNeutral[ptIndex!]
-          if (!pt || !ptLv) return
+          if (!pt || !ptLv) return false
           const [total] = conf.getFp(ptLv)
           createInitialPoint(pt, ptLv, total)
-          return
+          return true
         }
 
         matcher = conf.conquerMatch
@@ -838,11 +843,11 @@ const useCombatParser = () => {
           const pt = matchConquer[ptIndex!]
           const ptLv = matchConquer[ptLvIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !ptLv || !owner) return
+          if (!pt || !ptLv || !owner) return false
           const gc = parseGc(owner)
           const [total, drop] = conf.getFp(ptLv)
           activatePoint(pt, gc, ptLv, total, drop)
-          return
+          return true
         }
 
         matcher = conf.cleanMatch
@@ -850,11 +855,11 @@ const useCombatParser = () => {
         if (matchClean) {
           const [ptIndex] = matcher.indexes
           const pt = matchClean[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           if (combatData.pointMap[pt] && combatData.pointMap[pt].type !== 'static' && combatData.pointMap[pt].type !== 'initial') {
             combatData.pointMap[pt].cancel()
           }
-          return
+          return true
         }
       } else if (conf.mode === 'secure') {
         let matcher = conf.conquerMatch
@@ -865,13 +870,13 @@ const useCombatParser = () => {
           const [ptIndex, ptLvIndex, ownerIndex] = matcher.indexes
           const pt = matchConquer[ptIndex!]
           const owner = matchConquer[ownerIndex!]
-          if (!pt || !owner) return
+          if (!pt || !owner) return false
           const gc = parseGc(owner)
           combatData.pointMap[pt] = {
             type: 'static',
             owner: gc,
           }
-          return
+          return true
         }
 
         matcher = conf.pauseMatch
@@ -879,13 +884,14 @@ const useCombatParser = () => {
         if (matchPause) {
           const [ptIndex] = matcher.indexes
           const pt = matchPause[ptIndex!]
-          if (!pt) return
+          if (!pt) return false
           combatData.pointMap[pt] = {
             type: 'static'
           }
-          return
+          return true
         }
       }
+      return false
     }
   }
 
@@ -1088,6 +1094,8 @@ const useCombatParser = () => {
     // 处理基本战斗数据
     combatData.zone = Frontline.seize
     combatData.onConflict = true
+    combatData.playerId ||= 'SELF'
+    combatData.playerName ||= 'SELF'
 
     // 生成“战况”调试数据
     Object.entries(combatData.pointMap).forEach(([key, val]) => {
@@ -1107,6 +1115,162 @@ const useCombatParser = () => {
       owner: GrandCompany.immoflame
     }
     combatData.prePoints.push(createPrePoint('A4', 15))
+
+    // 生成“战绩”调试数据
+    const timeGap = 1000 * 35
+    combatData.allPlayersDeaths = [
+      {
+        happenTime: Date.now(),
+        victimName: '无辜路人01',
+        victimJob: 24,
+        summonedBy: combatData.playerName,
+        perpetratorName: '亚灵神巴哈姆特',
+        perpetratorJob: 42,
+        lasthitActionName: '百万核爆',
+        lasthitActionDamage: 11627,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap,
+        victimName: '无辜路人02',
+        victimJob: 19,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '山崩',
+        lasthitActionDamage: 6742,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        perpetratorName: '某个忍者',
+        perpetratorJob: 30,
+        lasthitActionName: '星遁天诛',
+        lasthitActionDamage: 0,
+        lasthitActionInstantDeath: true,
+      },
+      {
+        happenTime: Date.now() + timeGap * 3,
+        victimName: '无辜路人03',
+        victimJob: 20,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '死星核爆',
+        lasthitActionDamage: 9144,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 4,
+        victimName: '无辜路人04',
+        victimJob: 21,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '毁绝',
+        lasthitActionDamage: 2415,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 5,
+        victimName: '无辜路人05',
+        victimJob: 22,
+        perpetratorName: combatData.playerName,
+        perpetratorJob: 42,
+        lasthitActionName: '彗星',
+        lasthitActionDamage: 8921,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        perpetratorName: '某个机工',
+        perpetratorJob: 31,
+        lasthitActionName: '魔弹射手',
+        lasthitActionDamage: 22174,
+        lasthitActionInstantDeath: false,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        victimName: combatData.playerName,
+        victimJob: 42,
+        summonedBy: '某个召唤',
+        perpetratorName: '亚灵神巴哈姆特',
+        perpetratorJob: 27,
+        lasthitActionName: '百万核爆',
+        lasthitActionDamage: 11946,
+        lasthitActionInstantDeath: false,
+      },
+    ]
+
+    // 生成“恩怨”调试数据
+    combatData.goodboys = [
+      {
+        happenTime: Date.now(),
+        targetName: '好心白魔',
+        targetJob: 24,
+        actionName: '水流幕',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 1,
+        targetName: '好心召唤',
+        targetJob: 27,
+        actionName: '守护之光',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 2,
+        targetName: '骑士',
+        targetJob: 19,
+        actionName: '卫护',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 3,
+        targetName: '好心白魔',
+        targetJob: 24,
+        actionName: '救疗',
+        actionDamage: 12000,
+      },
+    ]
+    combatData.badboys = [
+      {
+        happenTime: Date.now() + timeGap * 4,
+        targetName: '狗战士',
+        targetJob: 21,
+        actionName: '献身',
+        actionDamage: 0,
+      },
+      {
+        happenTime: Date.now() + timeGap * 5,
+        targetName: '狗骑士',
+        targetJob: 19,
+        actionName: '全力挥打',
+        actionDamage: 1260,
+      },
+      {
+        happenTime: Date.now() + timeGap * 6,
+        targetName: '狗武僧',
+        targetJob: 20,
+        actionName: '陨石冲击',
+        actionDamage: 11842,
+      },
+      {
+        happenTime: Date.now() + timeGap * 7,
+        targetName: '组排机工1',
+        targetJob: 31,
+        actionName: '魔弹射手',
+        actionDamage: 16742,
+      },
+      {
+        happenTime: Date.now() + timeGap * 7,
+        targetName: '组排机工2',
+        targetJob: 31,
+        actionName: '魔弹射手',
+        actionDamage: 24716,
+      },
+    ]
 
     // 生成“统计”调试数据
     if (!combatData.frontlineLog.length) {
