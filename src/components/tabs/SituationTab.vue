@@ -50,6 +50,24 @@ const {
       :points="pointData"
       :card-style="store.appConfig.situation_pointcard_style"
     />
+
+
+    <!-- 关注玩家 -->
+    <template v-if="combatData.matchedWatchedPlayers.length > 0">
+      <div class="page-title">关注玩家</div>
+      <div
+        v-for="(wp, idx) in combatData.matchedWatchedPlayers"
+        :key="idx"
+        class="page-content flex !items-baseline gap-1 !px-1 !py-0.5"
+      >
+        <div class="w-60">
+          <span class="">⭐ {{ wp.name }}</span>
+          <span v-if="wp.worldName" class="text-base text-amber-900"> @{{ wp.worldName }}</span>
+        </div>
+        <div>／</div>
+        <div v-if="wp.note">{{ wp.note }}</div>
+      </div>
+    </template>
   </div>
 </template>
 
