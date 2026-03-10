@@ -2,6 +2,13 @@ import { assignDefaults } from "../tools"
 import { type AppTextUi } from "."
 import type { Component } from "vue"
 
+export interface WatchedPlayer {
+  /** 玩家名，格式："名称" 或 "名称@服务器" */
+  name: string
+  /** 备注，选填 */
+  note: string
+}
+
 export interface AppConfig {
   // #region 通用
   /** 悬浮窗缩放 */
@@ -22,6 +29,11 @@ export interface AppConfig {
   badboy_threshold: number
   // #endregion
 
+  // #region 关注
+  /** 关注的玩家列表，最多3个 */
+  watched_players: WatchedPlayer[]
+  // #endregion
+
   // #region 隐藏的设置项
   /** FoldableCard 折叠情况 */
   ui_fold_cache: Record<string, boolean>
@@ -37,6 +49,7 @@ const defaultAppConfig : AppConfig = {
   auto_collapse_when_leave_battlefield: false,
   situation_pointcard_style: 'modern',
   badboy_threshold: 20000,
+  watched_players: [],
   ui_fold_cache: {},
 }
 
@@ -56,7 +69,7 @@ export interface ConfigGroup {
   icon: Component
   items: ConfigItem[]
 }
-export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSliderNumber | ConfigItemSelect
+export type ConfigItem = ConfigItemSwitch | ConfigItemString | ConfigItemNumber | ConfigItemSliderNumber | ConfigItemSelect | ConfigItemWatchedPlayers
 interface ConfigItemBase {
   key: AppConfigKey
   name: string
@@ -85,4 +98,8 @@ interface ConfigItemSliderNumber extends ConfigItemBase {
 interface ConfigItemSelect extends ConfigItemBase {
   type: "select"
   options: { label: string; value: string | number }[]
+}
+interface ConfigItemWatchedPlayers extends ConfigItemBase {
+  type: "watched-players"
+  maxCount: number
 }

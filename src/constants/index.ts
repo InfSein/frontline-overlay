@@ -48,6 +48,8 @@ export const ImportantActions = {
   '百万核爆': [ 'hit,damage' ],
   '荆棘环绕': [ 'hit,damage' ],
   '南天十字': [ 'hit,damage' ],
+  '胖胖之墙': [ 'hit' ],
+  '天星棱光': [ 'hit,damage,heal' ],
 
   // * SPECIAL
   '交叉光剑': [ 'hit,damage' ],

@@ -75,6 +75,8 @@ const combatData = reactive({
   mybads: [] as SelfActionLog[],
   iarLog: [] as IarLog[],
   frontlineLog: [] as FrontlineLog[],
+  /** 匹配到的关注玩家 */
+  matchedWatchedPlayers: [] as { name: string; note: string; worldName: string }[],
 })
 const insiderData = reactive({
   pidIndex: 1,
@@ -366,6 +368,7 @@ const useCombatParser = () => {
         console.log('summon map:', deepCopy(combatData.summonMap))
       }
       combatData.summonMap = {}; combatData.playerLasthitMap = {}
+      combatData.matchedWatchedPlayers = []
       if (isDev) {
         console.log('[Zone] ', data.zoneID, ' / ', data.zoneName)
         if (data.zoneID === 250) { // 狼狱
@@ -419,6 +422,33 @@ const useCombatParser = () => {
       if (store.appConfig.auto_expand_when_enter_battlefield) {
         appVar.collapsed = false
       }
+
+      // 匹配关注玩家
+      combatData.matchedWatchedPlayers = []
+      if (store.appConfig.watched_players?.length) {
+        getCombatants().then(combatants => {
+          const matched: typeof combatData.matchedWatchedPlayers = []
+          for (const wp of store.appConfig.watched_players) {
+            const hasServer = wp.name.includes('@')
+            const [targetName, targetWorld] = hasServer ? wp.name.split('@') : [wp.name, '']
+            const found = combatants.find(c => {
+              if (hasServer) {
+                return c.Name === targetName && c.WorldName === targetWorld
+              }
+              return c.Name === targetName
+            })
+            if (found) {
+              matched.push({
+                name: found.Name,
+                note: wp.note,
+                worldName: found.WorldName,
+              })
+            }
+          }
+          combatData.matchedWatchedPlayers = matched
+        })
+      }
+
       return
     }
 
@@ -1115,6 +1145,23 @@ const useCombatParser = () => {
       owner: GrandCompany.immoflame
     }
     combatData.prePoints.push(createPrePoint('A4', 15))
+    combatData.matchedWatchedPlayers = [
+      {
+        name: '无辜路人01',
+        note: '大饼',
+        worldName: '红玉海',
+      },
+      {
+        name: '最长就六个字',
+        note: '四小',
+        worldName: '静语庄园',
+      },
+      {
+        name: '无辜路人03',
+        note: '不认识',
+        worldName: '',
+      },
+    ]
 
     // 生成“战绩”调试数据
     const timeGap = 1000 * 35

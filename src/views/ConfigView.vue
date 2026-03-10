@@ -6,7 +6,9 @@ import {
   SettingsApplicationsSharp,
   MonitorHeartFilled,
   FlagFilled,
+  AddRound, RemoveRound,
 } from '@vicons/material'
+import AppInfo from '@/constants/app-info'
 import { type AppConfig, type ConfigGroup } from '@/types/config'
 import { deepCopy } from '@/tools'
 import { useStore } from '@/stores'
@@ -35,7 +37,7 @@ const groups: ConfigGroup[] = [
         name: '启动时自动折叠',
         desc: [
           '在悬浮窗初次加载时自动折叠悬浮窗。',
-          '“初次加载”也包括刷新悬浮窗的场合。'
+          '※ 启用此项目时，刷新悬浮窗也会自动折叠。'
         ],
         type: 'switch',
       },
@@ -51,8 +53,8 @@ const groups: ConfigGroup[] = [
         key: 'auto_collapse_when_leave_battlefield',
         name: '离开对战时自动折叠',
         desc: [
-          '在离开对战区域(从PvP区域进入PvE区域)时自动折叠悬浮窗。',
-          '「初次加载」 和 「PvE区域进入PvE区域」 的场合不会触发折叠。',
+          '在离开对战区域（从PvP区域进入PvE区域）时自动折叠悬浮窗。',
+          '※ 「初次加载」和「从一个PvE区域进入另一个PvE区域」的场合不会触发折叠。',
         ],
         type: 'switch',
       },
@@ -67,7 +69,7 @@ const groups: ConfigGroup[] = [
         key: 'situation_pointcard_style',
         name: '“当前据点”布局',
         desc: [
-          '设置“当前据点”中各个据点卡片的布局样式。',
+          '调整“当前据点”中各个据点卡片的布局样式。',
           '　> 现代：每行展示多个卡片，提高信息密度；',
           '　> 经典：每行展示一个卡片，维持旧版本习惯。',
         ],
@@ -76,6 +78,26 @@ const groups: ConfigGroup[] = [
           { label: '现代', value: 'modern' },
           { label: '经典', value: 'classic' },
         ]
+      },
+      {
+        key: 'watched_players',
+        name: '关注列表',
+        beta: true,
+        desc: [
+          '关注让你印象深刻的玩家，并为其设置简短的备注。',
+          '战斗开始时会自动扫描己方团队，并展示被你关注的玩家和你对他的备注。',
+          '玩家名格式为“玩家名”或“玩家名@服务器名”。',
+          {
+            className: 'text-orange-600',
+            content: '※ 不会扫描敌方阵营。',
+          },
+          {
+            className: 'text-red-600',
+            content: `※ 目前最多只能关注${AppInfo.balanceConstants.watchedPlayersMaxCount}名玩家。`,
+          },
+        ],
+        type: 'watched-players',
+        maxCount: AppInfo.balanceConstants.watchedPlayersMaxCount,
       },
     ]
   },
@@ -105,9 +127,22 @@ const groupCollapsed = ref<Record<string, boolean>>({})
 onMounted(() => {
   formConfig.value = deepCopy(store.appConfig)
   groupCollapsed.value = Object.fromEntries(groups.map(group => [group.key, false]))
+  if (!formConfig.value.watched_players?.length) {
+    formConfig.value.watched_players = [{ name: '', note: '' }]
+  }
 })
 
+const handleAddWatchedPlayer = () => {
+  formConfig.value.watched_players.push({ name: '', note: '' })
+}
+const handleRemoveWatchedPlayer = (index: number) => {
+  formConfig.value.watched_players.splice(index, 1)
+}
+
 const handleSave = () => {
+  if (formConfig.value.watched_players.length) {
+    formConfig.value.watched_players = formConfig.value.watched_players.filter(wp => wp.name.trim())
+  }
   store.setAppConfig(formConfig.value)
   if (window.opener) {
     window.opener.postMessage(
@@ -154,7 +189,7 @@ const handleSave = () => {
         <div
           v-for="item in group.items"
           :key="item.key"
-          class="flex items-center justify-between px-1 py-2 hover:bg-gray-100 transition-colors"
+          class="flex items-start justify-between px-1 py-2 hover:bg-gray-100 transition-colors"
         >
           <div class="flex flex-col">
             <div class="flex items-center gap-1 text-base font-medium">
@@ -163,13 +198,13 @@ const handleSave = () => {
                 <template #trigger>
                   <n-icon size="16" color="#F0A020"><WarningRound /></n-icon>
                 </template>
-                此设置项仅作测试之用，随时可能被更改或删除。
+                该项目还有待评估，后续版本可能视情况更改甚至删除。
               </n-tooltip>
             </div>
             <div v-if="item.desc">
               <template v-for="(descItem, descIndex) in item.desc" :key="`${item.key}-${descIndex}`">
                 <div v-if="typeof descItem === 'string'" class="text-xs text-gray-500">{{ descItem }}</div>
-                <div v-else :class="descItem.className" :style="descItem.style">{{ descItem.content }}</div>
+                <div v-else :class="'text-xs text-gray-500 ' + (descItem.className || '')" :style="descItem.style">{{ descItem.content }}</div>
               </template>
             </div>
           </div>
@@ -205,6 +240,41 @@ const handleSave = () => {
               :options="item.options"
               class="w-36"
             />
+            <!-- 关注玩家 -->
+            <div v-else-if="item.type === 'watched-players'" class="w-96 ml-1">
+              <div
+                v-for="(wp, wpIndex) in formConfig.watched_players"
+                :key="wpIndex"
+                class="flex items-center gap-x-1 mb-1"
+              >
+                <n-input
+                  v-model:value="wp.name"
+                  class="flex-1"
+                  title="玩家名"
+                  placeholder="玩家名"
+                />
+                <n-input
+                  v-model:value="wp.note"
+                  class="max-w-44"
+                  title="备注(选填)"
+                  placeholder="备注(选填)"
+                />
+                <n-button
+                  ghost
+                  type="error"
+                  title="删除该行"
+                  @click="handleRemoveWatchedPlayer(wpIndex)"
+                >
+                  <template #icon><n-icon><RemoveRound /></n-icon></template>
+                </n-button>
+              </div>
+              <div v-if="formConfig.watched_players.length < item.maxCount" class="flex items-center justify-end w-full">
+                <n-button type="primary" class="w-32" @click="handleAddWatchedPlayer">
+                  <template #icon><n-icon><AddRound /></n-icon></template>
+                  添加关注
+                </n-button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
