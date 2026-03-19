@@ -324,13 +324,7 @@ const useCombatParser = () => {
     } else {
       if (combatData.zone) {
         let result: FrontlineResult | undefined = undefined
-        if (
-          insiderData.currFrontlineResult
-          && (
-            Object.values(CrystalConflict).includes(combatData.zone as CrystalConflict)
-            || combatData.zone === RivalWings.hiddengorge
-          )
-        ) {
+        if (insiderData.currFrontlineResult) {
           result = insiderData.currFrontlineResult
           insiderData.currFrontlineResult = undefined
         }
@@ -416,6 +410,8 @@ const useCombatParser = () => {
 
       if (combatData.zone === Frontline.seize) combatData.ptMax = 4
       else if (combatData.zone === Frontline.naadam) combatData.ptMax = 6
+      else if (combatData.zone === Frontline.triumph) combatData.ptMax = 6
+      else if (combatData.zone === Frontline.secure) combatData.ptMax = 9
       else combatData.ptMax = 0
 
       insiderData.currFrontlineStartTime = Date.now()
@@ -481,7 +477,7 @@ const useCombatParser = () => {
         ptMax: {
           initial: 4,
           changeEvents: [
-            { msg: '距离"尘封秘岩（争夺战）"结束还有10分钟。', changeTo: 3 },
+            { msg: '距离“尘封秘岩（争夺战）”结束还有10分钟。', changeTo: 3 },
           ]
         }
       })
@@ -547,7 +543,60 @@ const useCombatParser = () => {
 
     // 处理结算信息，尝试获取比赛结果
     if (Object.values(Frontline).includes(combatData.zone as Frontline)) {
-
+      // 战场
+      const matchRewardWolfMark = msg.match(/获得了([\d,]+)枚狼印战绩。/)
+      if (matchRewardWolfMark && matchRewardWolfMark[1]) {
+        switch (matchRewardWolfMark[1]) {
+          case '500':
+          case '550':
+          case '600':
+          case '650':
+          case '700':
+            insiderData.currFrontlineResult = '3rd'; break
+          case '825':
+          case '900':
+          case '975':
+          case '1,050':
+          case '1,125':
+            insiderData.currFrontlineResult = '2nd'; break
+          case '1,000':
+          case '1,100':
+          case '1,200':
+          case '1,300':
+          case '1,400':
+          case '1,500':
+            insiderData.currFrontlineResult = '1st'; break
+          // 无法判断：'750'(2/3)
+          default:
+            break
+        }
+      }
+      const matchRewardSeriesExp = msg.match(/获得了([\d,]+)点系列赛经验值。/)
+      if (matchRewardSeriesExp && matchRewardSeriesExp[1]) {
+        switch (matchRewardSeriesExp[1]) {
+          case '1,000':
+          case '1,100':
+          case '1,200':
+          case '1,300':
+          case '1,400':
+            insiderData.currFrontlineResult = '3rd'; break
+          case '1,250':
+          case '1,375':
+          case '1,625':
+          case '1,750':
+          case '1,875':
+            insiderData.currFrontlineResult = '2nd'; break
+          case '1,650':
+          case '1,800':
+          case '1,950':
+          case '2,100':
+          case '2,250':
+            insiderData.currFrontlineResult = '1st'; break
+          // 无法判断：'1,500'(1/2/3)
+          default:
+            break
+        }
+      }
     }
     else if (combatData.zone === RivalWings.hiddengorge) {
       // 隐塞

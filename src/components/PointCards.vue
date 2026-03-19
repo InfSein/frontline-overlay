@@ -13,6 +13,7 @@ interface PointData {
 
 interface PointCardsProps {
   points: PointData[]
+  maxPointCount: number
   cardStyle?: "modern" | "classic"
 }
 
@@ -31,7 +32,8 @@ const getPointColor = (point: PointData) => {
 const getPointProgress = (point: PointData) => point.ptProgress ?? 100
 
 const modernGridClass = computed(() => {
-  switch (props.points.length) {
+  console.log('props.maxPointCounts:', props.maxPointCount)
+  switch (props.maxPointCount || props.points.length) {
     case 1:
       return 'grid grid-cols-1 gap-2'
     case 2:
