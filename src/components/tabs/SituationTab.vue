@@ -48,6 +48,7 @@ const {
     </div>
     <PointCards
       :points="pointData"
+      :max-point-count="combatData.ptMax"
       :card-style="store.appConfig.situation_pointcard_style"
     />
 
