@@ -19,7 +19,7 @@ export type PointConfigSeize = {
   getFp: (ptLv: string) => [number, number]
   ptMax: {
     initial: number,
-    changeEvents?: { msg: string; changeTo: number; }[]
+    changeEvents: { msg: string; changeTo: number; }[]
   }
 }
 export type PointConfigNaadam = {
@@ -29,6 +29,10 @@ export type PointConfigNaadam = {
   conquerMatch: PointTextRegexMatch
   cleanMatch: PointTextRegexMatch
   getFp: (ptLv: string) => [number, number]
+  ptMax: {
+    initial: number,
+    changeEvents: { msg: string; changeTo: number; }[]
+  }
 }
 export type PointConfigSecure = {
   mode: "secure"

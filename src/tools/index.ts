@@ -249,8 +249,8 @@ export const getFrontlineBackgroundColor = (fl: PvPBattle) => {
 
 export const getFrontlineResultBackgroundColor = (result: FrontlineResult) => {
   switch (result) {
-    case '1st': return '#FFD700'
-    case '2nd': return '#C0C0C0'
+    case '1st': return '#A78D00'
+    case '2nd': return '#7E7E7E'
     case '3rd': return '#CD7F32'
     case 'win': return '#4CAF50'
     case 'lose': return '#F44336'

@@ -502,6 +502,14 @@ const useCombatParser = () => {
           else if (ptLv === 'B') return [50, 5]
           throw new Error('[gcFp] wtf point is? ' + ptLv)
         },
+        ptMax: {
+          initial: 6,
+          changeEvents: [
+            { msg: '战斗已经过去了5分钟，无垢的大地同时出现的数量减少了！', changeTo: 5 },
+            { msg: '战斗已经过去了10分钟，无垢的大地同时出现的数量减少了！', changeTo: 3 },
+            { msg: '战斗已经过去了15分钟，无垢的大地同时出现的数量减少了！', changeTo: 2 },
+          ]
+        }
       })
     } else if (combatData.zone === Frontline.triumph) {
       pointLogMatched = parsePointLog({
@@ -524,6 +532,14 @@ const useCombatParser = () => {
           else if (ptLv === 'B') return [50, 5]
           throw new Error('[gcFp] wtf point is? ' + ptLv)
         },
+        ptMax: {
+          initial: 6,
+          changeEvents: [
+            { msg: '战斗已经过去了5分钟，战略目标点同时出现的数量减少了！', changeTo: 5 },
+            { msg: '战斗已经过去了10分钟，战略目标点同时出现的数量减少了！', changeTo: 3 },
+            { msg: '战斗已经过去了15分钟，战略目标点同时出现的数量减少了！', changeTo: 2 },
+          ]
+        }
       })
     } else if (combatData.zone === Frontline.secure) {
       pointLogMatched = parsePointLog({
@@ -884,7 +900,7 @@ const useCombatParser = () => {
           return true
         }
 
-        conf.ptMax.changeEvents?.forEach(eventConf => {
+        conf.ptMax.changeEvents.forEach(eventConf => {
           if (msg === eventConf.msg) {
             combatData.ptMax = eventConf.changeTo
           }
@@ -940,6 +956,12 @@ const useCombatParser = () => {
           }
           return true
         }
+
+        conf.ptMax.changeEvents.forEach(eventConf => {
+          if (msg === eventConf.msg) {
+            combatData.ptMax = eventConf.changeTo
+          }
+        })
       } else if (conf.mode === 'secure') {
         let matcher = conf.conquerMatch
 
@@ -1372,10 +1394,11 @@ const useCombatParser = () => {
     if (!combatData.frontlineLog.length) {
       combatData.frontlineLog.push({
         zone: Frontline.seize,
-        job: 42,
+        job: 27,
         start_time: Date.now(),
-        knockouts: [],
-        deaths: [],
+        result: '1st',
+        knockouts: deepCopy(knockouts.value),
+        deaths: deepCopy(deaths.value),
       })
     }
   }

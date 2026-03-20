@@ -84,28 +84,28 @@ const detailBgColor = computed(() => {
     >
       <JobSpan size="2.5rem" :job="frontlineLog.job" />
       <div>
-        <div class="flex items-center text-[1.5rem] leading-[1] font-medium text-white text-shadow">
+        <div class="flex items-center gap-1.5 text-[1.5rem] leading-[1] font-medium text-white text-shadow">
           <!-- 战斗名称 -->
-          {{ frontlineName }}
+          <div>{{ frontlineName }}</div>
           <!-- 结果 -->
-          <span
+          <div
             v-if="frontlineLog.result"
-            class="text-[1rem] leading-[1] font-normal p-1 text-white ml-1 rounded"
+            class="text-[1rem] leading-[1] font-normal p-1 text-white rounded"
             :style="{
               backgroundColor: getFrontlineResultBackgroundColor(frontlineLog.result)
             }"
           >
             {{ frontlineResult }}
-          </span>
+          </div>
           <!-- 展开/折叠指示器 -->
-          <span
+          <div
             v-if="hasDetails"
-            class="inline-block ml-1.5 text-[0.75rem] text-white transition-transform duration-300
+            class="inline-block text-[0.75rem] text-white transition-transform duration-300
               ease-in-out pointer-events-none"
             :class="{ 'rotate-180': expanded }"
           >
             ▼
-          </span>
+          </div>
         </div>
         <div class="flex items-center gap-1 text-[1.1rem] text-gray-200 leading-[1] m-0 text-shadow">
           <!-- 开始时间 -->
@@ -132,7 +132,7 @@ const detailBgColor = computed(() => {
         :style="{ backgroundColor: detailBgColor }"
       >
         <!-- 击倒记录 -->
-        <div class="py-1.5 px-2 text-[1.15rem] font-semibold text-white/90 border-b border-white/15 text-shadow">
+        <div class="p-2 text-[1.15rem] font-semibold text-white/90 border-b border-white/15 text-shadow">
           — KNOCKOUTS —
         </div>
         <div v-if="!frontlineLog.knockouts.length" class="flex flex-wrap items-center text-[1.1rem] text-white/85 py-1 px-2">无</div>
@@ -160,7 +160,7 @@ const detailBgColor = computed(() => {
         </div>
 
         <!-- 阵亡记录 -->
-        <div class="py-1.5 px-2 text-[1.15rem] font-semibold text-white/90 border-b border-white/15 text-shadow">
+        <div class="p-2 pt-1 text-[1.15rem] font-semibold text-white/90 border-b border-white/15 text-shadow">
           — DEATHS —
         </div>
         <div v-if="!frontlineLog.deaths.length" class="flex flex-wrap items-center text-[1.1rem] text-white/85 py-1 px-2">无</div>
