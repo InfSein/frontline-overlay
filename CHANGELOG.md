@@ -1,6 +1,6 @@
 # 更新日志
 
-## v3.3.0 (2026-03-19)
+## v3.3.0 (2026-03-20)
 * “统计”选项卡的对战记录现已支持记录纷争前线的对战结果。
 * “统计”选项卡的对战记录现在可以点击来展开对战详情（击倒/死亡记录）。<br>
   ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.3.0/1.jpg)
