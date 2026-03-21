@@ -31,11 +31,11 @@ const frontlineResult = computed(() => {
     case 'lose':
       return '负'
     case '1st':
-      return '冠'
+      return '冠军'
     case '2nd':
-      return '亚'
+      return '亚军'
     case '3rd':
-      return '季'
+      return '季军'
     default:
       return props.frontlineLog.result
   }

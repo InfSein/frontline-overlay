@@ -13,6 +13,16 @@ const {
   situationLockMsg,
   pointData,
 } = useCombatParser()
+
+const maxPointCountForPointCard = computed(() => {
+  switch (combatData.zone) {
+    case Frontline.triumph:
+    case Frontline.naadam:
+      return 0
+    default:
+      return combatData.ptMax
+  }
+})
 </script>
 
 <template>
@@ -48,7 +58,7 @@ const {
     </div>
     <PointCards
       :points="pointData"
-      :max-point-count="combatData.ptMax"
+      :max-point-count="maxPointCountForPointCard"
       :card-style="store.appConfig.situation_pointcard_style"
     />
 

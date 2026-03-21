@@ -32,7 +32,6 @@ const getPointColor = (point: PointData) => {
 const getPointProgress = (point: PointData) => point.ptProgress ?? 100
 
 const modernGridClass = computed(() => {
-  console.log('props.maxPointCounts:', props.maxPointCount)
   switch (props.maxPointCount || props.points.length) {
     case 1:
       return 'grid grid-cols-1 gap-2'
