@@ -90,8 +90,8 @@ const currDeathChartData = computed(() =>
       </div>
     </ContentBlock>
 
-    <!-- 胜率统计 -->
-    <ContentBlock title="胜率统计">
+    <!-- 结果统计 -->
+    <ContentBlock title="结果统计">
       <template v-if="winRateTabs.length > 0">
         <div class="flex items-center gap-1">
           <div
