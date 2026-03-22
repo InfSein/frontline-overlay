@@ -9,6 +9,30 @@ const {
   statistics,
 } = useCombatParser()
 
+const winRateTabs = computed(() => {
+  const tabs: [string, string][] = []
+  if (statistics.value.winRateSummary.frontline) {
+    tabs.push(['frontline', '纷争前线'])
+  }
+  if (statistics.value.winRateSummary.rivalWings) {
+    tabs.push(['rivalWings', '烈羽争锋'])
+  }
+  if (statistics.value.winRateSummary.crystalConflict) {
+    tabs.push(['crystalConflict', '水晶冲突'])
+  }
+  return tabs
+})
+const activeWinRateTab = ref(winRateTabs.value[0]?.[0])
+watch(winRateTabs, (newTabs) => {
+  if (newTabs.length > 0) {
+    if (!newTabs.some(tab => tab[0] === activeWinRateTab.value)) {
+      activeWinRateTab.value = newTabs[0]![0]
+    }
+  } else {
+    activeWinRateTab.value = undefined
+  }
+}, { immediate: true })
+
 const knockoutChartTabs = computed(() => [
   [ 'skill', '按技能', statistics.value.pieData.knockoutBySkill ],
   [ 'selfJob', '按自身职业', statistics.value.pieData.knockoutBySelfJob ],
@@ -68,54 +92,60 @@ const currDeathChartData = computed(() =>
 
     <!-- 胜率统计 -->
     <ContentBlock title="胜率统计">
-      <div class="w-full grid grid-cols-3">
-        <template v-if="statistics.winRateSummary.frontline">
+      <template v-if="winRateTabs.length > 0">
+        <div class="flex items-center gap-1">
           <div
-            class="col-span-3"
-            v-if="statistics.winRateSummary.rivalWings || statistics.winRateSummary.crystalConflict"
+            v-for="tab in winRateTabs"
+            :key="tab[0]"
+            class="text-[1.1rem] px-2 py-1 border border-transparent rounded text-white cursor-pointer text-shadow
+              transition-colors duration-200"
+            :class="activeWinRateTab === tab[0] ? 'bg-gray-500' : 'hover:bg-gray-500'"
+            @click="activeWinRateTab = tab[0]"
           >
-            [纷争前线]
+            {{ tab[1] }}
           </div>
-          <div>
-            冠军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.rate }}</span>%)
-          </div>
-          <div>
-            亚军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.rate }}</span>%)
-          </div>
-          <div>
-            季军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.rate }}</span>%)
-          </div>
-        </template>
+        </div>
+        <n-divider class="!my-1" />
+        <div class="flex flex-col gap-1">
+          <template v-if="activeWinRateTab === 'frontline' && statistics.winRateSummary.frontline">
+            <div>
+              冠军场次：<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.rate }}</span>%)
+            </div>
+            <div>
+              亚军场次：<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.rate }}</span>%)
+            </div>
+            <div>
+              季军场次：<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.rate }}</span>%)
+            </div>
+          </template>
 
-        <template v-if="statistics.winRateSummary.rivalWings">
-          <div class="col-span-3">[烈羽争锋]</div>
-          <div>
-            胜利<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.rate }}</span>%)
-          </div>
-          <div>
-            失败<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.rate }}</span>%)
-          </div>
-          <div />
-        </template>
+          <template v-if="activeWinRateTab === 'rivalWings' && statistics.winRateSummary.rivalWings">
+            <div>
+              胜利场次：<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.rate }}</span>%)
+            </div>
+            <div>
+              失败场次：<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.rate }}</span>%)
+            </div>
+          </template>
 
-        <template v-if="statistics.winRateSummary.crystalConflict">
-          <div class="col-span-3">[水晶冲突]</div>
-          <div>
-            胜利<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.rate }}</span>%)
-          </div>
-          <div>
-            失败<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.count }}</span>场
-            (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.rate }}</span>%)
-          </div>
-          <div />
-        </template>
-      </div>
+          <template v-if="activeWinRateTab === 'crystalConflict' && statistics.winRateSummary.crystalConflict">
+            <div>
+              胜利场次：<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.rate }}</span>%)
+            </div>
+            <div>
+              失败场次：<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.count }}</span>
+              (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.rate }}</span>%)
+            </div>
+          </template>
+        </div>
+      </template>
+      <div v-else class="py-2 flex items-center justify-center">暂无数据</div>
     </ContentBlock>
 
     <!-- 击倒统计 -->
