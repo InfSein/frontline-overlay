@@ -35,23 +35,27 @@ const currDeathChartData = computed(() =>
     <AlertTitle v-if="!combatData.frontlineLog.length" msg="暂无记录。请完成至少一场对战后再来查看。" />
 
     <!-- 参战统计 -->
-    <div class="page-title">
-      参战统计
-      <div class="ml-auto mr-5 flex items-center gap-1">
-        <div class="w-[4.5rem] text-right">K</div>
-        <div class="w-[4.5rem] text-right">D</div>
+    <ContentBlock title="参战统计" use-custom-content-container>
+      <template #title>
+        参战统计
+        <div class="ml-auto mr-5 flex items-center gap-1">
+          <div class="w-[4.5rem] text-right">K</div>
+          <div class="w-[4.5rem] text-right">D</div>
+        </div>
+      </template>
+
+      <div class="page-content" v-if="!combatData.frontlineLog.length">暂无数据</div>
+      <div class="flex flex-col gap-1" v-else>
+        <CombatLogCard
+          v-for="(log, index) in combatData.frontlineLog"
+          :key="index"
+          :frontline-log="log"
+        />
       </div>
-    </div>
-    <div class="page-content" v-if="!combatData.frontlineLog.length">暂无数据</div>
-    <CombatLogCard
-      v-for="(log, index) in combatData.frontlineLog"
-      :key="index"
-      :frontline-log="log"
-    />
+    </ContentBlock>
 
     <!-- K/D统计 -->
-    <div class="page-title">K/D统计</div>
-    <div class="page-content">
+    <ContentBlock title="K/D统计">
       <div class="w-full grid grid-cols-3">
         <div>参战<span class="text-orange-700">{{ combatData.frontlineLog.length }}</span>场</div>
         <div>击倒数 <span class="text-orange-700">{{ statistics.knockouts.length }}</span></div>
@@ -60,11 +64,62 @@ const currDeathChartData = computed(() =>
         <div>场均击倒 <span class="text-orange-700">{{ statistics.knockoutEachMatch }}</span></div>
         <div>场均死亡 <span class="text-orange-700">{{ statistics.deathEachMatch }}</span></div>
       </div>
-    </div>
+    </ContentBlock>
+
+    <!-- 胜率统计 -->
+    <ContentBlock title="胜率统计">
+      <div class="w-full grid grid-cols-3">
+        <template v-if="statistics.winRateSummary.frontline">
+          <div
+            class="col-span-3"
+            v-if="statistics.winRateSummary.rivalWings || statistics.winRateSummary.crystalConflict"
+          >
+            [纷争前线]
+          </div>
+          <div>
+            冠军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.first.rate }}</span>%)
+          </div>
+          <div>
+            亚军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.second.rate }}</span>%)
+          </div>
+          <div>
+            季军<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.frontline.third.rate }}</span>%)
+          </div>
+        </template>
+
+        <template v-if="statistics.winRateSummary.rivalWings">
+          <div class="col-span-3">[烈羽争锋]</div>
+          <div>
+            胜利<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.win.rate }}</span>%)
+          </div>
+          <div>
+            失败<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.rivalWings.lose.rate }}</span>%)
+          </div>
+          <div />
+        </template>
+
+        <template v-if="statistics.winRateSummary.crystalConflict">
+          <div class="col-span-3">[水晶冲突]</div>
+          <div>
+            胜利<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.win.rate }}</span>%)
+          </div>
+          <div>
+            失败<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.count }}</span>场
+            (<span class="text-orange-700">{{ statistics.winRateSummary.crystalConflict.lose.rate }}</span>%)
+          </div>
+          <div />
+        </template>
+      </div>
+    </ContentBlock>
 
     <!-- 击倒统计 -->
-    <div class="page-title">击倒统计</div>
-    <div class="page-content">
+    <ContentBlock title="击倒统计">
       <div class="flex items-center gap-1">
         <div
           v-for="tab in knockoutChartTabs"
@@ -82,11 +137,10 @@ const currDeathChartData = computed(() =>
         <PieChart v-if="currKnockoutChartData.length" :data="currKnockoutChartData" />
         <div v-else class="h-full flex items-center justify-center">暂无数据</div>
       </div>
-    </div>
+    </ContentBlock>
 
     <!-- 死亡统计 -->
-    <div class="page-title">死亡统计</div>
-    <div class="page-content">
+    <ContentBlock title="死亡统计">
       <div class="flex items-center gap-1">
         <div
           v-for="tab in deathChartTabs"
@@ -104,10 +158,7 @@ const currDeathChartData = computed(() =>
         <PieChart v-if="currDeathChartData.length" :data="currDeathChartData" />
         <div v-else class="h-full flex items-center justify-center">暂无数据</div>
       </div>
-    </div>
-
-
-
+    </ContentBlock>
   </div>
 </template>
 
