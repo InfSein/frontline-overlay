@@ -2,7 +2,7 @@
 
 ## v3.4.0 (2026-03-23)
 * “统计”选项卡中追加“结果统计”。<br>
-  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.4.0/1.png)
+  ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.4.0/1.jpg)
 * 优化一部分UI细节。
 * “关注列表”可关注的玩家数量上限从10提升至20。
 
