@@ -6,7 +6,7 @@ class AppInfo {
   static readonly changelogDoc = 'https://infsein.github.io/frontline-overlay/changelog'
 
   static readonly balanceConstants = {
-    watchedPlayersMaxCount: 10,
+    watchedPlayersMaxCount: 20,
   } as const
 }
 

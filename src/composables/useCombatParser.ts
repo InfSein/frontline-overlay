@@ -1117,12 +1117,48 @@ const useCombatParser = () => {
     const dealDouble = (a: number, b: number) => {
       return Math.round((a / (b || 1)) * 100) / 100
     }
+    const dealRate = (a: number, b: number) => {
+      if (b === 0) return `0`
+      const percent = (a / b) * 100
+      if (Number.isInteger(percent)) {
+        return `${percent}`
+      }
+      return `${percent.toFixed(2)}`
+    }
 
     const knockouts = combatData.frontlineLog.map(log => log.knockouts).flat()
     const deaths = combatData.frontlineLog.map(log => log.deaths).flat()
     const kd = dealDouble(knockouts.length, deaths.length)
     const knockoutEachMatch = dealDouble(knockouts.length, combatData.frontlineLog.length)
     const deathEachMatch = dealDouble(deaths.length, combatData.frontlineLog.length)
+
+    type GroupKey = "Frontline" | "RivalWings" | "CrystalConflict"
+    const groupedLogs = combatData.frontlineLog.reduce((acc, log) => {
+      const k: GroupKey =
+        Object.values(RivalWings).includes(log.zone as any) ? "RivalWings" :
+        Object.values(CrystalConflict).includes(log.zone as any) ? "CrystalConflict" :
+        "Frontline"
+      ;(acc[k] ||= []).push(log)
+      return acc
+    }, {} as Record<GroupKey, FrontlineLog[]>)
+    const calc = <T extends string | number | symbol>(
+      logs: FrontlineLog[] | undefined,
+      map: Record<T, string>
+    ) => {
+      if (!logs) return undefined
+      return Object.fromEntries(
+        Object.entries(map).map(([k, v]) => {
+          const c = logs.filter(l => l.result === v).length
+          const total = logs.length
+          return [k, { count: c, rate: total ? dealRate(c, total) : 0 }]
+        })
+      ) as Record<T, { count: number; rate: number }>
+    }
+    const winRateSummary = {
+      frontline: calc(groupedLogs.Frontline, { first: "1st", second: "2nd", third: "3rd" }),
+      rivalWings: calc(groupedLogs.RivalWings, { win: "win", lose: "lose" }),
+      crystalConflict: calc(groupedLogs.CrystalConflict, { win: "win", lose: "lose" })
+    }
 
     const pieData = {
       knockoutBySkill: countBy(knockouts, k => k.lasthitActionName),
@@ -1136,6 +1172,7 @@ const useCombatParser = () => {
     return {
       knockouts, deaths, kd,
       knockoutEachMatch, deathEachMatch,
+      winRateSummary,
       pieData,
     }
 
@@ -1392,13 +1429,49 @@ const useCombatParser = () => {
 
     // 生成“统计”调试数据
     if (!combatData.frontlineLog.length) {
-      combatData.frontlineLog.push({
+      const logTemplate : FrontlineLog = {
         zone: Frontline.seize,
         job: 27,
         start_time: Date.now(),
         result: '1st',
         knockouts: deepCopy(knockouts.value),
         deaths: deepCopy(deaths.value),
+      }
+      combatData.frontlineLog.push({
+        ...logTemplate,
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        zone: Frontline.secure,
+        result: '2nd',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        zone: Frontline.shatter,
+        result: '2nd',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        result: '2nd',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        result: '3rd',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        zone: CrystalConflict.bayside,
+        result: 'win',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        zone: RivalWings.hiddengorge,
+        result: 'lose',
+      })
+      combatData.frontlineLog.push({
+        ...logTemplate,
+        zone: RivalWings.hiddengorge,
+        result: 'win',
       })
     }
   }
