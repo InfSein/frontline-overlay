@@ -1,5 +1,8 @@
 # 更新日志
 
+## v3.4.1 (2026-03-28)
+* 修复了启用部队特效等提高狼印战绩获得量的场合，计算纷争前线名次不准确的问题。
+
 ## v3.4.0 (2026-03-23)
 * “统计”选项卡中追加“结果统计”。<br>
   ![Preview](https://infsein.github.io/static/frontline-overlay/patchnote/3.4.0/1.jpg)

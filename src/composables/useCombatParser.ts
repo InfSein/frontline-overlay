@@ -560,29 +560,35 @@ const useCombatParser = () => {
     // 处理结算信息，尝试获取比赛结果
     if (Object.values(Frontline).includes(combatData.zone as Frontline)) {
       // 战场
-      const matchRewardWolfMark = msg.match(/获得了([\d,]+)枚狼印战绩。/)
+      const matchRewardWolfMark = msg.match(/获得了([\d,]+)(?:\(\+(\d+)%\))?枚狼印战绩。/)
       if (matchRewardWolfMark && matchRewardWolfMark[1]) {
-        switch (matchRewardWolfMark[1]) {
-          case '500':
-          case '550':
-          case '600':
-          case '650':
-          case '700':
+        let value = parseInt(matchRewardWolfMark[1].replace(/,/g, ''), 10)
+        const bonusStr = matchRewardWolfMark[2]
+        if (bonusStr) {
+          const bonus = parseInt(bonusStr, 10)
+          value = Math.round(value / (1 + bonus / 100))
+        }
+        switch (value) {
+          case 500:
+          case 550:
+          case 600:
+          case 650:
+          case 700:
             insiderData.currFrontlineResult = '3rd'; break
-          case '825':
-          case '900':
-          case '975':
-          case '1,050':
-          case '1,125':
+          case 825:
+          case 900:
+          case 975:
+          case 1050:
+          case 1125:
             insiderData.currFrontlineResult = '2nd'; break
-          case '1,000':
-          case '1,100':
-          case '1,200':
-          case '1,300':
-          case '1,400':
-          case '1,500':
+          case 1000:
+          case 1100:
+          case 1200:
+          case 1300:
+          case 1400:
+          case 1500:
             insiderData.currFrontlineResult = '1st'; break
-          // 无法判断：'750'(2/3)
+          // 无法判断：750(若无明确加成)(2/3)
           default:
             break
         }
