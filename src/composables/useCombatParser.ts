@@ -677,7 +677,7 @@ const useCombatParser = () => {
 
         if (isValidAction && perpetratorId && victimId) {
           const summonerId = combatData.summonMap[perpetratorId]
-          const { hit, instantDeath, damageType, damage, heal } = getActionDamageFromLogLine(data.line)
+          const { hit, instantDeath, damageType, damage, refDamage, heal } = getActionDamageFromLogLine(data.line)
 
           if (
             isDev
@@ -688,6 +688,7 @@ const useCombatParser = () => {
               '\nhit:', hit,
               '\tdamageType:', damageType,
               '\ndamage:', damage,
+              '\nrefDamage:', refDamage,
               '\nheal:', heal,
               '\ndetail:', data.rawLine,
             )
@@ -787,6 +788,50 @@ const useCombatParser = () => {
                 totalDamage: damage,
                 totalHeal: heal,
               }, maxGapTime)
+            }
+            // 特殊处理反击(上次伤害表、行迹)
+            if (refDamage > 0) {
+              const refActionName = (() => {
+                switch (victimJob) {
+                  case 25: return '寒冰环反击'
+                  case 34: return '地天反击'
+                  case 37: return '星云反击'
+                  default: return '反击'
+                }
+              })()
+              const refPerpetrator = {
+                id: victimId,
+                name: victimName,
+                job: victimJob,
+              }
+              const refVictim = {
+                id: perpetratorId,
+                name: perpetratorName,
+                job: perpetratorJob,
+              }
+
+              // 记录上次伤害表
+              const key = `${victimId}-${perpetratorId}`
+              combatData.playerLasthitMap[key] = {
+                perpetratorName: refPerpetrator.name,
+                victimName: refVictim.name,
+                hitActionName: refActionName,
+                hitActionDamage: refDamage,
+              }
+
+              // 记录行迹
+              if (importantActions.includes(refActionName) && refPerpetrator.id === combatData.playerId) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const [m, maxGapTime] = ImportantActions[refActionName]!
+                const actionTargets = refVictim.id !== combatData.playerId ? [refVictim.name] : []
+                addIarLog(combatData.iarLog, {
+                  happenTime: Date.now(),
+                  actionName: refActionName,
+                  actionTargets,
+                  totalDamage: refDamage,
+                  totalHeal: 0,
+                }, maxGapTime)
+              }
             }
           }
         }

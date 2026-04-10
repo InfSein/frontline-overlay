@@ -8,6 +8,11 @@ export type ImportantActionConfig = [
 ]
 
 export const ImportantActions = {
+  // * GENERAL
+  '反击': [ 'hit,damage' ],
+  '地天反击': [ 'hit,damage', 5500 ],
+  '星云反击': [ 'hit,damage', 9500 ],
+
   // * TANK
   '圣盾阵': [ 'hit,damage', 4500 ],
   '蛮荒崩裂': [ 'hit,damage' ],
@@ -19,7 +24,6 @@ export const ImportantActions = {
   '连续剑': [ 'hit,damage', 4500 ],
   '终结击': [ 'hit,damage' ],
   // * HEALER
-  '坚石肤': [ 'hit' ],
   '涤罪之心': [ 'hit,damage' ],
   '炽天附体': [ 'hit' ],
   '展开战术': [ 'hit' ],
