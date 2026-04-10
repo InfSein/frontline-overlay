@@ -15,118 +15,120 @@ import { useStore } from '@/stores'
 
 const store = useStore()
 
-const groups: ConfigGroup[] = [
-  {
-    key: 'general',
-    name: '通用',
-    icon: SettingsApplicationsSharp,
-    items: [
-      {
-        key: 'app_scale',
-        name: '悬浮窗缩放',
-        desc: [
-          '调整悬浮窗的显示大小倍数。',
-          '当你使用了infsein.github.io提供的其他悬浮窗时，请使用此处而非ACT的设置来调整缩放。',
-          '调整此项目后，需要刷新一次悬浮窗才能生效。',
-        ],
-        type: 'slider-number',
-        min: 0.5, max: 2, step: 0.1,
-      },
-      {
-        key: 'auto_collapse_when_launch',
-        name: '启动时自动折叠',
-        desc: [
-          '在悬浮窗初次加载时自动折叠悬浮窗。',
-          '※ 启用此项目时，刷新悬浮窗也会自动折叠。'
-        ],
-        type: 'switch',
-      },
-      {
-        key: 'auto_expand_when_enter_battlefield',
-        name: '进入对战时自动展开',
-        desc: [
-          '在对战开始时自动展开悬浮窗。',
-        ],
-        type: 'switch',
-      },
-      {
-        key: 'auto_collapse_when_leave_battlefield',
-        name: '离开对战时自动折叠',
-        desc: [
-          '在离开对战区域（从PvP区域进入PvE区域）时自动折叠悬浮窗。',
-          '※ 「初次加载」和「从一个PvE区域进入另一个PvE区域」的场合不会触发折叠。',
-        ],
-        type: 'switch',
-      },
-    ]
-  },
-  {
-    key: 'situation',
-    name: '战况',
-    icon: FlagFilled,
-    items: [
-      {
-        key: 'situation_pointcard_style',
-        name: '“当前据点”布局',
-        desc: [
-          '调整“当前据点”中各个据点卡片的布局样式。',
-          '　> 现代：每行展示多个卡片，提高信息密度；',
-          '　> 经典：每行展示一个卡片，维持旧版本习惯。',
-        ],
-        type: 'select',
-        options: [
-          { label: '现代', value: 'modern' },
-          { label: '经典', value: 'classic' },
-        ]
-      },
-      {
-        key: 'watched_players',
-        name: '关注列表',
-        beta: true,
-        desc: [
-          '关注让你印象深刻的玩家，并为其设置简短的备注。',
-          '战斗开始时会自动扫描己方团队，并展示被你关注的玩家和你对他的备注。',
-          '玩家名格式为“玩家名”或“玩家名@服务器名”。',
-          {
-            className: 'text-orange-600',
-            content: '※ 不会扫描敌方阵营。',
-          },
-          {
-            className: 'text-red-600',
-            content: `※ 目前最多只能关注${AppInfo.balanceConstants.watchedPlayersMaxCount}名玩家。`,
-          },
-        ],
-        type: 'watched-players',
-        maxCount: AppInfo.balanceConstants.watchedPlayersMaxCount,
-      },
-    ]
-  },
-  {
-    key: 'monitor',
-    name: '监控',
-    icon: MonitorHeartFilled,
-    items: [
-      {
-        key: 'badboy_threshold',
-        name: '仇怨阈值',
-        desc: [
-          '设置一个10000～99999之间的数字作为阈值。',
-          '当你受到超过阈值的伤害时，即使此技能不在“蒙怨”／“结怨”所监控的阻碍技能之列，也仍然会进入统计。',
-        ],
-        type: 'number',
-        min: 10000, max: 99999,
-        step: 1000, decimalPlaces: 0,
-      },
-    ]
-  },
-]
+const groups = computed(() : ConfigGroup[] => {
+  return [
+    {
+      key: 'general',
+      name: '通用',
+      icon: SettingsApplicationsSharp,
+      items: [
+        {
+          key: 'app_scale',
+          name: '悬浮窗缩放',
+          desc: [
+            '调整悬浮窗的显示大小倍数。',
+            '当你使用了infsein.github.io提供的其他悬浮窗时，请使用此处而非ACT的设置来调整缩放。',
+            '调整此项目后，需要刷新一次悬浮窗才能生效。',
+          ],
+          type: 'slider-number',
+          min: 0.5, max: 2, step: 0.1,
+        },
+        {
+          key: 'auto_collapse_when_launch',
+          name: '启动时自动折叠',
+          desc: [
+            '在悬浮窗初次加载时自动折叠悬浮窗。',
+            '※ 启用此项目时，刷新悬浮窗也会自动折叠。'
+          ],
+          type: 'switch',
+        },
+        {
+          key: 'auto_expand_when_enter_battlefield',
+          name: '进入对战时自动展开',
+          desc: [
+            '在对战开始时自动展开悬浮窗。',
+          ],
+          type: 'switch',
+        },
+        {
+          key: 'auto_collapse_when_leave_battlefield',
+          name: '离开对战时自动折叠',
+          desc: [
+            '在离开对战区域（从PvP区域进入PvE区域）时自动折叠悬浮窗。',
+            '※ 「初次加载」和「从一个PvE区域进入另一个PvE区域」的场合不会触发折叠。',
+          ],
+          type: 'switch',
+        },
+      ]
+    },
+    {
+      key: 'situation',
+      name: '战况',
+      icon: FlagFilled,
+      items: [
+        {
+          key: 'situation_pointcard_style',
+          name: '“当前据点”布局',
+          desc: [
+            '调整“当前据点”中各个据点卡片的布局样式。',
+            '　> 现代：每行展示多个卡片，提高信息密度；',
+            '　> 经典：每行展示一个卡片，维持旧版本习惯。',
+          ],
+          type: 'select',
+          options: [
+            { label: '现代', value: 'modern' },
+            { label: '经典', value: 'classic' },
+          ]
+        },
+        {
+          key: 'watched_players',
+          name: '关注列表',
+          beta: true,
+          desc: [
+            '关注让你印象深刻的玩家，并为其设置简短的备注。',
+            '战斗开始时会自动扫描己方团队，并展示被你关注的玩家和你对他的备注。',
+            '玩家名格式为“玩家名”或“玩家名@服务器名”。',
+            {
+              className: 'text-orange-600',
+              content: '※ 不会扫描敌方阵营，也不会扫描中途参战的友方玩家。',
+            },
+            {
+              className: 'text-red-600',
+              content: `※ 目前最多只能关注${AppInfo.balanceConstants.watchedPlayersMaxCount}名玩家。`,
+            },
+          ],
+          type: 'watched-players',
+          maxCount: AppInfo.balanceConstants.watchedPlayersMaxCount,
+        },
+      ]
+    },
+    {
+      key: 'monitor',
+      name: '监控',
+      icon: MonitorHeartFilled,
+      items: [
+        {
+          key: 'badboy_threshold',
+          name: '仇怨阈值',
+          desc: [
+            '设置一个10000～99999之间的数字作为阈值。',
+            '当你受到超过阈值的伤害时，即使此技能不在“蒙怨”／“结怨”所监控的阻碍技能之列，也仍然会进入统计。',
+          ],
+          type: 'number',
+          min: 10000, max: 99999,
+          step: 1000, decimalPlaces: 0,
+        },
+      ]
+    },
+  ]
+})
 
 const formConfig = ref<AppConfig>(store.appConfig)
 const groupCollapsed = ref<Record<string, boolean>>({})
 
 onMounted(() => {
   formConfig.value = deepCopy(store.appConfig)
-  groupCollapsed.value = Object.fromEntries(groups.map(group => [group.key, false]))
+  groupCollapsed.value = Object.fromEntries(groups.value.map(group => [group.key, false]))
   if (!formConfig.value.watched_players?.length) {
     formConfig.value.watched_players = [{ name: '', note: '' }]
   }
@@ -198,7 +200,7 @@ const handleSave = () => {
                 <template #trigger>
                   <n-icon size="16" color="#F0A020"><WarningRound /></n-icon>
                 </template>
-                该项目还有待评估，后续版本可能视情况更改甚至删除。
+                该项目还有待评估，后续版本可能视情况大规模更改甚至删除。
               </n-tooltip>
             </div>
             <div v-if="item.desc">
