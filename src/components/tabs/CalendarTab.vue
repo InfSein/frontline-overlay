@@ -6,12 +6,12 @@ import { Frontline } from '@/types'
  * 轮换算法参考了 https://github.com/NekoWoods/what-zc-today/blob/main/sketch.js
  */
 
-const startDate = new Date('2025-07-17T15:00:00Z') // 此时间节点是 尘封秘岩
-const showFuture = [0, 1, 2] as const
+const startDate = new Date('2026-04-27T15:00:00Z') // 此时间节点是轮换起点
+const showFuture = [0, 1, 2, 3, 4, 5, 6] as const
 
 const now = ref(new Date())
 const days = ref(daysBetween(startDate, new Date()))
-const remainder = ref(days.value % 4)
+const remainder = ref(calRemainder(days.value))
 const timer = ref(0)
 
 onMounted(() => {
@@ -21,65 +21,60 @@ onMounted(() => {
 
     const dayCount = daysBetween(startDate, current)
     days.value = dayCount
-    remainder.value = dayCount % 4
+    remainder.value = calRemainder(dayCount)
   }, 1000)
 })
 onUnmounted(() => {
   clearInterval(timer.value)
 })
 
+const currentFrontline = computed(() => {
+  return getFrontline(remainder.value)
+})
+
 const futureData = computed(() => showFuture.map(val => {
+  const rm = calRemainder(days.value + val + 1)
   return {
     val: val,
-    rm: (remainder.value + val + 1) % 4,
+    rm: rm,
+    ...getFrontline(rm),
   }
 }))
 
 function daysBetween(from: Date, to: Date) {
-  const diffMs = getDtVal(to) - getDtVal(from)
+  let diffMs = getDtVal(to) - getDtVal(from)
+  if (diffMs < 0) diffMs = -1 * diffMs
   return Math.floor(diffMs / (1000 * 3600 * 24))
 
   function getDtVal(date: Date) {
     return date.getTime() + date.getTimezoneOffset() * 1000 * 60
   }
 }
+function calRemainder(day: number) {
+  return day % 8
+}
 
 const getFrontline = (index: number) => {
+  let frontline: Frontline
   switch (index) {
-    case 0: return getFrontlineNames(Frontline.seize)
-    case 1: return getFrontlineNames(Frontline.shatter)
-    case 2: return getFrontlineNames(Frontline.naadam)
-    case 3: return getFrontlineNames(Frontline.secure)
-    default: throw new Error('Invalid remainder value')
+    case 0: frontline = Frontline.seize; break;
+    case 1: frontline = Frontline.shatter; break;
+    case 2: frontline = Frontline.naadam; break;
+    case 3: frontline = Frontline.triumph; break;
+    case 4: frontline = Frontline.seize; break;
+    case 5: frontline = Frontline.secure; break;
+    case 6: frontline = Frontline.naadam; break;
+    case 7: frontline = Frontline.triumph; break;
+    default: throw new Error('Invalid remainder value: ' + index)
+  }
+  return {
+    names: getFrontlineNames(frontline),
+    foreColor: getFrontlineForeColor(frontline),
+    backgroundColor: getFrontlineBackgroundColor(frontline),
+    backgroundImage: getFrontlineBackground(frontline),
   }
 }
-const getCardForeColor = (index: number) => {
-  switch (index) {
-    case 0: return getFrontlineForeColor(Frontline.seize)
-    case 1: return getFrontlineForeColor(Frontline.shatter)
-    case 2: return getFrontlineForeColor(Frontline.naadam)
-    case 3: return getFrontlineForeColor(Frontline.secure)
-    default: throw new Error('Invalid remainder value')
-  }
-}
-const getCardBackgroundColor = (index: number) => {
-  switch (index) {
-    case 0: return getFrontlineBackgroundColor(Frontline.seize)
-    case 1: return getFrontlineBackgroundColor(Frontline.shatter)
-    case 2: return getFrontlineBackgroundColor(Frontline.naadam)
-    case 3: return getFrontlineBackgroundColor(Frontline.secure)
-    default: throw new Error('Invalid remainder value')
-  }
-}
-const getCardBackgroundImage = (index: number) => {
-  switch (index) {
-    case 0: return getFrontlineBackground(Frontline.seize)
-    case 1: return getFrontlineBackground(Frontline.shatter)
-    case 2: return getFrontlineBackground(Frontline.naadam)
-    case 3: return getFrontlineBackground(Frontline.secure)
-    default: throw new Error('Invalid remainder value')
-  }
-}
+
 const getNext23 = (now: Date, addDay?: number) => {
   const next23 = new Date(now)
   next23.setHours(23, 0, 0, 0)
@@ -127,9 +122,9 @@ const formatDate = (date: Date) => {
     <div
       class="relative p-2 gap-1 rounded shadow-xl flex items-center"
       :style="{
-        color: getCardForeColor(remainder),
-        backgroundColor: getCardBackgroundColor(remainder),
-        backgroundImage: `url(${getCardBackgroundImage(remainder)})`,
+        color: currentFrontline.foreColor,
+        backgroundColor: currentFrontline.backgroundColor,
+        backgroundImage: `url(${currentFrontline.backgroundImage})`,
         backgroundSize: '70%',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: '1% center',
@@ -137,30 +132,10 @@ const formatDate = (date: Date) => {
     >
       <div class="ml-auto">
         <div class="text-[1.75rem] leading-[1.5] font-medium text-white text-shadow">
-          {{ getFrontline(remainder)[1] }}
+          {{ currentFrontline.names[1] }}
         </div>
         <p class="text-[#cad5e2] m-0 mr-1 text-right">
-          {{ getFrontline(remainder)[2] }}
-        </p>
-      </div>
-    </div>
-    <div
-      class="relative p-2 gap-1 rounded shadow-xl flex items-center"
-      :style="{
-        color: getFrontlineForeColor(Frontline.triumph),
-        backgroundColor: getFrontlineBackgroundColor(Frontline.triumph),
-        backgroundImage: `url(${getFrontlineBackground(Frontline.triumph)})`,
-        backgroundSize: '70%',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: '1% center',
-      }"
-    >
-      <div class="ml-auto">
-        <div class="text-[1.75rem] leading-[1.5] font-medium text-white text-shadow">
-          {{ getFrontlineNames(Frontline.triumph)[1] }}
-        </div>
-        <p class="text-[#cad5e2] m-0 mr-1 text-right">
-          {{ getFrontlineNames(Frontline.triumph)[2] }}
+          {{ currentFrontline.names[2] }}
         </p>
       </div>
     </div>
@@ -172,31 +147,16 @@ const formatDate = (date: Date) => {
         :key="future.val"
         class="flex items-center border border-black/50 rounded px-1 py-0.5 pr-2"
         :style="{
-          color: getCardForeColor(future.rm),
-          backgroundColor: getCardBackgroundColor(future.rm),
+          color: future.foreColor,
+          backgroundColor: future.backgroundColor,
         }"
       >
         <div>
           <span class="mx-[0.3em] ml-[0.5em]"> · </span>
-          <span>{{ getFrontline(future.rm)[1] }}</span>
+          <span>{{ future.names[1] }}</span>
         </div>
         <div class="ml-auto">
           {{ `${formatDate(getNext23(now, future.val))}／${timeUntilNext23(now, future.val)}后` }}
-        </div>
-      </div>
-      <div
-        class="flex items-center border border-black/50 rounded px-1 py-0.5 pr-2"
-        :style="{
-          color: getFrontlineForeColor(Frontline.triumph),
-          backgroundColor: getFrontlineBackgroundColor(Frontline.triumph),
-        }"
-      >
-        <div>
-          <span class="mx-[0.3em] ml-[0.5em]"> · </span>
-          <span>{{ getFrontlineNames(Frontline.triumph)[1] }}</span>
-        </div>
-        <div class="ml-auto">
-          {{`　当前版本长期开放`}}
         </div>
       </div>
     </div>

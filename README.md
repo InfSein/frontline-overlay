@@ -1,7 +1,9 @@
 # FFXIV PvP悬浮窗
 
-![Vite](https://img.shields.io/badge/Vite-7.1.12-646CFF?style=flat&logo=vite)
-![Vue3](https://img.shields.io/badge/Vue-3.5.22-4FC08D?style=flat&logo=vue.js)
+[![GitHub Release](https://img.shields.io/github/v/release/InfSein/frontline-overlay?style=flat&logo=github)](https://github.com/InfSein/hqhelper-dawntrail/releases)
+<br>
+![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=flat&logo=vite)
+![Vue3](https://img.shields.io/badge/Vue-3.5.25-4FC08D?style=flat&logo=vue.js)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4.19-06b6d4?logo=tailwindcss)
 
 专为 最终幻想XIV PvP 玩法制作的 ACT OverlayPlugin 悬浮窗插件。
