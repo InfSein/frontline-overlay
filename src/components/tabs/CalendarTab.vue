@@ -58,11 +58,11 @@ const getFrontline = (index: number) => {
   let frontline: Frontline
   switch (index) {
     case 0: frontline = Frontline.seize; break;
-    case 1: frontline = Frontline.shatter; break;
+    case 1: frontline = Frontline.secure; break;
     case 2: frontline = Frontline.naadam; break;
     case 3: frontline = Frontline.triumph; break;
     case 4: frontline = Frontline.seize; break;
-    case 5: frontline = Frontline.secure; break;
+    case 5: frontline = Frontline.shatter; break;
     case 6: frontline = Frontline.naadam; break;
     case 7: frontline = Frontline.triumph; break;
     default: throw new Error('Invalid remainder value: ' + index)
