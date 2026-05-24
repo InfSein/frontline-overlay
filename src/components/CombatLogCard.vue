@@ -3,12 +3,12 @@ import JobSpan from './ui/JobSpan.vue'
 import {
   formatTimestamp,
   formatTime,
-  getJobInfo,
   getFrontlineBackground,
   getFrontlineBackgroundColor,
   getFrontlineForeColor,
   getFrontlineNames,
   getFrontlineResultBackgroundColor,
+  formatTimeDurationText,
 } from '@/tools';
 import type { FrontlineLog, DeathInfo } from '@/types/combat'
 
@@ -110,9 +110,14 @@ const detailBgColor = computed(() => {
         <div class="flex items-center gap-1 text-[1.1rem] text-gray-200 leading-[1] m-0 text-shadow">
           <!-- 开始时间 -->
           {{ formatTimestamp(frontlineLog.start_time) }}
-          <n-divider vertical class="!mx-1" />
-          <!-- 职业名 -->
-          {{ getJobInfo(frontlineLog.job).job_name }}
+          <!-- 战意 -->
+          <template v-if="frontlineLog.battleHigh?.level">
+            <n-divider vertical class="!mx-1" />
+            <img :src="`/icon/game-effect/battlehigh_${frontlineLog.battleHigh.level}.png`" class="w-auto h-[1.1rem]" />
+            <span v-if="frontlineLog.battleHigh.level === 5">
+              (用时{{ formatTimeDurationText(frontlineLog.battleHigh.maxUseTime) }})
+            </span>
+          </template>
         </div>
       </div>
       <!-- 击倒/阵亡数 -->

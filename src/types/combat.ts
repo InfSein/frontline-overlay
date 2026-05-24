@@ -65,6 +65,10 @@ export interface FrontlineLog {
   zone: PvPBattle
   job?: number
   result?: FrontlineResult
+  battleHigh?: {
+    level: number
+    maxUseTime: number
+  }
   start_time: number
   knockouts: DeathInfo[]
   deaths: DeathInfo[]

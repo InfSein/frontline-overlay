@@ -122,6 +122,26 @@ export const formatTimestamp = (ts: number) => {
   const time = formatTime(ts)
   return `${date} ${time}`
 }
+export const formatTimeDurationText = (ts: number) => {
+  if (ts < 0) return '???'
+  const totalSecs = ts / 1000
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  const hours = Math.floor(totalSecs / 3600)
+  const minutes: number | string = Math.floor((totalSecs % 3600) / 60)
+  const seconds: number | string = Math.floor(totalSecs % 60)
+
+  const minutesForShow = hours ? pad(minutes) : minutes
+  const secondsForShow = hours || minutes ? pad(seconds) : seconds
+
+  if (hours > 0) {
+    return `${hours}小时${minutesForShow}分${secondsForShow}秒`
+  } else if (minutes > 0) {
+    return `${minutesForShow}分${secondsForShow}秒`
+  } else {
+    return `${secondsForShow}秒`
+  }
+}
 
 export const getGrandCompanyName = (gc: GrandCompany) => {
   switch (gc) {

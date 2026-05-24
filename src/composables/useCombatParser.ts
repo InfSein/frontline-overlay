@@ -42,6 +42,11 @@ const combatData = reactive({
   gc: '' as GrandCompany | "",
   zone: '' as PvPBattle | "",
   ptMax: 0,
+  battleStartTime: 0,
+
+  // * 战意
+  highestBh: 0,
+  maxBhUsedTime: 0,
 
   // * maps
   gcFp: {
@@ -81,7 +86,6 @@ const combatData = reactive({
 const insiderData = reactive({
   pidIndex: 1,
   currFrontlineResult: undefined as FrontlineResult | undefined,
-  currFrontlineStartTime: 0,
   combatantWatcher: null as number | null,
 })
 
@@ -334,10 +338,16 @@ const useCombatParser = () => {
           zone: zone,
           job,
           result,
-          start_time: insiderData.currFrontlineStartTime,
+          battleHigh: {
+            level: combatData.highestBh,
+            maxUseTime: combatData.maxBhUsedTime,
+          },
+          start_time: combatData.battleStartTime,
           knockouts: deepCopy(knockouts.value),
           deaths: deepCopy(deaths.value),
         })
+        combatData.battleStartTime = 0
+        combatData.highestBh = 0; combatData.maxBhUsedTime = 0
         combatData.frontlineLog.push(log)
         if (isDev) {
           console.log(JSON.stringify(combatData.playerMapFull))
@@ -381,6 +391,23 @@ const useCombatParser = () => {
       parseCombatLog()
     }
 
+    // 处理状态（斗志昂扬等）
+    if (msgType === '26') {
+      // 26|2026-05-24T19:37:05.1420000+08:00|853|斗志昂扬I|9999.00|E0000000||107F5CF8|name|00|66000||
+      const battleHighIds = [853, 854, 855, 856, 857]
+      const [, , effectId, , , , , playerId] = data.line
+      if (battleHighIds.includes(Number(effectId)) && playerId === combatData.playerId) {
+        const bhLevel = Number(effectId) - 853 + 1
+        if (bhLevel > combatData.highestBh) {
+          combatData.highestBh = bhLevel
+          if (bhLevel === 5) {
+            combatData.maxBhUsedTime = Date.now() - combatData.battleStartTime
+            if (!combatData.battleStartTime) combatData.maxBhUsedTime = -1
+          }
+        }
+      }
+    }
+
     // 开始处理刷点文本日志
     // 首先过滤一些无关频道
     const validChannels = [
@@ -400,6 +427,7 @@ const useCombatParser = () => {
         combatData.gc = parseGc(matchGc[1])
       }
       combatData.onConflict = true
+      combatData.battleStartTime = Date.now()
       Object.keys(combatData.playerLasthitMap).forEach(key => delete combatData.playerLasthitMap[key])
       combatData.allPlayersDeaths.length = 0
       combatData.goodboys.length = 0
@@ -414,7 +442,6 @@ const useCombatParser = () => {
       else if (combatData.zone === Frontline.secure) combatData.ptMax = 9
       else combatData.ptMax = 0
 
-      insiderData.currFrontlineStartTime = Date.now()
       if (store.appConfig.auto_expand_when_enter_battlefield) {
         appVar.collapsed = false
       }
