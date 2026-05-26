@@ -113,7 +113,7 @@ const detailBgColor = computed(() => {
           <!-- 战意 -->
           <template v-if="frontlineLog.battleHigh?.level">
             <n-divider vertical class="!mx-1" />
-            <img :src="`/icon/game-effect/battlehigh_${frontlineLog.battleHigh.level}.png`" class="w-auto h-[1.1rem]" />
+            <img :src="`icon/game-effect/battlehigh_${frontlineLog.battleHigh.level}.png`" class="w-auto h-[1.1rem]" />
             <span v-if="frontlineLog.battleHigh.level === 5">
               (用时{{ formatTimeDurationText(frontlineLog.battleHigh.maxUseTime) }})
             </span>

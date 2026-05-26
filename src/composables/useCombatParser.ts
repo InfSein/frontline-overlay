@@ -1514,6 +1514,10 @@ const useCombatParser = () => {
         result: '1st',
         knockouts: deepCopy(knockouts.value),
         deaths: deepCopy(deaths.value),
+        battleHigh: {
+          level: 3,
+          maxUseTime: 10000,
+        }
       }
       combatData.frontlineLog.push({
         ...logTemplate,
