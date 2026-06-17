@@ -117,13 +117,18 @@ const useCombatParser = () => {
     return player.Job
   }
   const isPlayerEffectable = (playerId: string) => {
-    const uneffectableEffects: string[] = [
-      // todo
+    const uneffectableBuffs: string[] = [
+      /*无敌*/'18A', /*无敌*/'37F',
+      /*活性*/'CB0', /*防御*/'BEE', /*弱化防御*/'E59',
+      /*原初的解放*/'517',
+      /*炽天之翼*/'C18',
+      /*敏捷*/'117D', /*明镜止水*/'528', /*蛇鳞*/'1000',
+      /*光阴神的礼赞凯歌*/'C47',
     ]
     if (!combatData.playerEffectMap[playerId]) {
       return true
     }
-    return combatData.playerEffectMap[playerId].every(effect => !uneffectableEffects.includes(effect))
+    return combatData.playerEffectMap[playerId].every(effect => !uneffectableBuffs.includes(effect))
   }
   const addSelfActionLog = (list: SelfActionLog[], log: SelfActionLog) => {
     const recentLogs = list.slice(-5)
@@ -155,6 +160,7 @@ const useCombatParser = () => {
       list[actualIndex] = {
         ...oldData,
         actionTargets: [...new Set([...oldData.actionTargets, ...log.actionTargets])],
+        effectedTargets: [...new Set([...oldData.effectedTargets, ...log.effectedTargets])],
         totalDamage: oldData.totalDamage + log.totalDamage,
         totalHeal: oldData.totalHeal + log.totalHeal,
       }
