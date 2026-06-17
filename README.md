@@ -85,7 +85,10 @@
 
 ### 本地调试
 
-* 在第2步将悬浮窗地址设置为 `http://localhost:3000` 即可。
+1. 拉取本仓库并在仓库目录中执行 `npm i`
+2. 执行 `git submodule update --init --recursive` 拉取 cactbot 等外部依赖
+3. 执行 `npm run dev` ，在本地运行悬浮窗服务
+4. 依次执行上方使用方法中的步骤，在第2步将悬浮窗地址设置为 `http://localhost:3000` 即可。
 
 ## 开源许可
 

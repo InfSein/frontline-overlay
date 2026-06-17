@@ -71,6 +71,7 @@ const combatData = reactive({
    * @value 上次受击信息
    */
   playerLasthitMap: {} as Record<string, LasthitInfo>,
+  playerEffectMap: {} as Record<string, number[]>,
 
   // * logs
   allPlayersDeaths: [] as DeathInfo[],
@@ -368,6 +369,7 @@ const useCombatParser = () => {
       }
       combatData.playerMapJob = {}
       combatData.playerMapFull = {}
+      combatData.playerEffectMap = {}
       if (isDev && Object.values(combatData.summonMap).length) {
         console.log('summon map:', deepCopy(combatData.summonMap))
       }
@@ -382,6 +384,9 @@ const useCombatParser = () => {
     }
   }
   const handleLogLine: EventMap['LogLine'] = (data) => {
+    // * LogLine 文档
+    // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
+
     const msgType = data.line[0] // "00"
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
@@ -389,23 +394,6 @@ const useCombatParser = () => {
     // 处理战斗日志
     if (combatData.onConflict || combatData.zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       parseCombatLog()
-    }
-
-    // 处理状态（斗志昂扬等）
-    if (msgType === '26') {
-      // 26|2026-05-24T19:37:05.1420000+08:00|853|斗志昂扬I|9999.00|E0000000||107F5CF8|name|00|66000||
-      const battleHighIds = [853, 854, 855, 856, 857]
-      const [, , effectId, , , , , playerId] = data.line
-      if (battleHighIds.includes(Number(effectId)) && playerId === combatData.playerId) {
-        const bhLevel = Number(effectId) - 853 + 1
-        if (bhLevel > combatData.highestBh) {
-          combatData.highestBh = bhLevel
-          if (bhLevel === 5) {
-            combatData.maxBhUsedTime = Date.now() - combatData.battleStartTime
-            if (!combatData.battleStartTime) combatData.maxBhUsedTime = -1
-          }
-        }
-      }
     }
 
     // 开始处理刷点文本日志
@@ -685,7 +673,6 @@ const useCombatParser = () => {
           }
         }
       } else if ((msgType === '21' || msgType === '22')) { // 发动技能
-        // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
         // 22|2025-07-21T20:15:49.3900000+08:00|1058F1D5|浮|72DC|霰弹枪|40000002|木人|720003|17700000|0|0|0|0|0|0|0|0|0|0|0|0|0|0|75000|75000|10000|10000|||104.12|-4.71|2.31|3.14|57000|57000|10000|10000|||94.94|-13.42|2.31|-2.71|0007B835|1|2|00||01|72DC|72DC|0.100|0000|69f2e27a0f10b758
         const perpetratorId = data.line[2]
         const perpetratorName = data.line[3] || '???'
@@ -917,6 +904,31 @@ const useCombatParser = () => {
         ) {
           combatData.summonMap[summonedId] = ownerId
         }
+      }
+
+      // 处理状态（斗志昂扬等）
+      const uneffectableIds = [0] // todo
+      if (msgType === '26') {
+        // 26|2026-05-24T19:37:05.1420000+08:00|853|斗志昂扬I|9999.00|E0000000||107F5CF8|name|00|66000||
+        const battleHighIds = [853, 854, 855, 856, 857]
+        const [, , effectId, , , , , playerId] = data.line
+        if (battleHighIds.includes(Number(effectId)) && playerId === combatData.playerId) {
+          const bhLevel = Number(effectId) - 853 + 1
+          if (bhLevel > combatData.highestBh) {
+            combatData.highestBh = bhLevel
+            if (bhLevel === 5) {
+              combatData.maxBhUsedTime = Date.now() - combatData.battleStartTime
+              if (!combatData.battleStartTime) combatData.maxBhUsedTime = -1
+            }
+          }
+        }
+        if (uneffectableIds.includes(Number(effectId)) && playerId) {
+          if (!combatData.playerEffectMap[playerId]) combatData.playerEffectMap[playerId] = []
+          combatData.playerEffectMap[playerId].push(Number(effectId))
+        }
+      } else if (msgType === '30') {
+        //30|2021-04-26T14:38:09.6990000-04:00|13A|Inferno|0.00|400009FF|Ifrit-Egi|400009FD|Scylla|00|941742|4933|
+        // todo
       }
     }
     function parsePointLog(conf: PointConfigSeize | PointConfigNaadam | PointConfigSecure) {
