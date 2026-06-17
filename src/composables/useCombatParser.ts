@@ -71,6 +71,7 @@ const combatData = reactive({
    * @value 上次受击信息
    */
   playerLasthitMap: {} as Record<string, LasthitInfo>,
+  playerEffectMap: {} as Record<string, string[]>,
 
   // * logs
   allPlayersDeaths: [] as DeathInfo[],
@@ -115,6 +116,20 @@ const useCombatParser = () => {
     }
     return player.Job
   }
+  const isPlayerEffectable = (playerId: string) => {
+    const uneffectableBuffs: string[] = [
+      /*无敌*/'18A', /*无敌*/'37F',
+      /*活性*/'CB0', /*防御*/'BEE', /*弱化防御*/'E59',
+      /*原初的解放*/'517',
+      /*炽天之翼*/'C18',
+      /*敏捷*/'117D', /*明镜止水*/'528', /*蛇鳞*/'1000',
+      /*光阴神的礼赞凯歌*/'C47',
+    ]
+    if (!combatData.playerEffectMap[playerId]) {
+      return true
+    }
+    return combatData.playerEffectMap[playerId].every(effect => !uneffectableBuffs.includes(effect))
+  }
   const addSelfActionLog = (list: SelfActionLog[], log: SelfActionLog) => {
     const recentLogs = list.slice(-5)
 
@@ -145,6 +160,7 @@ const useCombatParser = () => {
       list[actualIndex] = {
         ...oldData,
         actionTargets: [...new Set([...oldData.actionTargets, ...log.actionTargets])],
+        effectedTargets: [...new Set([...oldData.effectedTargets, ...log.effectedTargets])],
         totalDamage: oldData.totalDamage + log.totalDamage,
         totalHeal: oldData.totalHeal + log.totalHeal,
       }
@@ -368,6 +384,7 @@ const useCombatParser = () => {
       }
       combatData.playerMapJob = {}
       combatData.playerMapFull = {}
+      combatData.playerEffectMap = {}
       if (isDev && Object.values(combatData.summonMap).length) {
         console.log('summon map:', deepCopy(combatData.summonMap))
       }
@@ -382,6 +399,9 @@ const useCombatParser = () => {
     }
   }
   const handleLogLine: EventMap['LogLine'] = (data) => {
+    // * LogLine 文档
+    // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
+
     const msgType = data.line[0] // "00"
     const msgChannel = data.line[2] // "0839"
     const msg = data.line[4] // "冰封的石文A1启动了，冰块变得脆弱了！"
@@ -389,23 +409,6 @@ const useCombatParser = () => {
     // 处理战斗日志
     if (combatData.onConflict || combatData.zone) { // * 为了减轻负载，仅在纷争前线期间解析战斗
       parseCombatLog()
-    }
-
-    // 处理状态（斗志昂扬等）
-    if (msgType === '26') {
-      // 26|2026-05-24T19:37:05.1420000+08:00|853|斗志昂扬I|9999.00|E0000000||107F5CF8|name|00|66000||
-      const battleHighIds = [853, 854, 855, 856, 857]
-      const [, , effectId, , , , , playerId] = data.line
-      if (battleHighIds.includes(Number(effectId)) && playerId === combatData.playerId) {
-        const bhLevel = Number(effectId) - 853 + 1
-        if (bhLevel > combatData.highestBh) {
-          combatData.highestBh = bhLevel
-          if (bhLevel === 5) {
-            combatData.maxBhUsedTime = Date.now() - combatData.battleStartTime
-            if (!combatData.battleStartTime) combatData.maxBhUsedTime = -1
-          }
-        }
-      }
     }
 
     // 开始处理刷点文本日志
@@ -685,7 +688,6 @@ const useCombatParser = () => {
           }
         }
       } else if ((msgType === '21' || msgType === '22')) { // 发动技能
-        // https://github.com/OverlayPlugin/cactbot/blob/main/docs/LogGuide.md#line-21-0x15-networkability
         // 22|2025-07-21T20:15:49.3900000+08:00|1058F1D5|浮|72DC|霰弹枪|40000002|木人|720003|17700000|0|0|0|0|0|0|0|0|0|0|0|0|0|0|75000|75000|10000|10000|||104.12|-4.71|2.31|3.14|57000|57000|10000|10000|||94.94|-13.42|2.31|-2.71|0007B835|1|2|00||01|72DC|72DC|0.100|0000|69f2e27a0f10b758
         const perpetratorId = data.line[2]
         const perpetratorName = data.line[3] || '???'
@@ -808,10 +810,13 @@ const useCombatParser = () => {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const [m, maxGapTime] = ImportantActions[hitActionName]!
               const actionTargets = victimId !== combatData.playerId ? [victimName] : []
+              const targetEffectable = isPlayerEffectable(victimId)
+              const effectedTargets = targetEffectable ? actionTargets : []
               addIarLog(combatData.iarLog, {
                 happenTime: Date.now(),
                 actionName: hitActionName,
                 actionTargets,
+                effectedTargets,
                 totalDamage: damage,
                 totalHeal: heal,
               }, maxGapTime)
@@ -851,10 +856,13 @@ const useCombatParser = () => {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [m, maxGapTime] = ImportantActions[refActionName]!
                 const actionTargets = refVictim.id !== combatData.playerId ? [refVictim.name] : []
+                const targetEffectable = isPlayerEffectable(refVictim.id)
+                const effectedTargets = targetEffectable ? actionTargets : []
                 addIarLog(combatData.iarLog, {
                   happenTime: Date.now(),
                   actionName: refActionName,
                   actionTargets,
+                  effectedTargets,
                   totalDamage: refDamage,
                   totalHeal: 0,
                 }, maxGapTime)
@@ -906,6 +914,31 @@ const useCombatParser = () => {
               lasthitActionInstantDeath: lastHitAction.instantDeath,
             })
           }
+        }
+      } else if (msgType === '26') { // GainEffect
+        // 26|2026-05-24T19:37:05.1420000+08:00|853|斗志昂扬I|9999.00|E0000000||107F5CF8|name|00|66000||
+        const [, , effectId, , , , , playerId] = data.line
+        if (playerId && effectId) {
+          if (!combatData.playerEffectMap[playerId]) combatData.playerEffectMap[playerId] = []
+          combatData.playerEffectMap[playerId].push(effectId)
+        }
+        const battleHighIds = [853, 854, 855, 856, 857]
+        if (battleHighIds.includes(Number(effectId)) && playerId === combatData.playerId) {
+          const bhLevel = Number(effectId) - 853 + 1
+          if (bhLevel > combatData.highestBh) {
+            combatData.highestBh = bhLevel
+            if (bhLevel === 5) {
+              combatData.maxBhUsedTime = Date.now() - combatData.battleStartTime
+              if (!combatData.battleStartTime) combatData.maxBhUsedTime = -1
+            }
+          }
+        }
+      } else if (msgType === '30') { // LoseEffect
+        //30|[timestamp]|[effectId]|[effect]|[?]|[sourceId]|[source]|[targetId]|[target]|[count]
+        //30|2021-04-26T14:38:09.6990000-04:00|13A|Inferno|0.00|400009FF|Ifrit-Egi|400009FD|Scylla|00|941742|4933|
+        const [, , effectId, , , , , targetId] = data.line
+        if (effectId && targetId && combatData.playerEffectMap[targetId]) {
+          combatData.playerEffectMap[targetId] = combatData.playerEffectMap[targetId].filter(e => e !== effectId)
         }
       } else if (msgType === '261' && data.line[2] === 'Add') { // Summon
         // 261|2025-07-21T20:19:36.6860000+08:00|Add|40007109|BNpcID|3951|BNpcNameID|E53|CastTargetID|E0000000|CurrentMP|10000|CurrentWorldID|65535|Heading|1.6445|Level|100|MaxHP|57000|MaxMP|10000|ModelStatus|3072|Name|象式浮空炮塔|NPCTargetID|E0000000|OwnerID|1058F1D5|PosX|95.1405|PosY|-7.4485|PosZ|2.3552|Radius|1.0000|Type|2|WorldID|65535|0ed50912a51e73d8
