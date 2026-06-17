@@ -56,6 +56,8 @@ export interface IarLog {
   happenTime: number;
   actionName: string;
   actionTargets: string[];
+  /** 命中且没有处于免控状态的目标 */
+  effectedTargets: string[];
   totalDamage: number;
   totalHeal: number;
 }

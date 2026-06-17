@@ -1,7 +1,7 @@
 export type ImportantActionConfig = [
   /**
    * 衡量技能成效的指标，多个指标之间用英文逗号分隔。
-   * @指标表 hit | exec | damage | heal
+   * @指标表 hit | exec | damage | heal | effected
    */
   measures: string,
   maxGapTime?: number
@@ -15,21 +15,21 @@ export const ImportantActions = {
 
   // * TANK
   '圣盾阵': [ 'hit,damage', 4500 ],
-  '蛮荒崩裂': [ 'hit,damage' ],
-  '原初的怒震': [ 'hit,damage' ],
+  '蛮荒崩裂': [ 'hit,effected,damage' ],
+  '原初的怒震': [ 'hit,effected,damage' ],
   '原初的怒号': [ 'hit' ],
-  '腐秽大地': [ 'hit' ],
+  '腐秽大地': [ 'hit,effected' ],
   '夜昏': [ 'hit,damage' ],
   '命运之印': [ 'hit' ],
   '连续剑': [ 'hit,damage', 4500 ],
-  '终结击': [ 'hit,damage' ],
+  '终结击': [ 'hit,effected,damage' ],
   // * HEALER
-  '涤罪之心': [ 'hit,damage' ],
+  '涤罪之心': [ 'hit,effected,damage' ],
   '炽天附体': [ 'hit' ],
   '展开战术': [ 'hit' ],
   '星河漫天': [ 'hit' ],
-  '神谕': [ 'hit,damage' ],
-  '发炎III': [ 'hit,damage' ],
+  '神谕': [ 'hit,effected,damage' ],
+  '发炎III': [ 'hit,effected,damage' ],
   // * DPS(MELEE)
   '梦幻斗舞': [ 'hit,damage' ],
   '金刚转轮': [ 'hit,damage,heal' ],
@@ -48,9 +48,9 @@ export const ImportantActions = {
   // * DPS(MAGIC)
   '彗星': [ 'hit,damage' ],
   '耀星': [ 'hit,damage' ],
-  '霜星': [ 'hit,damage' ],
+  '霜星': [ 'hit,effected,damage' ],
   '百万核爆': [ 'hit,damage' ],
-  '荆棘环绕': [ 'hit,damage' ],
+  '荆棘环绕': [ 'hit,effected,damage' ],
   '南天十字': [ 'hit,damage' ],
   '胖胖之墙': [ 'hit' ],
   '天星棱光': [ 'hit,damage,heal' ],
