@@ -88,6 +88,7 @@ const insiderData = reactive({
   pidIndex: 1,
   currFrontlineResult: undefined as FrontlineResult | undefined,
   combatantWatcher: null as number | null,
+  ignoreWolfGain: false,
 })
 
 const useCombatParser = () => {
@@ -396,6 +397,7 @@ const useCombatParser = () => {
           combatData.onConflict = true
         }
       }
+      insiderData.ignoreWolfGain = false
     }
   }
   const handleLogLine: EventMap['LogLine'] = (data) => {
@@ -587,11 +589,16 @@ const useCombatParser = () => {
       return
     }
 
+    // 结算信息过滤挑战笔记内容
+    if (msgType === '00' && msg.includes('成功完成了挑战笔记中的“纷争前线参战次数”挑战')) {
+      insiderData.ignoreWolfGain = true
+    }
+
     // 处理结算信息，尝试获取比赛结果
     if (Object.values(Frontline).includes(combatData.zone as Frontline)) {
       // 战场
       const matchRewardWolfMark = msg.match(/获得了([\d,]+)(?:\(\+(\d+)%\))?枚狼印战绩。/)
-      if (matchRewardWolfMark && matchRewardWolfMark[1]) {
+      if (!insiderData.ignoreWolfGain && matchRewardWolfMark && matchRewardWolfMark[1]) {
         let value = parseInt(matchRewardWolfMark[1].replace(/,/g, ''), 10)
         const bonusStr = matchRewardWolfMark[2]
         if (bonusStr) {
